@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل التاسع: بروتوكولات المصادقة البسيطة</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter9.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>بروتوكولات المصادقة البسيطة</h1>
+        <p class="subtitle">الفصل التاسع: تصميم البروتوكولات، طرق المصادقة، ومفاتيح الجلسة</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#intro">1. مقدمة في البروتوكولات</a></li>
+            <li><a href="#simple">2. بروتوكولات الأمان البسيطة</a></li>
+            <li><a href="#hash-auth">3. المصادقة بالتجزئة</a></li>
+            <li><a href="#symmetric-auth">4. المصادقة باستخدام المفاتيح المتماثلة</a></li>
+            <li><a href="#mutual-auth">5. المصادقة المتبادلة</a></li>
+            <li><a href="#pubkey-auth">6. المصادقة باستخدام المفاتيح العامة</a></li>
+            <li><a href="#session-keys">7. مفاتيح الجلسة والسرية الأمامية المثالية</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذا الفصل، ستكون قادراً على:</p>
+            <ul>
+                <li>التمييز بين البروتوكولات الرسمية وبروتوكولات الأمان</li>
+                <li>شرح آليات المصادقة الأساسية (PIN، البطاقة، الصراف الآلي)</li>
+                <li>وصف كيف تمنع دوال التجزئة والأرقام المستخدمة مرة واحدة هجمات الإعادة</li>
+                <li>مقارنة المصادقة باستخدام المفاتيح المتماثلة مقابل المفاتيح العامة</li>
+                <li>فهم مفاتيح الجلسة والسرية الأمامية المثالية (PFS)</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction to Protocols -->
+        <section id="intro" class="content-section">
+            <h2>1. مقدمة في البروتوكولات</h2>
+
+            <div class="definition">
+                <h3>ما هو البروتوكول؟</h3>
+                <p><strong>البروتوكول</strong> هو مجموعة من القواعد التي تحكم كيفية تواصل طرفين أو أكثر. في مجال الأمان، تحدد البروتوكولات التسلسل الدقيق للرسائل المتبادلة لتحقيق هدف أمني مثل المصادقة أو تبادل المفاتيح.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>أنواع البروتوكولات</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>النوع</th>
+                            <th>الغرض</th>
+                            <th>أمثلة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>بروتوكولات الاتصال</strong></td>
+                            <td>تحدد كيفية نقل البيانات</td>
+                            <td>HTTP, FTP, SMTP, TCP/IP</td>
+                        </tr>
+                        <tr>
+                            <td><strong>بروتوكولات الأمان</strong></td>
+                            <td>توفر خدمات الأمان</td>
+                            <td>SSH, SSL/TLS, Kerberos, IPSec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <div class="key-message">
+                <p><strong>رؤية أساسية:</strong> يجب تصميم بروتوكولات الأمان بعناية. حتى العيوب الصغيرة في تصميم البروتوكول يمكن أن يستغلها المهاجمون. على عكس الأخطاء البرمجية، عيوب البروتوكولات هي أخطاء تصميم جوهرية يصعب إصلاحها.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Simple Security Protocols -->
+        <section id="simple" class="content-section">
+            <h2>2. بروتوكولات الأمان البسيطة</h2>
+
+            <p>قبل الغوص في البروتوكولات التشفيرية، لنلقِ نظرة على أمثلة المصادقة اليومية.</p>
+
+            <article class="security-concept">
+                <h4>مصادقة البطاقة/PIN</h4>
+                <p>أبسط أشكال المصادقة تستخدم شيئاً <strong>تملكه</strong> (البطاقة) أو شيئاً <strong>تعرفه</strong> (PIN).</p>
+                <ul>
+                    <li><strong>البطاقة فقط:</strong> بطاقات الوصول المادي &mdash; ضعيفة إذا سُرقت</li>
+                    <li><strong>PIN فقط:</strong> رمز رقمي &mdash; ضعيف إذا لوحظ أو خُمن</li>
+                    <li><strong>البطاقة + PIN:</strong> عاملان &mdash; أقوى بكثير (يتطلب كليهما)</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>مثال مصادقة الصراف الآلي</h4>
+                <p>يستخدم الصراف الآلي مصادقة ثنائية العامل:</p>
+                <ol>
+                    <li><strong>شيء تملكه:</strong> البطاقة المصرفية (تحتوي على بيانات الحساب على الشريط المغناطيسي أو الشريحة)</li>
+                    <li><strong>شيء تعرفه:</strong> رمز PIN (رمز مكون من 4-6 أرقام)</li>
+                    <li>يرسل الصراف الآلي كلا العاملين إلى البنك للتحقق</li>
+                    <li>إذا تطابق كلاهما، يتم مصادقة المستخدم ويمكنه الوصول إلى حسابه</li>
+                </ol>
+            </article>
+
+            <div class="warning-box">
+                <h4>ثغرات البروتوكولات البسيطة</h4>
+                <p>المصادقة البسيطة عرضة لـ: التلصص (مراقبة إدخال PIN)، النسخ (نسخ بيانات البطاقة)، هجمات الإعادة (إعادة استخدام بيانات المصادقة المحتجزة)، والهندسة الاجتماعية.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Authentication with Hash -->
+        <section id="hash-auth" class="content-section">
+            <h2>3. المصادقة بالتجزئة</h2>
+
+            <div class="definition">
+                <h3>المصادقة المبنية على التجزئة</h3>
+                <p>بدلاً من إرسال كلمات المرور كنص عادي، يخزن النظام ويتحقق من <strong>تجزئة</strong> كلمة المرور. بهذه الطريقة، حتى لو تم اختراق البيانات المخزنة، لا تُكشف كلمات المرور الفعلية.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">تدفق المصادقة بالتجزئة</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">1. "أنا أليس", h(كلمة المرور)</span>
+                        </div>
+                        <div class="protocol-actor">الخادم</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">2. "مرحباً" أو "مرفوض"</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">الخادم</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>مشكلة هجوم الإعادة</h3>
+            <p>المهاجم الذي يلتقط التجزئة يمكنه ببساطة إعادة إرسالها للمصادقة كأليس. التجزئة لا تتغير أبداً!</p>
+
+            <h3>الحل: الأرقام المستخدمة مرة واحدة (Nonce)</h3>
+            <div class="definition">
+                <p><strong>Nonce</strong> (رقم يُستخدم مرة واحدة) هو قيمة عشوائية تضمن أن كل محاولة مصادقة فريدة وتمنع هجمات الإعادة.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">مصادقة التجزئة + Nonce (التحدي والاستجابة)</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">1. "أنا أليس"</span>
+                        </div>
+                        <div class="protocol-actor">الخادم</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">2. Nonce R (تحدٍ عشوائي)</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">الخادم</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">3. h(كلمة المرور || R)</span>
+                        </div>
+                        <div class="protocol-actor">الخادم</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>لماذا يعمل هذا:</strong> لأن Nonce R مختلف كل مرة، فإن التجزئة h(كلمة المرور || R) مختلفة لكل جلسة. المهاجم الذي يلتقط استجابة واحدة لا يمكنه إعادة استخدامها.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Symmetric Key Authentication -->
+        <section id="symmetric-auth" class="content-section">
+            <h2>4. المصادقة باستخدام المفاتيح المتماثلة</h2>
+
+            <div class="definition">
+                <h3>المصادقة بالمفتاح المتماثل</h3>
+                <p>يتشارك الطرفان مفتاحاً سرياً. تتحقق المصادقة بإثبات معرفة المفتاح دون كشفه، عادةً من خلال بروتوكولات <strong>التحدي والاستجابة</strong>.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">التحدي والاستجابة بالمفتاح المتماثل</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">1. "أنا أليس"</span>
+                        </div>
+                        <div class="protocol-actor">بوب</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">2. Nonce R</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">بوب</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">3. E(R, K<sub>AB</sub>)</span>
+                        </div>
+                        <div class="protocol-actor">بوب</div>
+                    </div>
+                </div>
+                <p class="diagram-note">يرسل بوب nonce عشوائي R. تشفر أليس R بالمفتاح المشترك K<sub>AB</sub>. يفك بوب التشفير ويتحقق من تطابقه مع R.</p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>لماذا يعمل هذا:</strong> فقط من يعرف المفتاح المشترك K<sub>AB</sub> يمكنه تشفير nonce بشكل صحيح. يمنع nonce هجمات الإعادة لأنه مختلف كل مرة.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Mutual Authentication -->
+        <section id="mutual-auth" class="content-section">
+            <h2>5. المصادقة المتبادلة</h2>
+
+            <div class="definition">
+                <h3>ما هي المصادقة المتبادلة؟</h3>
+                <p><strong>المصادقة المتبادلة</strong> تعني أن كلا الطرفين يتحققان من هوية بعضهما البعض. هذا يمنع أي طرف من الانخداع بمنتحل.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">بروتوكول المصادقة المتبادلة</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">1. "أنا أليس", R<sub>A</sub></span>
+                        </div>
+                        <div class="protocol-actor">بوب</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">2. R<sub>B</sub>, E(R<sub>A</sub>, K<sub>AB</sub>)</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">بوب</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">3. E(R<sub>B</sub>, K<sub>AB</sub>)</span>
+                        </div>
+                        <div class="protocol-actor">بوب</div>
+                    </div>
+                </div>
+                <p class="diagram-note">تتحقق أليس من بوب بفك تشفير E(R<sub>A</sub>, K<sub>AB</sub>) والتأكد من تطابقه مع R<sub>A</sub>. يتحقق بوب من أليس بفك تشفير E(R<sub>B</sub>, K<sub>AB</sub>) والتأكد من تطابقه مع R<sub>B</sub>.</p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>كلا الطرفين تم التحقق منهما:</strong> كل طرف يرسل تحدياً (nonce) ويتوقع من الآخر تشفيره بالمفتاح المشترك. إذا كانت كلتا الاستجابتين صحيحتين، يتم تأكيد كلتا الهويتين.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: Public Key Authentication -->
+        <section id="pubkey-auth" class="content-section">
+            <h2>6. المصادقة باستخدام المفاتيح العامة</h2>
+
+            <div class="definition">
+                <h3>المصادقة بالمفتاح العام</h3>
+                <p>بدلاً من سر مشترك، كل طرف لديه <strong>زوج مفتاح عام/خاص</strong>. تعمل المصادقة بإثبات امتلاك المفتاح الخاص (من خلال التوقيع أو فك التشفير) دون كشفه.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">بروتوكول المصادقة بالمفتاح العام</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">1. "أنا أليس"</span>
+                        </div>
+                        <div class="protocol-actor">بوب</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">2. R (nonce)</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">بوب</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">أليس</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">3. Sign(R, مفتاح أليس الخاص)</span>
+                        </div>
+                        <div class="protocol-actor">بوب</div>
+                    </div>
+                </div>
+                <p class="diagram-note">يتحقق بوب من التوقيع باستخدام مفتاح أليس العام. فقط مفتاح أليس الخاص يمكنه إنتاج توقيع صحيح على R.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>مزايا المصادقة بالمفتاح العام</h4>
+                <ul>
+                    <li><strong>لا حاجة لسر مشترك:</strong> لا مشكلة في توزيع المفاتيح</li>
+                    <li><strong>التوقيعات الرقمية:</strong> توفر عدم الإنكار (أليس لا يمكنها إنكار التوقيع)</li>
+                    <li><strong>قابلة للتوسع:</strong> كل مستخدم يحتاج زوج مفاتيح واحد فقط</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>تتطلب مفاتيح عامة موثوقة</h4>
+                <p>المصادقة بالمفتاح العام تعمل فقط إذا وثق بوب بأن مفتاح أليس العام ينتمي حقاً لأليس. يُحل هذا بواسطة <strong>الشهادات</strong> الصادرة من سلطة شهادات موثوقة (CA).</p>
+            </div>
+        </section>
+
+        <!-- Section 7: Session Keys and PFS -->
+        <section id="session-keys" class="content-section">
+            <h2>7. مفاتيح الجلسة والسرية الأمامية المثالية</h2>
+
+            <div class="definition">
+                <h3>ما هو مفتاح الجلسة؟</h3>
+                <p><strong>مفتاح الجلسة</strong> هو مفتاح متماثل مؤقت يُولد لجلسة اتصال واحدة. عند انتهاء الجلسة، يُتخلص من المفتاح.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>لماذا نستخدم مفاتيح الجلسة؟</h4>
+                <ul>
+                    <li><strong>تحديد التعرض:</strong> إذا تم اختراق مفتاح جلسة، تتأثر تلك الجلسة فقط</li>
+                    <li><strong>الأداء:</strong> المفاتيح المتماثلة سريعة؛ استخدم المفتاح العام فقط لتبادل المفاتيح الأولي</li>
+                    <li><strong>مفاتيح جديدة:</strong> كل جلسة تحصل على مفتاح فريد، مما يجعل الهجمات أصعب</li>
+                </ul>
+            </article>
+
+            <div class="definition">
+                <h3>السرية الأمامية المثالية (PFS)</h3>
+                <p><strong>PFS</strong> تضمن أنه حتى لو تم اختراق المفتاح الخاص طويل المدى في المستقبل، لا يمكن استرجاع مفاتيح الجلسات السابقة. كل جلسة تستخدم تبادل مفاتيح مستقل (مثل Diffie-Hellman المؤقت).</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>مثال PFS</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>بدون PFS</th>
+                            <th>مع PFS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>مفتاح الجلسة مشتق من المفتاح الخاص طويل المدى للخادم</td>
+                            <td>مفتاح الجلسة من تبادل مفاتيح مؤقت</td>
+                        </tr>
+                        <tr>
+                            <td>إذا تسرب المفتاح الخاص لاحقاً، يمكن فك تشفير جميع الجلسات السابقة</td>
+                            <td>الجلسات السابقة تبقى آمنة حتى لو تسرب المفتاح الخاص</td>
+                        </tr>
+                        <tr>
+                            <td>تبادل مفاتيح RSA (بدون PFS)</td>
+                            <td>Diffie-Hellman المؤقت (DHE, ECDHE)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <div class="key-message">
+                <p><strong>المعيار الحديث:</strong> PFS مطلوب الآن في TLS 1.3. جميع تبادلات المفاتيح تستخدم Diffie-Hellman المؤقت (ECDHE)، مما يضمن أن اختراق المفتاح طويل المدى للخادم لا يكشف الاتصالات السابقة.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>البروتوكولات</strong> تحدد قواعد الاتصال. يجب تصميم بروتوكولات الأمان بعناية لمنع الاستغلال.</li>
+
+                <li><strong>المصادقة البسيطة</strong> تستخدم عوامل مثل PINs والبطاقات. الجمع بين العوامل (المصادقة ثنائية العامل) أقوى بكثير.</li>
+
+                <li><strong>المصادقة بالتجزئة</strong> تتجنب إرسال كلمات المرور كنص عادي. إضافة <strong>nonce</strong> تمنع هجمات الإعادة.</li>
+
+                <li><strong>المصادقة بالمفتاح المتماثل</strong> تستخدم التحدي والاستجابة: إثبات معرفة المفتاح المشترك بتشفير nonce عشوائي.</li>
+
+                <li><strong>المصادقة المتبادلة</strong> تضمن أن كلا الطرفين يتحققان من بعضهما باستخدام nonces ومفاتيح مشتركة.</li>
+
+                <li><strong>المصادقة بالمفتاح العام</strong> تستخدم التوقيعات الرقمية لإثبات الهوية دون سر مشترك، لكنها تتطلب توزيع مفاتيح عامة موثوقة.</li>
+
+                <li><strong>مفاتيح الجلسة</strong> هي مفاتيح مؤقتة لجلسة واحدة، تحد من الضرر إذا تم اختراقها.</li>
+
+                <li><strong>السرية الأمامية المثالية</strong> تضمن بقاء الجلسات السابقة آمنة حتى لو تم اختراق المفاتيح طويلة المدى لاحقاً.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>التطلع إلى الأمام:</strong> في الفصل العاشر، سنرى كيف يتم تطبيق مفاهيم المصادقة هذه في بروتوكولات العالم الحقيقي مثل SSL/TLS، SSH، IPSec، وKerberos.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>الاعتمادات والإسناد</h2>
+            <p class="credits-intro">جميع الرسوم البيانية في هذه الوثيقة هي أعمال تعليمية أصلية تم إنشاؤها خصيصاً لهذا المقرر.</p>
+            <ul class="credits-list">
+                <li><strong>تدفقات بروتوكولات المصادقة:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>رسوم التحدي والاستجابة:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>تدفق تبادل مفتاح الجلسة:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">&rarr; العودة إلى الصفحة الرئيسية</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 9 specific styles */
+        .protocol-flow {
+            padding: 1.5rem;
+        }
+
+        .protocol-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .protocol-actor {
+            font-weight: 700;
+            color: var(--primary-color);
+            min-width: 60px;
+            text-align: center;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 8px;
+            border: 2px solid var(--secondary-color);
+        }
+
+        .protocol-message {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .msg-label {
+            background: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9em;
+            font-family: "Courier New", Courier, monospace;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .msg-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .diagram-note {
+            font-size: 0.9em;
+            color: #555;
+            font-style: italic;
+            text-align: center;
+            padding: 0 1.5rem 1rem;
+        }
+
+        @media screen and (max-width: 768px) {
+            .protocol-step {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .msg-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+            direction: ltr;
+            text-align: left;
+        }
+
+        code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+            direction: ltr;
+        }
+    </style>
+</body>
+</html>

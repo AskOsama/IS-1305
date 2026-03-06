@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alice-Bob-Trudy Communication Demo | Network Security</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --accent-color: #c53030;
+            --success-color: #276749;
+            --warning-color: #c05621;
+            --light-gray: #f8f9fa;
+            --alice-color: #276749;
+            --bob-color: #2b6cb0;
+            --trudy-color: #c53030;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        h1 {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Attack Type Selector */
+        .attack-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .attack-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            background: white;
+            color: var(--secondary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .attack-btn:hover {
+            background: var(--light-gray);
+        }
+
+        .attack-btn.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .attack-btn.secure {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .attack-btn.secure.active {
+            background: var(--success-color);
+            color: white;
+        }
+
+        /* Communication Diagram */
+        .comm-diagram {
+            background: var(--light-gray);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            min-height: 300px;
+        }
+
+        .characters {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+        }
+
+        .character {
+            text-align: center;
+            z-index: 10;
+            width: 120px;
+        }
+
+        .character-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            margin: 0 auto 0.5rem;
+            border: 4px solid white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .alice .character-icon {
+            background: linear-gradient(135deg, #48bb78, var(--alice-color));
+        }
+
+        .bob .character-icon {
+            background: linear-gradient(135deg, #4299e1, var(--bob-color));
+        }
+
+        .trudy {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.5s ease;
+        }
+
+        .trudy.hidden {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+        }
+
+        .trudy .character-icon {
+            background: linear-gradient(135deg, #fc8181, var(--trudy-color));
+        }
+
+        .character-name {
+            font-weight: 700;
+            font-size: 1.1em;
+            margin-bottom: 0.25rem;
+        }
+
+        .character-role {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        /* Message Animation */
+        .message-path {
+            position: absolute;
+            top: 60px;
+            left: 130px;
+            right: 130px;
+            height: 60px;
+        }
+
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            white-space: nowrap;
+            opacity: 0;
+            transition: all 0.1s linear;
+        }
+
+        .message.visible {
+            opacity: 1;
+        }
+
+        .message.intercepted {
+            background: var(--trudy-color);
+        }
+
+        .message.modified {
+            background: var(--warning-color);
+        }
+
+        .message.blocked {
+            background: #666;
+            text-decoration: line-through;
+        }
+
+        /* Connection Line */
+        .connection-line {
+            position: absolute;
+            top: 90px;
+            left: 120px;
+            right: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--alice-color), var(--bob-color));
+            border-radius: 2px;
+        }
+
+        .connection-line.compromised {
+            background: linear-gradient(90deg, var(--alice-color), var(--trudy-color), var(--bob-color));
+        }
+
+        .connection-line.broken {
+            background: repeating-linear-gradient(
+                90deg,
+                #ccc,
+                #ccc 10px,
+                transparent 10px,
+                transparent 20px
+            );
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e5a9e;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--primary-color);
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background: white;
+            border: 2px solid var(--secondary-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-panel h3 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-panel p {
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-panel.warning {
+            border-color: var(--accent-color);
+            background: #fff5f5;
+        }
+
+        .info-panel.warning h3 {
+            color: var(--accent-color);
+        }
+
+        .info-panel.success {
+            border-color: var(--success-color);
+            background: #f0fff4;
+        }
+
+        .info-panel.success h3 {
+            color: var(--success-color);
+        }
+
+        /* Event Log */
+        .event-log {
+            background: #1a1a2e;
+            color: #0f0;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.9em;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .event-log p {
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .event-log .alice-msg { color: #48bb78; }
+        .event-log .bob-msg { color: #4299e1; }
+        .event-log .trudy-msg { color: #fc8181; }
+        .event-log .system-msg { color: #a0aec0; }
+
+        /* CIA Badge */
+        .cia-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .badge-c { background: #e3f2fd; color: #2b6cb0; }
+        .badge-i { background: #e8f5e9; color: #276749; }
+        .badge-a { background: #fff3e0; color: #c05621; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .attack-selector {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .character {
+                width: 80px;
+            }
+
+            .character-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8em;
+            }
+
+            .message-path {
+                left: 80px;
+                right: 80px;
+            }
+
+            .connection-line {
+                left: 80px;
+                right: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../chapters/chapter1.html#characters" class="back-link">&larr; Back to Chapter 1</a>
+
+        <header>
+            <h1>Alice-Bob-Trudy Communication Demo</h1>
+            <p class="subtitle">Watch how Trudy can intercept, modify, or block messages between Alice and Bob</p>
+        </header>
+
+        <!-- Attack Type Selector -->
+        <div class="attack-selector">
+            <button class="attack-btn secure active" onclick="selectAttack('secure')">
+                ✅ Secure Communication
+            </button>
+            <button class="attack-btn" onclick="selectAttack('eavesdrop')">
+                🎧 Eavesdropping
+            </button>
+            <button class="attack-btn" onclick="selectAttack('modify')">
+                ✏️ Message Modification
+            </button>
+            <button class="attack-btn" onclick="selectAttack('dos')">
+                🚫 Denial of Service
+            </button>
+        </div>
+
+        <!-- Communication Diagram -->
+        <div class="comm-diagram">
+            <div class="characters">
+                <div class="character alice">
+                    <div class="character-icon">👩</div>
+                    <div class="character-name">Alice</div>
+                    <div class="character-role">Sender</div>
+                </div>
+
+                <div class="character trudy hidden" id="trudy">
+                    <div class="character-icon">🦹</div>
+                    <div class="character-name">Trudy</div>
+                    <div class="character-role">Attacker</div>
+                </div>
+
+                <div class="character bob">
+                    <div class="character-icon">👨</div>
+                    <div class="character-name">Bob</div>
+                    <div class="character-role">Receiver</div>
+                </div>
+            </div>
+
+            <div class="connection-line" id="connection-line"></div>
+
+            <div class="message-path">
+                <div class="message" id="message">Transfer $100</div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-primary" id="sendBtn" onclick="sendMessage()">
+                Send Message
+            </button>
+            <button class="btn btn-secondary" onclick="resetDemo()">
+                Reset
+            </button>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel" id="info-panel">
+            <h3>✅ Secure Communication</h3>
+            <p>In a secure channel, Alice's message reaches Bob without any interference. The message remains confidential (only Alice and Bob can read it), has integrity (it's not modified), and is available (it reaches its destination).</p>
+            <p><strong>All three CIA properties are maintained.</strong></p>
+        </div>
+
+        <!-- Event Log -->
+        <div class="info-panel">
+            <h3>📋 Event Log</h3>
+            <div class="event-log" id="event-log">
+                <p class="system-msg">[System] Select an attack type and click "Send Message" to begin</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAttack = 'secure';
+        let isAnimating = false;
+
+        const attackInfo = {
+            secure: {
+                title: '✅ Secure Communication',
+                class: 'success',
+                description: `In a secure channel, Alice's message reaches Bob without any interference. The message remains confidential (only Alice and Bob can read it), has integrity (it's not modified), and is available (it reaches its destination).`,
+                extra: '<p><strong>All three CIA properties are maintained.</strong></p>',
+                showTrudy: false,
+                lineClass: ''
+            },
+            eavesdrop: {
+                title: '🎧 Eavesdropping Attack',
+                class: 'warning',
+                description: `Trudy intercepts and reads the message as it travels from Alice to Bob. The message still reaches Bob, but Trudy now knows its contents. This is a <strong>passive attack</strong> that compromises confidentiality.`,
+                extra: '<span class="cia-badge badge-c">Attacks Confidentiality</span>',
+                showTrudy: true,
+                lineClass: 'compromised'
+            },
+            modify: {
+                title: '✏️ Message Modification Attack',
+                class: 'warning',
+                description: `Trudy intercepts Alice's message and changes it before forwarding to Bob. Bob receives a different message than what Alice sent. This is an <strong>active attack</strong> that compromises integrity.`,
+                extra: '<span class="cia-badge badge-i">Attacks Integrity</span>',
+                showTrudy: true,
+                lineClass: 'compromised'
+            },
+            dos: {
+                title: '🚫 Denial of Service Attack',
+                class: 'warning',
+                description: `Trudy blocks or drops Alice's message entirely, preventing it from reaching Bob. The communication channel is disrupted. This attack compromises availability.`,
+                extra: '<span class="cia-badge badge-a">Attacks Availability</span>',
+                showTrudy: true,
+                lineClass: 'broken'
+            }
+        };
+
+        function selectAttack(attack) {
+            if (isAnimating) return;
+
+            currentAttack = attack;
+
+            // Update buttons
+            document.querySelectorAll('.attack-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update info panel
+            const info = attackInfo[attack];
+            const panel = document.getElementById('info-panel');
+            panel.className = `info-panel ${info.class}`;
+            panel.innerHTML = `
+                <h3>${info.title}</h3>
+                <p>${info.description}</p>
+                ${info.extra}
+            `;
+
+            // Show/hide Trudy
+            const trudy = document.getElementById('trudy');
+            if (info.showTrudy) {
+                trudy.classList.remove('hidden');
+            } else {
+                trudy.classList.add('hidden');
+            }
+
+            // Update connection line
+            const line = document.getElementById('connection-line');
+            line.className = `connection-line ${info.lineClass}`;
+
+            // Reset message
+            resetMessage();
+        }
+
+        function resetMessage() {
+            const message = document.getElementById('message');
+            message.style.left = '0';
+            message.classList.remove('visible', 'intercepted', 'modified', 'blocked');
+            message.textContent = 'Transfer $100';
+        }
+
+        function logEvent(text, type = 'system-msg') {
+            const log = document.getElementById('event-log');
+            const p = document.createElement('p');
+            p.className = type;
+            p.textContent = text;
+            log.appendChild(p);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function sendMessage() {
+            if (isAnimating) return;
+            isAnimating = true;
+
+            const message = document.getElementById('message');
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            // Clear previous log
+            document.getElementById('event-log').innerHTML = '';
+
+            resetMessage();
+            message.classList.add('visible');
+
+            logEvent('[Alice] Preparing to send message: "Transfer $100"', 'alice-msg');
+
+            let position = 0;
+            const pathWidth = document.querySelector('.message-path').offsetWidth - message.offsetWidth;
+
+            switch (currentAttack) {
+                case 'secure':
+                    animateSecure(message, pathWidth);
+                    break;
+                case 'eavesdrop':
+                    animateEavesdrop(message, pathWidth);
+                    break;
+                case 'modify':
+                    animateModify(message, pathWidth);
+                    break;
+                case 'dos':
+                    animateDos(message, pathWidth);
+                    break;
+            }
+        }
+
+        function animateSecure(message, pathWidth) {
+            setTimeout(() => logEvent('[Alice] Message sent via secure channel', 'alice-msg'), 500);
+
+            let position = 0;
+            const interval = setInterval(() => {
+                position += 5;
+                message.style.left = position + 'px';
+
+                if (position >= pathWidth) {
+                    clearInterval(interval);
+                    logEvent('[Bob] Message received: "Transfer $100"', 'bob-msg');
+                    logEvent('[System] Communication successful - CIA maintained', 'system-msg');
+                    endAnimation();
+                }
+            }, 20);
+        }
+
+        function animateEavesdrop(message, pathWidth) {
+            setTimeout(() => logEvent('[Alice] Message sent...', 'alice-msg'), 500);
+
+            let position = 0;
+            const midpoint = pathWidth / 2;
+            let paused = false;
+            let hasIntercepted = false;
+
+            const interval = setInterval(() => {
+                if (!paused && !hasIntercepted && position >= midpoint) {
+                    paused = true;
+                    hasIntercepted = true;
+                    message.classList.add('intercepted');
+                    logEvent('[Trudy] Intercepting message...', 'trudy-msg');
+                    logEvent('[Trudy] Reading: "Transfer $100"', 'trudy-msg');
+                    logEvent('[Trudy] Confidentiality COMPROMISED!', 'trudy-msg');
+
+                    setTimeout(() => {
+                        message.classList.remove('intercepted');
+                        logEvent('[Trudy] Forwarding original message...', 'trudy-msg');
+                        paused = false;
+                    }, 1500);
+                    return;
+                }
+
+                if (!paused) {
+                    position += 5;
+                    message.style.left = position + 'px';
+
+                    if (position >= pathWidth) {
+                        clearInterval(interval);
+                        logEvent('[Bob] Message received: "Transfer $100"', 'bob-msg');
+                        logEvent('[System] Bob unaware message was intercepted', 'system-msg');
+                        endAnimation();
+                    }
+                }
+            }, 20);
+        }
+
+        function animateModify(message, pathWidth) {
+            setTimeout(() => logEvent('[Alice] Message sent: "Transfer $100"', 'alice-msg'), 500);
+
+            let position = 0;
+            const midpoint = pathWidth / 2;
+            let paused = false;
+            let hasIntercepted = false;
+
+            const interval = setInterval(() => {
+                if (!paused && !hasIntercepted && position >= midpoint) {
+                    paused = true;
+                    hasIntercepted = true;
+                    message.classList.add('intercepted');
+                    logEvent('[Trudy] Intercepting message...', 'trudy-msg');
+
+                    setTimeout(() => {
+                        message.classList.remove('intercepted');
+                        message.classList.add('modified');
+                        message.textContent = 'Transfer $10,000';
+                        logEvent('[Trudy] Modifying: $100 → $10,000', 'trudy-msg');
+                        logEvent('[Trudy] Integrity COMPROMISED!', 'trudy-msg');
+
+                        setTimeout(() => {
+                            logEvent('[Trudy] Forwarding modified message...', 'trudy-msg');
+                            paused = false;
+                        }, 1000);
+                    }, 1000);
+                    return;
+                }
+
+                if (!paused) {
+                    position += 5;
+                    message.style.left = position + 'px';
+
+                    if (position >= pathWidth) {
+                        clearInterval(interval);
+                        logEvent('[Bob] Message received: "Transfer $10,000"', 'bob-msg');
+                        logEvent('[System] Bob received MODIFIED message!', 'system-msg');
+                        endAnimation();
+                    }
+                }
+            }, 20);
+        }
+
+        function animateDos(message, pathWidth) {
+            setTimeout(() => logEvent('[Alice] Message sent: "Transfer $100"', 'alice-msg'), 500);
+
+            let position = 0;
+            const midpoint = pathWidth / 2;
+
+            const interval = setInterval(() => {
+                position += 5;
+                message.style.left = position + 'px';
+
+                if (position >= midpoint) {
+                    clearInterval(interval);
+                    message.classList.add('blocked');
+                    logEvent('[Trudy] Intercepting message...', 'trudy-msg');
+                    logEvent('[Trudy] BLOCKING message!', 'trudy-msg');
+                    logEvent('[Trudy] Availability COMPROMISED!', 'trudy-msg');
+
+                    setTimeout(() => {
+                        message.classList.add('visible');
+                        message.style.opacity = '0.3';
+                        logEvent('[Alice] Waiting for acknowledgment...', 'alice-msg');
+                        logEvent('[Alice] Message timeout!', 'alice-msg');
+                        logEvent('[System] Bob never received the message', 'system-msg');
+                        endAnimation();
+                    }, 2000);
+                }
+            }, 20);
+        }
+
+        function endAnimation() {
+            isAnimating = false;
+            document.getElementById('sendBtn').disabled = false;
+        }
+
+        function resetDemo() {
+            if (isAnimating) return;
+            resetMessage();
+            document.getElementById('event-log').innerHTML = '<p class="system-msg">[System] Demo reset. Select an attack type and click "Send Message"</p>';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="مقرر أمن الشبكات ومواقع الانترنت - تعلم التشفير وبروتوكولات الأمان والمصادقة">
+    <meta name="keywords" content="أمن الشبكات, أمن الويب, التشفير, المصادقة, التفويض, ثالوث CIA, تعليم">
+    <title>أمن الشبكات ومواقع الانترنت | Network Security</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="index.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header class="course-header">
+        <h1>أمن الشبكات ومواقع الانترنت<br>Network Security</h1>
+        <p class="course-subtitle">IS 1305 | د. أسامة المرشد</p>
+        <p class="course-tagline">أتقن أساسيات أمن المعلومات والتشفير وبروتوكولات الاتصال الآمن.</p>
+    </header>
+
+    <main>
+        <!-- Course Overview Section -->
+        <section id="overview" class="course-overview">
+            <h2>عن هذا المقرر</h2>
+            <p class="overview-intro">
+                مرحباً بك في مقرر أمن الشبكات ومواقع الانترنت. تغطي هذه السلسلة الشاملة
+                المفاهيم الأساسية لأمن المعلومات، من المبادئ الأساسية مثل ثالوث CIA
+                إلى الموضوعات المتقدمة بما في ذلك التشفير وبروتوكولات المصادقة وأمن البرمجيات.
+            </p>
+
+            <div class="overview-grid">
+                <article class="overview-card">
+                    <h3>ماذا ستتعلم</h3>
+                    <ul>
+                        <li>مفاهيم الأمان الأساسية (ثالوث CIA)</li>
+                        <li>أساسيات التشفير</li>
+                        <li>التشفير المتماثل وغير المتماثل</li>
+                        <li>المصادقة والتفويض</li>
+                        <li>بروتوكولات الأمان العملية</li>
+                        <li>مبادئ أمن البرمجيات</li>
+                    </ul>
+                </article>
+
+                <article class="overview-card">
+                    <h3>لمن هذا المقرر</h3>
+                    <ul>
+                        <li>طلاب نظم المعلومات</li>
+                        <li>متخصصي الأمان الطموحين</li>
+                        <li>مطوري البرمجيات</li>
+                        <li>مديري تقنية المعلومات</li>
+                        <li>أي شخص مهتم بالأمن السيبراني</li>
+                    </ul>
+                </article>
+
+                <article class="overview-card">
+                    <h3>شكل المقرر</h3>
+                    <ul>
+                        <li>وحدات منظمة حسب الفصول</li>
+                        <li>دروس تفاعلية بصيغة HTML</li>
+                        <li>محتوى ثنائي اللغة (العربية والإنجليزية)</li>
+                        <li>رسوم بيانية ورسوم متحركة</li>
+                        <li>عروض أمان تفاعلية</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <!-- Course Chapters Section -->
+        <section id="modules" class="modules-section">
+            <h2>فصول المقرر</h2>
+            <p class="section-intro">ابدأ رحلتك في أمن الشبكات مع الفصل الأول</p>
+
+            <div class="chapter-cards-grid">
+                <!-- Chapter 1 - Available -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">الفصل الأول</div>
+                    <span class="status-badge available">متاح الآن</span>
+
+                    <h3>مقدمة في أمن الشبكات</h3>
+                    <p class="chapter-description">
+                        اكتشف أساسيات أمن المعلومات، وافهم ثالوث CIA،
+                        وتعرف على شخصيات القصة (أليس، بوب، ترودي)، واستكشف ما يجعل
+                        الأنظمة آمنة.
+                    </p>
+
+                    <div class="chapter-topics">
+                        <h4>المواضيع المغطاة:</h4>
+                        <ul>
+                            <li>مقدمة في أمن المعلومات</li>
+                            <li>شخصيات القصة (أليس، بوب، ترودي)</li>
+                            <li>ثالوث CIA (السرية، السلامة، التوفر)</li>
+                            <li>مثال البنك الإلكتروني لأليس</li>
+                            <li>ما وراء CIA: المصادقة، التفويض، المحاسبة</li>
+                            <li>المجالات الأساسية لأمن المعلومات</li>
+                            <li>مشكلة العامل البشري</li>
+                        </ul>
+                    </div>
+
+                    <div class="chapter-actions">
+                        <a href="chapters/chapter1_ar.html" class="btn btn-primary">
+                            <span>عرض بالعربية</span>
+                        </a>
+                        <a href="chapters/chapter1.html" class="btn btn-secondary">
+                            <span>View in English</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Chapter 2 - Available -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">الفصل الثاني</div>
+                    <span class="status-badge available">متاح الآن</span>
+
+                    <h3>أساسيات التشفير</h3>
+                    <p class="chapter-description">
+                        مقدمة في أساسيات التشفير، بما في ذلك المصطلحات،
+                        الشفرات الكلاسيكية (قيصر، التبديل)، وتصنيف
+                        التشفير وتحليل الشفرات.
+                    </p>
+
+                    <div class="chapter-topics">
+                        <h4>المواضيع المغطاة:</h4>
+                        <ul>
+                            <li>مصطلحات التشفير</li>
+                            <li>التشفير الكلاسيكي: شفرات الاستبدال والتبديل</li>
+                            <li>تاريخ التشفير الحديث</li>
+                            <li>تصنيف علم التشفير</li>
+                            <li>تصنيف تحليل الشفرات</li>
+                            <li>مبدأ كيرخوفس</li>
+                        </ul>
+                    </div>
+
+                    <div class="chapter-actions">
+                        <a href="chapters/chapter2_ar.html" class="btn btn-primary">
+                            <span>عرض بالعربية</span>
+                        </a>
+                        <a href="chapters/chapter2.html" class="btn btn-secondary">
+                            <span>View in English</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Chapter 3 - Available -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">الفصل الثالث</div>
+                    <span class="status-badge available">متاح الآن</span>
+
+                    <h3>تشفير المفتاح المتماثل</h3>
+                    <p class="chapter-description">
+                        دراسة معمقة لخوارزميات التشفير المتماثل، بما في ذلك شفرات التدفق (RC4، A5/1)،
+                        شفرات الكتل (DES، 3DES، AES)، ورموز مصادقة الرسائل (MACs).
+                    </p>
+
+                    <div class="chapter-topics">
+                        <h4>المواضيع المغطاة:</h4>
+                        <ul>
+                            <li>شفرات التدفق: RC4، A5/1، لوحة المرة الواحدة</li>
+                            <li>شفرات الكتل: DES، 3DES، AES</li>
+                            <li>رموز مصادقة الرسائل (MACs)</li>
+                            <li>التشفير المصادق (AES-GCM)</li>
+                        </ul>
+                    </div>
+
+                    <div class="chapter-actions">
+                        <a href="chapters/chapter3_ar.html" class="btn btn-primary">
+                            <span>عرض بالعربية</span>
+                        </a>
+                        <a href="chapters/chapter3.html" class="btn btn-secondary">
+                            <span>View in English</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Chapter 8 - Available -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">الفصل الثامن</div>
+                    <span class="status-badge available">متاح الآن</span>
+
+                    <h3>التفويض</h3>
+                    <p class="chapter-description">
+                        تعلم آليات التحكم في الوصول، نموذج بيل-لابادولا الأمني،
+                        كابتشا، وأنواع الجدران النارية.
+                    </p>
+
+                    <div class="chapter-topics">
+                        <h4>المواضيع المغطاة:</h4>
+                        <ul>
+                            <li>مصفوفة التحكم في الوصول، ACLs، قوائم القدرات</li>
+                            <li>نموذج بيل-لابادولا (BLP)</li>
+                            <li>كابتشا والتحقق من البشر</li>
+                            <li>الجدران النارية وأنظمة كشف التسلل</li>
+                        </ul>
+                    </div>
+
+                    <div class="chapter-actions">
+                        <a href="chapters/chapter8_ar.html" class="btn btn-primary">
+                            <span>عرض بالعربية</span>
+                        </a>
+                        <a href="chapters/chapter8.html" class="btn btn-secondary">
+                            <span>View in English</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Chapter 9 - Available -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">الفصل التاسع</div>
+                    <span class="status-badge available">متاح الآن</span>
+
+                    <h3>بروتوكولات المصادقة البسيطة</h3>
+                    <p class="chapter-description">
+                        استكشف آليات المصادقة من أنظمة PIN/البطاقة البسيطة إلى
+                        بروتوكولات التحدي والاستجابة التشفيرية والسرية الأمامية المثالية.
+                    </p>
+
+                    <div class="chapter-topics">
+                        <h4>المواضيع المغطاة:</h4>
+                        <ul>
+                            <li>المصادقة بالتجزئة وNonce</li>
+                            <li>التحدي والاستجابة بالمفتاح المتماثل</li>
+                            <li>المصادقة المتبادلة والمفتاح العام</li>
+                            <li>مفاتيح الجلسة والسرية الأمامية المثالية</li>
+                        </ul>
+                    </div>
+
+                    <div class="chapter-actions">
+                        <a href="chapters/chapter9_ar.html" class="btn btn-primary">
+                            <span>عرض بالعربية</span>
+                        </a>
+                        <a href="chapters/chapter9.html" class="btn btn-secondary">
+                            <span>View in English</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Chapter 10 - Available -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">الفصل العاشر</div>
+                    <span class="status-badge available">متاح الآن</span>
+
+                    <h3>بروتوكولات الأمان في العالم الحقيقي</h3>
+                    <p class="chapter-description">
+                        دراسة بروتوكولات الأمان المستخدمة عملياً، بما في ذلك SSH، SSL/TLS،
+                        IPSec، Kerberos، ودروس من البروتوكولات المكسورة (WEP، GSM).
+                    </p>
+
+                    <div class="chapter-topics">
+                        <h4>المواضيع المغطاة:</h4>
+                        <ul>
+                            <li>TCP، SSH، ومصافحة SSL/TLS</li>
+                            <li>IPSec (AH/ESP) والشبكات الافتراضية الخاصة</li>
+                            <li>مصادقة Kerberos القائمة على التذاكر</li>
+                            <li>إخفاقات أمن WEP وGSM</li>
+                        </ul>
+                    </div>
+
+                    <div class="chapter-actions">
+                        <a href="chapters/chapter10_ar.html" class="btn btn-primary">
+                            <span>عرض بالعربية</span>
+                        </a>
+                        <a href="chapters/chapter10.html" class="btn btn-secondary">
+                            <span>View in English</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Chapter 11 - Available -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">الفصل الحادي عشر</div>
+                    <span class="status-badge available">متاح الآن</span>
+
+                    <h3>البرمجيات والأمان</h3>
+                    <p class="chapter-description">
+                        افهم ثغرات البرمجيات (طفحان المخزن المؤقت، حالات السباق)،
+                        أنواع البرمجيات الخبيثة، الهجمات التاريخية، وآليات حماية البرمجيات.
+                    </p>
+
+                    <div class="chapter-topics">
+                        <h4>المواضيع المغطاة:</h4>
+                        <ul>
+                            <li>طفحان المخزن المؤقت، الوساطة غير المكتملة، حالات السباق</li>
+                            <li>الفيروسات، الديدان، أحصنة طروادة، والتهديدات المختلطة</li>
+                            <li>البرمجيات الخبيثة التاريخية والهندسة الاجتماعية</li>
+                            <li>اكتشاف البرمجيات الخبيثة، شبكات البوت، وDRM</li>
+                        </ul>
+                    </div>
+
+                    <div class="chapter-actions">
+                        <a href="chapters/chapter11_ar.html" class="btn btn-primary">
+                            <span>عرض بالعربية</span>
+                        </a>
+                        <a href="chapters/chapter11.html" class="btn btn-secondary">
+                            <span>View in English</span>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Interactive Demos Section -->
+        <section id="demos" class="modules-section">
+            <h2>العروض التفاعلية</h2>
+            <p class="section-intro">استكشف مفاهيم الأمان من خلال تصورات تفاعلية عملية</p>
+
+            <div class="chapter-cards-grid">
+                <!-- CIA Triad Demo -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">عرض</div>
+                    <span class="status-badge available">تفاعلي</span>
+
+                    <h3>تصور ثالوث CIA</h3>
+                    <p class="chapter-description">
+                        استكشف الركائز الثلاث لأمن المعلومات - السرية والسلامة
+                        والتوفر - من خلال رسم تفاعلي مع أمثلة من العالم الحقيقي.
+                    </p>
+
+                    <div class="chapter-actions">
+                        <a href="demos/cia_triad_demo.html" class="btn btn-primary">
+                            <span>تشغيل العرض</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Alice-Bob-Trudy Demo -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">عرض</div>
+                    <span class="status-badge available">تفاعلي</span>
+
+                    <h3>اتصال أليس-بوب-ترودي</h3>
+                    <p class="chapter-description">
+                        شاهد كيف تنتقل الرسائل بين أليس وبوب، وانظر كيف يمكن لترودي
+                        اعتراض أو تعديل أو حظر الاتصالات في سيناريوهات هجوم مختلفة.
+                    </p>
+
+                    <div class="chapter-actions">
+                        <a href="demos/alice_bob_trudy_demo.html" class="btn btn-primary">
+                            <span>تشغيل العرض</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Bank Security Demo -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">عرض</div>
+                    <span class="status-badge available">تفاعلي</span>
+
+                    <h3>سيناريو أمان البنك الإلكتروني</h3>
+                    <p class="chapter-description">
+                        جرب أمان الخدمات المصرفية عبر الإنترنت من ثلاث وجهات نظر: البنك،
+                        والعميل، والمهاجم. شاهد كيف تحمي إجراءات الأمان المعاملات.
+                    </p>
+
+                    <div class="chapter-actions">
+                        <a href="demos/bank_security_demo.html" class="btn btn-primary">
+                            <span>تشغيل العرض</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Caesar Cipher Demo -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">عرض</div>
+                    <span class="status-badge available">تفاعلي</span>
+
+                    <h3>تشفير شفرة قيصر</h3>
+                    <p class="chapter-description">
+                        استكشف شفرة قيصر الكلاسيكية باستخدام أداة تفاعلية. قم بتشفير وفك تشفير
+                        الرسائل، وتصور خرائط الحروف، وافهم شفرات الاستبدال.
+                    </p>
+
+                    <div class="chapter-actions">
+                        <a href="demos/caesar_cipher_demo.html" class="btn btn-primary">
+                            <span>تشغيل العرض</span>
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Transposition Cipher Demo -->
+                <article class="chapter-card available">
+                    <div class="chapter-number">عرض</div>
+                    <span class="status-badge available">تفاعلي</span>
+
+                    <h3>شفرة التبديل</h3>
+                    <p class="chapter-description">
+                        تصور كيف تعيد شفرات التبديل ترتيب الحروف دون تغييرها.
+                        شاهد عملية التبديل العمودي خطوة بخطوة مع الرسوم المتحركة.
+                    </p>
+
+                    <div class="chapter-actions">
+                        <a href="demos/transposition_cipher_demo.html" class="btn btn-primary">
+                            <span>تشغيل العرض</span>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section class="footer-content">
+            <div class="footer-info">
+                <h3>عن هذا المقرر</h3>
+                <p>
+                    تم تصميم هذا المقرر لتزويد الطلاب بفهم شامل
+                    لمفاهيم أمن الشبكات والويب. جميع المحتويات مقدمة لأغراض تعليمية.
+                </p>
+            </div>
+
+            <div class="footer-links">
+                <h3>روابط سريعة</h3>
+                <ul>
+                    <li><a href="#overview">عن المقرر</a></li>
+                    <li><a href="#modules">فصول المقرر</a></li>
+                    <li><a href="#demos">العروض التفاعلية</a></li>
+                    <li><a href="index.html">English Version</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-license">
+                <h3>معلومات المقرر</h3>
+                <p>
+                    <strong>رمز المقرر:</strong> IS 1305
+                </p>
+                <p>
+                    <strong>المحاضر:</strong> د. أسامة المرشد
+                </p>
+                <p class="last-updated">آخر تحديث: فبراير 2026</p>
+            </div>
+        </section>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 مقرر أمن الشبكات التعليمي | IS 1305</p>
+        </div>
+    </footer>
+</body>
+</html>

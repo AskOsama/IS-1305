@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 2: Crypto Basics</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter2_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>Crypto Basics</h1>
+        <p class="subtitle">Chapter 2: Fundamentals of Cryptography</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#intro">1. Introduction to Crypto Basics</a></li>
+            <li><a href="#terminology">2. How to Speak Crypto</a></li>
+            <li><a href="#classic-crypto">3. Classic Crypto</a></li>
+            <li><a href="#modern-history">4. Modern Crypto History</a></li>
+            <li><a href="#taxonomy-crypto">5. A Taxonomy of Cryptography</a></li>
+            <li><a href="#taxonomy-analysis">6. A Taxonomy of Cryptanalysis</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this chapter, you will be able to:</p>
+            <ul>
+                <li>Understand and use basic cryptographic terminology</li>
+                <li>Explain how classic ciphers work (substitution and transposition)</li>
+                <li>Describe basic cryptanalytic techniques</li>
+                <li>Define what it means for a cipher to be "secure"</li>
+                <li>Summarize important historical lessons from cryptography</li>
+                <li>Recognize major categories of cryptography and cryptanalysis</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction to Crypto Basics -->
+        <section id="intro" class="content-section">
+            <h2>1. Introduction to Crypto Basics</h2>
+
+            <div class="definition">
+                <h3>What is Cryptography?</h3>
+                <p><strong>Cryptography</strong> is the science of secret writing. The term comes from Greek: "kryptos" (hidden) + "graphein" (to write). It is the practice and study of techniques for secure communication in the presence of adversaries.</p>
+            </div>
+
+            <h3>Why Study Cryptography?</h3>
+            <p>Cryptography is fundamental to modern security. It provides:</p>
+            <ul>
+                <li><strong>Confidentiality:</strong> Keeping information secret from unauthorized parties</li>
+                <li><strong>Integrity:</strong> Detecting unauthorized modification of data</li>
+                <li><strong>Authentication:</strong> Verifying the identity of communicating parties</li>
+                <li><strong>Non-repudiation:</strong> Preventing denial of previous actions</li>
+            </ul>
+
+            <div class="key-message">
+                <p><strong>Key Insight:</strong> Cryptography is a tool, not a complete solution. Even the best cryptographic algorithms can be rendered useless by poor implementation, weak key management, or human error.</p>
+            </div>
+
+            <h3>Kerckhoffs's Principle</h3>
+            <p>A fundamental principle in cryptography states:</p>
+            <div class="definition">
+                <p><strong>Kerckhoffs's Principle:</strong> A cryptographic system should be secure even if everything about the system, except the key, is public knowledge.</p>
+            </div>
+            <p>This means:</p>
+            <ul>
+                <li>Security should depend only on the secrecy of the key</li>
+                <li>The algorithm itself can be publicly known</li>
+                <li>"Security through obscurity" is not reliable</li>
+            </ul>
+        </section>
+
+        <!-- Section 2: How to Speak Crypto -->
+        <section id="terminology" class="content-section">
+            <h2>2. How to Speak Crypto</h2>
+
+            <p>Before diving deeper, let's establish the essential vocabulary of cryptography.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Basic Cryptographic Process</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">Plaintext</div>
+                        <div class="step-desc">Original message</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔐</div>
+                        <div class="step-label">Encryption</div>
+                        <div class="step-desc">+ Key</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔒</div>
+                        <div class="step-label">Ciphertext</div>
+                        <div class="step-desc">Encrypted message</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔓</div>
+                        <div class="step-label">Decryption</div>
+                        <div class="step-desc">+ Key</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">Plaintext</div>
+                        <div class="step-desc">Original message</div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Essential Terms</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Definition</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Plaintext</strong></td>
+                            <td>The original, readable message before encryption</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Ciphertext</strong></td>
+                            <td>The encrypted, unreadable output after encryption</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cipher</strong></td>
+                            <td>An algorithm for encryption and decryption</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Key</strong></td>
+                            <td>A secret value that controls the cipher's operation</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Encryption</strong></td>
+                            <td>The process of converting plaintext to ciphertext</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Decryption</strong></td>
+                            <td>The process of converting ciphertext back to plaintext</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cryptanalysis</strong></td>
+                            <td>The science of breaking ciphers (code breaking)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <div class="example">
+                <h4>Notation Example</h4>
+                <p>In cryptographic notation:</p>
+                <ul>
+                    <li><strong>P</strong> = Plaintext (the original message)</li>
+                    <li><strong>C</strong> = Ciphertext (the encrypted message)</li>
+                    <li><strong>K</strong> = Key (the secret value)</li>
+                    <li><strong>E(P, K)</strong> = Encryption of P using key K, producing C</li>
+                    <li><strong>D(C, K)</strong> = Decryption of C using key K, recovering P</li>
+                </ul>
+                <p>The fundamental relationship: <strong>D(E(P, K), K) = P</strong></p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Remember:</strong> Without the correct key, decryption should be computationally infeasible. The security of the system rests on keeping the key secret, not the algorithm.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Classic Crypto -->
+        <section id="classic-crypto" class="content-section">
+            <h2>3. Classic Crypto</h2>
+
+            <p>Classic cryptography, used before the computer age, provides an excellent foundation for understanding cryptographic principles. There are two main types of classic ciphers:</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Types of Classic Ciphers</h3>
+                </div>
+                <div class="three-perspectives-grid">
+                    <div class="perspective-card perspective-bank">
+                        <h4>Substitution Ciphers</h4>
+                        <p><strong>Principle:</strong></p>
+                        <p>Replace each letter with a different letter or symbol. The positions of letters remain the same.</p>
+                    </div>
+                    <div class="perspective-card perspective-customer">
+                        <h4>Transposition Ciphers</h4>
+                        <p><strong>Principle:</strong></p>
+                        <p>Rearrange the positions of letters. The letters themselves remain unchanged.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Substitution Ciphers</h3>
+
+            <article class="security-concept">
+                <h4>Caesar Cipher</h4>
+                <p>The Caesar cipher is one of the oldest and simplest encryption techniques. Named after Julius Caesar, who reportedly used it for military communications.</p>
+
+                <p><strong>How it works:</strong></p>
+                <ul>
+                    <li>Each letter is shifted by a fixed number of positions in the alphabet</li>
+                    <li>The shift value is the key</li>
+                    <li>Wraps around at the end of the alphabet</li>
+                </ul>
+
+                <div class="example">
+                    <h4>Caesar Cipher Example (Shift = 3)</h4>
+                    <p><strong>Plaintext alphabet:</strong> A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</p>
+                    <p><strong>Ciphertext alphabet:</strong> D E F G H I J K L M N O P Q R S T U V W X Y Z A B C</p>
+                    <p><strong>Example:</strong></p>
+                    <ul>
+                        <li>Plaintext: <code>HELLO</code></li>
+                        <li>Ciphertext: <code>KHOOR</code></li>
+                    </ul>
+                    <p>H → K, E → H, L → O, L → O, O → R</p>
+                </div>
+            </article>
+
+            <a href="../demos/caesar_cipher_demo.html" class="demo-link">Launch Caesar Cipher Interactive Demo</a>
+
+            <div class="warning-box">
+                <h4>Weakness of Caesar Cipher</h4>
+                <p>The Caesar cipher is extremely weak because:</p>
+                <ul>
+                    <li>There are only 25 possible keys (shifts 1-25)</li>
+                    <li>Can be broken by trying all possibilities (brute force)</li>
+                    <li>Frequency analysis makes it even easier to break</li>
+                </ul>
+            </div>
+
+            <h3>Transposition Ciphers</h3>
+
+            <article class="security-concept">
+                <h4>Columnar Transposition</h4>
+                <p>In transposition ciphers, the letters are not replaced but rearranged according to a specific pattern.</p>
+
+                <p><strong>How columnar transposition works:</strong></p>
+                <ol>
+                    <li>Write the plaintext in rows of a fixed width (determined by the key)</li>
+                    <li>Read the columns in a specific order to create the ciphertext</li>
+                </ol>
+
+                <div class="example">
+                    <h4>Columnar Transposition Example</h4>
+                    <p><strong>Plaintext:</strong> ATTACK AT DAWN</p>
+                    <p><strong>Key:</strong> 4 columns, read in order 3-1-4-2</p>
+                    <p><strong>Step 1:</strong> Write in rows of 4:</p>
+                    <pre>
+A T T A
+C K A T
+D A W N
+                    </pre>
+                    <p><strong>Step 2:</strong> Read columns in key order (3-1-4-2):</p>
+                    <p>Column 3: TAW | Column 1: ACD | Column 4: ATN | Column 2: TKA</p>
+                    <p><strong>Ciphertext:</strong> TAWACDATNTKA</p>
+                </div>
+            </article>
+
+            <a href="../demos/transposition_cipher_demo.html" class="demo-link">Launch Transposition Cipher Interactive Demo</a>
+
+            <h3>Problems with Classic Cryptography</h3>
+
+            <div class="warning-box">
+                <h4>Why Classic Ciphers Are Insecure</h4>
+                <ul>
+                    <li><strong>Small key space:</strong> Limited number of possible keys makes brute force feasible</li>
+                    <li><strong>Frequency analysis:</strong> Letter frequencies in ciphertext reveal patterns</li>
+                    <li><strong>Pattern preservation:</strong> Repeated patterns in plaintext appear in ciphertext</li>
+                    <li><strong>No confusion/diffusion:</strong> Small changes don't spread throughout ciphertext</li>
+                </ul>
+            </div>
+
+            <article class="security-concept">
+                <h4>Frequency Analysis</h4>
+                <p>In English text, letters appear with predictable frequencies:</p>
+                <ul>
+                    <li>Most common: E, T, A, O, I, N, S, H, R</li>
+                    <li>Least common: Z, Q, X, J, K</li>
+                </ul>
+                <p>By analyzing the frequency of letters in ciphertext, cryptanalysts can often deduce the substitution pattern.</p>
+            </article>
+        </section>
+
+        <!-- Section 4: Modern Crypto History -->
+        <section id="modern-history" class="content-section">
+            <h2>4. Modern Crypto History</h2>
+
+            <p>The history of cryptography provides valuable lessons that still apply today.</p>
+
+            <article class="security-concept">
+                <h4>World War II: The Enigma Machine</h4>
+                <p>The German Enigma machine was considered unbreakable, using rotating cipher wheels to create complex substitution patterns.</p>
+                <p><strong>Key lessons from Enigma:</strong></p>
+                <ul>
+                    <li>A letter could never encrypt to itself - this helped Allied codebreakers</li>
+                    <li>Operator errors (repeated message starts) revealed patterns</li>
+                    <li>Even complex systems can be broken with enough information</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>The Birth of Modern Cryptography</h4>
+                <p>Key milestones in modern cryptography:</p>
+                <ul>
+                    <li><strong>1949:</strong> Claude Shannon's "Communication Theory of Secrecy Systems" - mathematical foundation of cryptography</li>
+                    <li><strong>1976:</strong> Diffie-Hellman key exchange - revolutionized key distribution</li>
+                    <li><strong>1977:</strong> DES (Data Encryption Standard) - first standardized cipher</li>
+                    <li><strong>1978:</strong> RSA algorithm - public key cryptography becomes practical</li>
+                    <li><strong>2001:</strong> AES (Advanced Encryption Standard) - current standard symmetric cipher</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Historical Lesson:</strong> "Those who cannot remember the past are condemned to repeat it." Many modern security failures echo mistakes from cryptographic history. Understanding history helps avoid repeating errors.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: A Taxonomy of Cryptography -->
+        <section id="taxonomy-crypto" class="content-section">
+            <h2>5. A Taxonomy of Cryptography</h2>
+
+            <p>Modern cryptography can be organized into three main categories:</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">The Three Pillars of Modern Cryptography</h3>
+                </div>
+                <div class="four-areas-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="area-card">
+                        <div class="area-icon">🔑</div>
+                        <h4>Symmetric Key Cryptography</h4>
+                        <p>Same key for encryption and decryption</p>
+                        <ul>
+                            <li>Fast and efficient</li>
+                            <li>Examples: AES, DES, 3DES</li>
+                            <li>Challenge: Key distribution</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">🔐</div>
+                        <h4>Public Key Cryptography</h4>
+                        <p>Different keys for encryption and decryption</p>
+                        <ul>
+                            <li>Solves key distribution</li>
+                            <li>Examples: RSA, ECC</li>
+                            <li>Slower than symmetric</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">#️⃣</div>
+                        <h4>Hash Functions</h4>
+                        <p>One-way functions producing fixed-size output</p>
+                        <ul>
+                            <li>No key required</li>
+                            <li>Examples: SHA-256, SHA-3</li>
+                            <li>Used for integrity</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Symmetric Key Cryptography</h4>
+                <p>Also called "secret key" or "private key" cryptography.</p>
+                <p><strong>Characteristics:</strong></p>
+                <ul>
+                    <li>Both sender and receiver share the same secret key</li>
+                    <li>Key must be exchanged securely before communication</li>
+                    <li>Very fast - suitable for encrypting large amounts of data</li>
+                    <li>n users need n(n-1)/2 keys for pairwise communication</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>Public Key (Asymmetric) Cryptography</h4>
+                <p>Uses a pair of mathematically related keys.</p>
+                <p><strong>Characteristics:</strong></p>
+                <ul>
+                    <li><strong>Public key:</strong> Can be freely shared, used for encryption</li>
+                    <li><strong>Private key:</strong> Must be kept secret, used for decryption</li>
+                    <li>Solves the key distribution problem</li>
+                    <li>Each user needs only one key pair</li>
+                    <li>Computationally more expensive than symmetric encryption</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>Cryptographic Hash Functions</h4>
+                <p>Transform any input into a fixed-size "fingerprint".</p>
+                <p><strong>Properties:</strong></p>
+                <ul>
+                    <li><strong>One-way:</strong> Cannot recover input from output</li>
+                    <li><strong>Deterministic:</strong> Same input always produces same output</li>
+                    <li><strong>Collision resistant:</strong> Hard to find two inputs with same output</li>
+                    <li><strong>Avalanche effect:</strong> Small input change causes large output change</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>In Practice:</strong> Modern systems often combine all three types. For example, TLS uses public key cryptography to exchange symmetric keys, symmetric encryption for data, and hash functions for integrity.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: A Taxonomy of Cryptanalysis -->
+        <section id="taxonomy-analysis" class="content-section">
+            <h2>6. A Taxonomy of Cryptanalysis</h2>
+
+            <p>Cryptanalysis is the study of breaking cryptographic systems. Understanding attack types helps design better security.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Types of Cryptanalytic Attacks</h3>
+                </div>
+                <div class="four-areas-grid">
+                    <div class="area-card">
+                        <div class="area-icon">👁️</div>
+                        <h4>Ciphertext-Only Attack (COA)</h4>
+                        <p>Attacker has access only to ciphertext.</p>
+                        <ul>
+                            <li>Most difficult attack scenario</li>
+                            <li>Relies on patterns and frequency analysis</li>
+                            <li>A secure cipher must resist this</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">📋</div>
+                        <h4>Known-Plaintext Attack (KPA)</h4>
+                        <p>Attacker has pairs of plaintext and corresponding ciphertext.</p>
+                        <ul>
+                            <li>More information available</li>
+                            <li>Can deduce key patterns</li>
+                            <li>Common in real-world scenarios</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">🎯</div>
+                        <h4>Chosen-Plaintext Attack (CPA)</h4>
+                        <p>Attacker can choose plaintexts and obtain their ciphertexts.</p>
+                        <ul>
+                            <li>Stronger attack model</li>
+                            <li>Can probe system behavior</li>
+                            <li>Public key systems must resist this</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">💥</div>
+                        <h4>Brute Force Attack</h4>
+                        <p>Try all possible keys until finding the correct one.</p>
+                        <ul>
+                            <li>Always possible in theory</li>
+                            <li>Defeated by large key space</li>
+                            <li>Key length is critical</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Side-Channel Attacks</h4>
+                <p>These attacks exploit information leaked by the physical implementation of a cryptosystem, not weaknesses in the algorithm itself.</p>
+                <ul>
+                    <li><strong>Timing attacks:</strong> Measure how long operations take</li>
+                    <li><strong>Power analysis:</strong> Monitor power consumption during encryption</li>
+                    <li><strong>Electromagnetic attacks:</strong> Capture EM emissions from devices</li>
+                    <li><strong>Acoustic attacks:</strong> Listen to sounds made by hardware</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>What Makes a Cipher "Secure"?</h4>
+                <p>A cipher is considered computationally secure if:</p>
+                <ul>
+                    <li>The best known attack requires more resources than the attacker has</li>
+                    <li>Breaking it is computationally infeasible (would take millions of years)</li>
+                    <li>The cost of breaking exceeds the value of the encrypted data</li>
+                </ul>
+                <p><strong>Note:</strong> "Secure" doesn't mean "unbreakable" - it means breaking it is impractical.</p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Defense in Depth:</strong> Never rely solely on cryptography. Combine it with proper key management, secure protocols, access controls, and security monitoring for robust protection.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>Cryptography</strong> is the science of secret writing, providing confidentiality, integrity, authentication, and non-repudiation.</li>
+
+                <li><strong>Essential terminology</strong> includes plaintext, ciphertext, cipher, key, encryption, decryption, and cryptanalysis.</li>
+
+                <li><strong>Classic ciphers</strong> fall into two categories: substitution (replacing letters) and transposition (rearranging letters).</li>
+
+                <li><strong>Caesar cipher</strong> shifts letters by a fixed amount, but is easily broken due to its small key space.</li>
+
+                <li><strong>Transposition ciphers</strong> rearrange letter positions but preserve the original letters.</li>
+
+                <li><strong>Modern cryptography</strong> encompasses symmetric key cryptography, public key cryptography, and hash functions.</li>
+
+                <li><strong>Cryptanalysis attacks</strong> range from ciphertext-only to chosen-plaintext attacks, plus side-channel attacks.</li>
+
+                <li><strong>Kerckhoffs's Principle</strong> states that security should depend only on the key, not the secrecy of the algorithm.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In Chapter 3, we'll dive deep into symmetric key cryptography, exploring modern algorithms like AES and understanding how block ciphers work.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>Credits and Attributions</h2>
+            <p class="credits-intro">All diagrams in this document are original educational works created specifically for this course.</p>
+            <ul class="credits-list">
+                <li><strong>Cryptographic Process Flow:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Cipher Types Diagram:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Cryptography Taxonomy:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Cryptanalysis Taxonomy:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Additional styles for Chapter 2 diagrams */
+        .crypto-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .crypto-step {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            min-width: 100px;
+        }
+
+        .crypto-step.highlight-step {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: var(--secondary-color);
+        }
+
+        .step-icon {
+            font-size: 2em;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .step-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .crypto-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        @media screen and (max-width: 768px) {
+            .crypto-flow {
+                flex-direction: column;
+            }
+
+            .crypto-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+        }
+
+        code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+        }
+    </style>
+</body>
+</html>

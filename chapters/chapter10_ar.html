@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل العاشر: بروتوكولات الأمان في العالم الحقيقي</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter10.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>بروتوكولات الأمان في العالم الحقيقي</h1>
+        <p class="subtitle">الفصل العاشر: TCP، SSH، SSL/TLS، IPSec، Kerberos، WEP، وGSM</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#tcp">1. بروتوكول TCP</a></li>
+            <li><a href="#ssh">2. بروتوكول SSH</a></li>
+            <li><a href="#ssl-tls">3. بروتوكول SSL/TLS</a></li>
+            <li><a href="#ipsec">4. بروتوكول IPSec</a></li>
+            <li><a href="#kerberos">5. بروتوكول Kerberos</a></li>
+            <li><a href="#wep">6. بروتوكول WEP</a></li>
+            <li><a href="#gsm">7. أمن GSM</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذا الفصل، ستكون قادراً على:</p>
+            <ul>
+                <li>شرح كيف يوفر TCP تسليم بيانات موثوق ولماذا يفتقر إلى الأمان</li>
+                <li>وصف كيف ينشئ SSH أنفاقاً آمنة للوصول عن بُعد</li>
+                <li>فهم مصافحة SSL/TLS وكيف يعمل HTTPS</li>
+                <li>مقارنة وضعي AH وESP في IPSec لأمن الشبكات الافتراضية الخاصة</li>
+                <li>شرح مصادقة Kerberos القائمة على التذاكر ودورها في Active Directory</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: TCP -->
+        <section id="tcp" class="content-section">
+            <h2>1. بروتوكول TCP (بروتوكول التحكم في النقل)</h2>
+
+            <div class="definition">
+                <h3>ما هو TCP؟</h3>
+                <p><strong>TCP</strong> هو بروتوكول نقل موجه بالاتصال يوفر تسليم بيانات موثوق ومرتب. يدعم معظم تطبيقات الإنترنت: HTTP، FTP، SMTP، SSH، وغيرها.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>مصافحة TCP الثلاثية</h4>
+                <p>يُنشئ TCP اتصالاً باستخدام عملية من ثلاث خطوات:</p>
+                <ol>
+                    <li><strong>SYN:</strong> يرسل العميل طلب مزامنة</li>
+                    <li><strong>SYN-ACK:</strong> يؤكد الخادم ويستجيب</li>
+                    <li><strong>ACK:</strong> يؤكد العميل الاتصال</li>
+                </ol>
+            </article>
+
+            <div class="warning-box">
+                <h4>TCP ليس لديه أمان مدمج</h4>
+                <p>صُمم TCP للموثوقية، وليس للأمان. لا يوجد تشفير ولا مصادقة ولا حماية سلامة. تشمل الهجمات:</p>
+                <ul>
+                    <li><strong>فيضان SYN:</strong> حرمان من الخدمة بإرسال طلبات SYN كثيرة دون إكمال المصافحات</li>
+                    <li><strong>اختطاف الجلسة:</strong> حقن حزم في اتصال TCP قائم</li>
+                    <li><strong>التنصت:</strong> جميع البيانات تُنقل كنص عادي</li>
+                </ul>
+                <p>لهذا تُطبق بروتوكولات الأمان مثل SSL/TLS فوق TCP.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: SSH -->
+        <section id="ssh" class="content-section">
+            <h2>2. بروتوكول SSH (الصدفة الآمنة)</h2>
+
+            <div class="definition">
+                <h3>ما هو SSH؟</h3>
+                <p><strong>SSH</strong> يوفر نفقاً آمناً مشفراً للوصول عن بُعد. حل محل البروتوكولات غير الآمنة مثل Telnet وrlogin وrsh، التي كانت تنقل كل شيء (بما في ذلك كلمات المرور) كنص عادي.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>ميزات SSH</h4>
+                <ul>
+                    <li><strong>اتصال مشفر:</strong> جميع البيانات مشفرة باستخدام شفرات متماثلة (AES)</li>
+                    <li><strong>مصادقة الخادم:</strong> يتحقق العميل من هوية الخادم باستخدام مفاتيح المضيف</li>
+                    <li><strong>مصادقة المستخدم:</strong> كلمة مرور، مفتاح عام، أو شهادة</li>
+                    <li><strong>إعادة توجيه المنافذ:</strong> نقل بروتوكولات أخرى عبر اتصال SSH الآمن</li>
+                    <li><strong>SFTP/SCP:</strong> نقل ملفات آمن مبني على SSH</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>SSH عملياً:</strong> SSH هي الأداة المعيارية لإدارة الخوادم. يستخدم مديرو الأنظمة مفاتيح SSH (مصادقة المفتاح العام) بدلاً من كلمات المرور لأمان أقوى ودعم الأتمتة.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: SSL/TLS -->
+        <section id="ssl-tls" class="content-section">
+            <h2>3. بروتوكول SSL/TLS</h2>
+
+            <div class="definition">
+                <h3>ما هو SSL/TLS؟</h3>
+                <p><strong>SSL</strong> (طبقة المقابس الآمنة) وخليفتها <strong>TLS</strong> (أمن طبقة النقل) توفر التشفير والمصادقة والسلامة لاتصالات الإنترنت. TLS هو البروتوكول وراء <strong>HTTPS</strong>.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">مصافحة TLS (مبسطة)</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">العميل</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">1. ClientHello (الشفرات المدعومة، عشوائي)</span>
+                        </div>
+                        <div class="protocol-actor">الخادم</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">العميل</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">2. ServerHello, شهادة, تبادل مفاتيح</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">الخادم</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">العميل</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">3. تبادل مفاتيح, تغيير الشفرة, انتهاء</span>
+                        </div>
+                        <div class="protocol-actor">الخادم</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">العميل</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">4. تغيير الشفرة, انتهاء</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">الخادم</div>
+                    </div>
+                </div>
+                <p class="diagram-note">بعد المصافحة، يتشارك الطرفان مفاتيح الجلسة وجميع البيانات اللاحقة تكون مشفرة.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>ما يوفره TLS</h4>
+                <ul>
+                    <li><strong>المصادقة:</strong> الخادم يثبت هويته عبر شهادة رقمية (موقعة من CA)</li>
+                    <li><strong>السرية:</strong> التشفير المتماثل (AES) يحمي البيانات أثناء النقل</li>
+                    <li><strong>السلامة:</strong> رموز MAC تكشف أي تلاعب</li>
+                    <li><strong>PFS:</strong> TLS 1.3 يتطلب تبادل مفاتيح مؤقت (ECDHE)</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>هجمات الرجل في المنتصف (MITM)</h4>
+                <p>بدون التحقق من الشهادة، يمكن للمهاجم اعتراض مصافحة TLS وتقديم شهادته الخاصة. نظام الشهادات (CAs) مصمم لمنع هذا من خلال توفير سلسلة موثوقة للتحقق من الهوية.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: IPSec -->
+        <section id="ipsec" class="content-section">
+            <h2>4. بروتوكول IPSec</h2>
+
+            <div class="definition">
+                <h3>ما هو IPSec؟</h3>
+                <p><strong>IPSec</strong> (أمن بروتوكول الإنترنت) يوفر الأمان في <strong>طبقة الشبكة</strong>. على عكس SSL/TLS (الذي يؤمن اتصالات فردية)، يمكن لـ IPSec حماية جميع حركة المرور بين شبكتين أو مضيفين. وهو أساس معظم <strong>الشبكات الافتراضية الخاصة (VPN)</strong>.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>مكونات IPSec</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المكون</th>
+                            <th>AH (رأس المصادقة)</th>
+                            <th>ESP (حمولة الأمان المغلفة)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>المصادقة</strong></td>
+                            <td>نعم</td>
+                            <td>نعم</td>
+                        </tr>
+                        <tr>
+                            <td><strong>السلامة</strong></td>
+                            <td>نعم</td>
+                            <td>نعم</td>
+                        </tr>
+                        <tr>
+                            <td><strong>السرية</strong></td>
+                            <td>لا</td>
+                            <td>نعم (يشفر الحمولة)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>يحمي رأس IP</strong></td>
+                            <td>نعم</td>
+                            <td>لا (في وضع النقل)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <article class="security-concept">
+                <h4>أوضاع IPSec</h4>
+                <ul>
+                    <li><strong>وضع النقل:</strong> يحمي حمولة حزمة IP. يُستخدم للاتصال من طرف إلى طرف بين المضيفين.</li>
+                    <li><strong>وضع النفق:</strong> يحمي حزمة IP بالكامل (مغلفة في حزمة جديدة). يُستخدم لبوابات VPN التي تربط الشبكات.</li>
+                </ul>
+            </article>
+        </section>
+
+        <!-- Section 5: Kerberos -->
+        <section id="kerberos" class="content-section">
+            <h2>5. بروتوكول Kerberos</h2>
+
+            <div class="definition">
+                <h3>ما هو Kerberos؟</h3>
+                <p><strong>Kerberos</strong> هو بروتوكول مصادقة قائم على التذاكر. طرف ثالث موثوق يُسمى <strong>مركز توزيع المفاتيح (KDC)</strong> يصدر تذاكر تثبت هوية المستخدم للخدمات، دون نقل كلمات المرور عبر الشبكة.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">تدفق مصادقة Kerberos</h3>
+                </div>
+                <div class="kerberos-flow">
+                    <div class="kerb-step">
+                        <div class="kerb-number">1</div>
+                        <div class="kerb-content">
+                            <strong>طلب المصادقة</strong>
+                            <p>يطلب المستخدم تذكرة منح التذاكر (TGT) من KDC</p>
+                        </div>
+                    </div>
+                    <div class="kerb-arrow">↓</div>
+                    <div class="kerb-step">
+                        <div class="kerb-number">2</div>
+                        <div class="kerb-content">
+                            <strong>إصدار TGT</strong>
+                            <p>يتحقق KDC من الهوية ويصدر TGT مشفرة</p>
+                        </div>
+                    </div>
+                    <div class="kerb-arrow">↓</div>
+                    <div class="kerb-step">
+                        <div class="kerb-number">3</div>
+                        <div class="kerb-content">
+                            <strong>طلب تذكرة الخدمة</strong>
+                            <p>يقدم المستخدم TGT لطلب الوصول إلى خدمة محددة</p>
+                        </div>
+                    </div>
+                    <div class="kerb-arrow">↓</div>
+                    <div class="kerb-step">
+                        <div class="kerb-number">4</div>
+                        <div class="kerb-content">
+                            <strong>إصدار تذكرة الخدمة</strong>
+                            <p>يصدر KDC تذكرة خدمة مشفرة لتلك الخدمة</p>
+                        </div>
+                    </div>
+                    <div class="kerb-arrow">↓</div>
+                    <div class="kerb-step">
+                        <div class="kerb-number">5</div>
+                        <div class="kerb-content">
+                            <strong>منح الوصول</strong>
+                            <p>يقدم المستخدم تذكرة الخدمة للوصول إلى الخدمة (المصادقة المتبادلة ممكنة)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Kerberos عملياً</h4>
+                <ul>
+                    <li><strong>Microsoft Active Directory:</strong> يستخدم Kerberos كبروتوكول المصادقة الأساسي</li>
+                    <li><strong>تسجيل الدخول الموحد (SSO):</strong> المصادقة مرة واحدة، والوصول إلى خدمات متعددة عبر التذاكر</li>
+                    <li><strong>المصادقة المتبادلة:</strong> كلا العميل والخدمة يمكنهما التحقق من بعضهما</li>
+                    <li><strong>تذاكر محدودة الوقت:</strong> التذاكر تنتهي صلاحيتها، مما يحد من نافذة الهجوم</li>
+                </ul>
+            </article>
+        </section>
+
+        <!-- Section 6: WEP -->
+        <section id="wep" class="content-section">
+            <h2>6. بروتوكول WEP (الخصوصية المكافئة للشبكة السلكية)</h2>
+
+            <div class="definition">
+                <h3>ما هو WEP؟</h3>
+                <p><strong>WEP</strong> كان بروتوكول الأمان الأصلي للواي فاي (IEEE 802.11). استخدم شفرة التدفق RC4 مع CRC-32 للتحقق من السلامة.</p>
+            </div>
+
+            <div class="warning-box">
+                <h4>WEP مكسور تماماً</h4>
+                <p>لدى WEP عيوب أمنية قاتلة:</p>
+                <ul>
+                    <li><strong>IV قصير (24 بت):</strong> متجه التهيئة يتكرر كثيراً، مما يسبب إعادة استخدام تدفق المفاتيح</li>
+                    <li><strong>جدولة مفاتيح ضعيفة:</strong> هجمات المفاتيح المرتبطة يمكنها استرجاع مفتاح WEP من الحزم المحتجزة</li>
+                    <li><strong>CRC-32 ليس تشفيرياً:</strong> يمكن للمهاجم تعديل الحزم وإصلاح CRC دون معرفة المفتاح</li>
+                    <li><strong>وقت الكسر:</strong> يمكن استرجاع مفتاح WEP في دقائق باستخدام أدوات متاحة مجاناً</li>
+                </ul>
+                <p><strong>لا تستخدم WEP أبداً.</strong> استخدم WPA2 (AES-CCMP) أو WPA3 بدلاً من ذلك.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: GSM -->
+        <section id="gsm" class="content-section">
+            <h2>7. أمن GSM</h2>
+
+            <div class="definition">
+                <h3>مصادقة GSM</h3>
+                <p><strong>GSM</strong> (النظام العالمي للاتصالات المتنقلة) يستخدم مصادقة قائمة على شريحة SIM. تخزن شريحة SIM مفتاحاً فريداً (Ki) مشتركاً مع مشغل الشبكة.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>كيف تعمل مصادقة GSM</h4>
+                <ol>
+                    <li>ترسل الشبكة تحدياً عشوائياً (RAND) إلى الهاتف</li>
+                    <li>تحسب شريحة SIM استجابة باستخدام <strong>خوارزمية A3</strong>: SRES = A3(Ki, RAND)</li>
+                    <li>تحسب شريحة SIM أيضاً مفتاح جلسة باستخدام <strong>خوارزمية A8</strong>: Kc = A8(Ki, RAND)</li>
+                    <li>تتحقق الشبكة من SRES؛ إذا صح، يُشفر الاتصال باستخدام Kc مع شفرة <strong>A5/1</strong></li>
+                </ol>
+            </article>
+
+            <div class="warning-box">
+                <h4>نقاط ضعف أمن GSM</h4>
+                <ul>
+                    <li><strong>مصادقة أحادية الاتجاه:</strong> الهاتف يصادق الشبكة، لكن الشبكة لا تصادق الهاتف (يسمح بمحطات قاعدة مزيفة)</li>
+                    <li><strong>تشفير ضعيف:</strong> تم كسر A5/1 بالكامل</li>
+                    <li><strong>لا حماية سلامة:</strong> يمكن تعديل الحزم أثناء النقل</li>
+                </ul>
+                <p>المعايير الحديثة (3G UMTS, 4G LTE, 5G NR) تعالج هذه العيوب بمصادقة متبادلة، وتشفير أقوى (AES)، وحماية السلامة.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>TCP</strong> يوفر تسليم بيانات موثوق لكنه لا يملك ميزات أمان. يجب إضافة الأمان من الطبقات العليا.</li>
+
+                <li><strong>SSH</strong> يوفر وصولاً مشفراً عن بُعد، ليحل محل البروتوكولات غير الآمنة مثل Telnet. يستخدم مفاتيح المضيف ويدعم طرق مصادقة متعددة.</li>
+
+                <li><strong>SSL/TLS</strong> يؤمن اتصالات الويب (HTTPS) من خلال المصادقة بالشهادات، والتشفير المتماثل، والتحقق من السلامة.</li>
+
+                <li><strong>IPSec</strong> يوفر أمان طبقة الشبكة باستخدام AH (المصادقة) وESP (التشفير + المصادقة). وهو أساس شبكات VPN.</li>
+
+                <li><strong>Kerberos</strong> يستخدم مصادقة قائمة على التذاكر مع KDC، مما يمكّن تسجيل الدخول الموحد. وهو العمود الفقري لمصادقة Active Directory.</li>
+
+                <li><strong>WEP</strong> مكسور تماماً بسبب إعادة استخدام IV، وجدولة مفاتيح ضعيفة، وسلامة غير تشفيرية. استخدم WPA2/WPA3 بدلاً من ذلك.</li>
+
+                <li><strong>GSM</strong> يستخدم مصادقة تحدي واستجابة قائمة على SIM لكنه يعاني من مصادقة أحادية الاتجاه وتشفير ضعيف. المعايير الحديثة تصلح هذه المشاكل.</li>
+            </ol>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">ملخص مقارنة البروتوكولات</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>البروتوكول</th>
+                            <th>الطبقة</th>
+                            <th>الاستخدام الأساسي</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>SSH</strong></td>
+                            <td>التطبيق</td>
+                            <td>الوصول عن بُعد</td>
+                            <td>آمن (حالي)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TLS 1.3</strong></td>
+                            <td>النقل</td>
+                            <td>الويب (HTTPS)</td>
+                            <td>آمن (حالي)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>IPSec</strong></td>
+                            <td>الشبكة</td>
+                            <td>شبكات VPN</td>
+                            <td>آمن (حالي)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Kerberos</strong></td>
+                            <td>التطبيق</td>
+                            <td>مصادقة المؤسسات</td>
+                            <td>آمن (حالي)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>WEP</strong></td>
+                            <td>ربط البيانات</td>
+                            <td>الواي فاي</td>
+                            <td>مكسور (لا تستخدم)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GSM (A5/1)</strong></td>
+                            <td>ربط البيانات</td>
+                            <td>الصوت المحمول</td>
+                            <td>مكسور (حل محله 4G/5G)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <p><strong>التطلع إلى الأمام:</strong> في الفصل الحادي عشر، سنفحص أمن البرمجيات &mdash; كيف تُستغل الثغرات في الكود وكيفية الدفاع ضد الهجمات المبنية على البرمجيات.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>الاعتمادات والإسناد</h2>
+            <p class="credits-intro">جميع الرسوم البيانية في هذه الوثيقة هي أعمال تعليمية أصلية تم إنشاؤها خصيصاً لهذا المقرر.</p>
+            <ul class="credits-list">
+                <li><strong>تدفق مصافحة TLS:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>تدفق مصادقة Kerberos:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>جدول مقارنة البروتوكولات:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">&rarr; العودة إلى الصفحة الرئيسية</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 10 specific styles */
+        .protocol-flow {
+            padding: 1.5rem;
+        }
+
+        .protocol-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .protocol-actor {
+            font-weight: 700;
+            color: var(--primary-color);
+            min-width: 60px;
+            text-align: center;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 8px;
+            border: 2px solid var(--secondary-color);
+        }
+
+        .protocol-message {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .msg-label {
+            background: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9em;
+            font-family: "Courier New", Courier, monospace;
+            direction: ltr;
+            text-align: left;
+        }
+
+        .msg-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .diagram-note {
+            font-size: 0.9em;
+            color: #555;
+            font-style: italic;
+            text-align: center;
+            padding: 0 1.5rem 1rem;
+        }
+
+        .kerberos-flow {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .kerb-step {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            margin: 0 auto;
+            max-width: 500px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            text-align: right;
+        }
+
+        .kerb-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .kerb-content {
+            flex: 1;
+        }
+
+        .kerb-content p {
+            margin: 0.25rem 0 0;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .kerb-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+            text-align: center;
+            margin: 0.3rem 0;
+        }
+
+        @media screen and (max-width: 768px) {
+            .protocol-step {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .msg-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+            direction: ltr;
+            text-align: left;
+        }
+
+        code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+            direction: ltr;
+        }
+    </style>
+</body>
+</html>

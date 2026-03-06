@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 11: Software and Security</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter11_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>Software and Security</h1>
+        <p class="subtitle">Chapter 11: Vulnerabilities, Malware, and Software Protection</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#overview">1. Software and Security Overview</a></li>
+            <li><a href="#flaws">2. Types of Software Flaws</a></li>
+            <li><a href="#buffer-overflow">3. Buffer Overflow</a></li>
+            <li><a href="#incomplete-mediation">4. Incomplete Mediation</a></li>
+            <li><a href="#race-conditions">5. Race Conditions</a></li>
+            <li><a href="#malware">6. Malware Overview</a></li>
+            <li><a href="#historical-malware">7. Historical Malware</a></li>
+            <li><a href="#trojans">8. Trojans and Social Engineering</a></li>
+            <li><a href="#detection">9. Malware Detection and Botnets</a></li>
+            <li><a href="#protection">10. Software Protection and DRM</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this chapter, you will be able to:</p>
+            <ul>
+                <li>Explain why software vulnerabilities are the primary cause of cyberattacks</li>
+                <li>Describe common software flaws: buffer overflow, incomplete mediation, and race conditions</li>
+                <li>Identify major types of malware: viruses, worms, Trojans, and blended threats</li>
+                <li>Understand malware detection techniques and botnet architectures</li>
+                <li>Explain software protection mechanisms including DRM and obfuscation</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="content-section">
+            <h2>1. Software and Security Overview</h2>
+
+            <div class="definition">
+                <h3>Why Software Security Matters</h3>
+                <p>Software vulnerabilities are the <strong>number one cause of cyberattacks</strong>. No matter how strong your encryption or authentication, a single bug in software can bypass all security measures.</p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Key Insight:</strong> Security is only as strong as the weakest link. Attackers target software because it is complex, written by humans, and almost always contains bugs. A typical software project has 15&ndash;50 bugs per 1,000 lines of code.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Types of Software Flaws -->
+        <section id="flaws" class="content-section">
+            <h2>2. Types of Software Flaws</h2>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Categories of Software Flaws</h3>
+                </div>
+                <div class="flaw-grid">
+                    <div class="flaw-card">
+                        <h4>Design Errors</h4>
+                        <p>Fundamental flaws in the architecture or logic of the software.</p>
+                        <ul>
+                            <li>Hard to fix (may require redesign)</li>
+                            <li>Example: No rate limiting on login attempts</li>
+                        </ul>
+                    </div>
+                    <div class="flaw-card">
+                        <h4>Implementation Bugs</h4>
+                        <p>Errors introduced during coding, even if the design is correct.</p>
+                        <ul>
+                            <li>Most common type of flaw</li>
+                            <li>Examples: Buffer overflow, SQL injection</li>
+                        </ul>
+                    </div>
+                    <div class="flaw-card">
+                        <h4>Environment Interactions</h4>
+                        <p>Issues arising from how software interacts with its operating environment.</p>
+                        <ul>
+                            <li>Often subtle and hard to detect</li>
+                            <li>Examples: Race conditions, shared resource conflicts</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Buffer Overflow -->
+        <section id="buffer-overflow" class="content-section">
+            <h2>3. Buffer Overflow</h2>
+
+            <div class="definition">
+                <h3>What is a Buffer Overflow?</h3>
+                <p>A <strong>buffer overflow</strong> occurs when a program writes more data to a buffer (fixed-size memory block) than it can hold. The excess data overwrites adjacent memory, potentially including the function's <strong>return address</strong> on the stack.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Stack Buffer Overflow</h3>
+                </div>
+                <div class="stack-diagram">
+                    <div class="stack-normal">
+                        <h4>Normal Stack</h4>
+                        <div class="stack-frame">
+                            <div class="stack-cell stack-ret">Return Address</div>
+                            <div class="stack-cell stack-saved">Saved Frame Pointer</div>
+                            <div class="stack-cell stack-buf">Buffer [64 bytes]</div>
+                        </div>
+                    </div>
+                    <div class="stack-arrow">→</div>
+                    <div class="stack-overflow">
+                        <h4>After Overflow</h4>
+                        <div class="stack-frame">
+                            <div class="stack-cell stack-ret stack-overwritten">OVERWRITTEN!</div>
+                            <div class="stack-cell stack-saved stack-overwritten">OVERWRITTEN!</div>
+                            <div class="stack-cell stack-buf stack-overwritten">Attacker's data...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Classic Example: gets() in C</h4>
+                <p>The C function <code>gets()</code> reads input without checking length:</p>
+                <pre>char buffer[64];
+gets(buffer);  // DANGEROUS: no bounds checking!</pre>
+                <p>If the user inputs more than 64 characters, the excess overwrites the stack, potentially hijacking program execution.</p>
+            </article>
+
+            <article class="security-concept">
+                <h4>The Morris Worm (1988)</h4>
+                <p>One of the first internet worms exploited a buffer overflow in the Unix <code>fingerd</code> program. It infected approximately 6,000 computers (10% of the internet at the time) and caused an estimated $10&ndash;100 million in damages.</p>
+            </article>
+
+            <div class="warning-box">
+                <h4>Defenses Against Buffer Overflow</h4>
+                <ul>
+                    <li><strong>Use safe functions:</strong> Replace gets() with fgets(), strcpy() with strncpy()</li>
+                    <li><strong>Stack canaries:</strong> Place known values before the return address; detect overwrites</li>
+                    <li><strong>ASLR:</strong> Address Space Layout Randomization makes addresses unpredictable</li>
+                    <li><strong>DEP/NX:</strong> Mark stack memory as non-executable</li>
+                    <li><strong>Memory-safe languages:</strong> Use Rust, Go, or Java instead of C/C++</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 4: Incomplete Mediation -->
+        <section id="incomplete-mediation" class="content-section">
+            <h2>4. Incomplete Mediation</h2>
+
+            <div class="definition">
+                <h3>What is Incomplete Mediation?</h3>
+                <p><strong>Incomplete mediation</strong> occurs when a program fails to properly validate user input before using it. The program trusts that the input is valid without checking.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>Examples</h4>
+                <ul>
+                    <li><strong>URL manipulation:</strong> Changing price values in hidden form fields or URL parameters</li>
+                    <li><strong>Path traversal:</strong> Using <code>../../etc/passwd</code> to access files outside the intended directory</li>
+                    <li><strong>SQL injection:</strong> Inserting SQL commands through input fields</li>
+                    <li><strong>Client-side validation only:</strong> Relying on JavaScript checks that can be bypassed</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Golden Rule:</strong> Never trust user input. <strong>Always validate on the server side.</strong> Client-side validation is for user convenience only; it provides zero security.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Race Conditions -->
+        <section id="race-conditions" class="content-section">
+            <h2>5. Race Conditions</h2>
+
+            <div class="definition">
+                <h3>What is a Race Condition?</h3>
+                <p>A <strong>race condition</strong> occurs when the behavior of a program depends on the relative timing of events (e.g., two processes accessing a shared resource). The classic security-relevant race condition is <strong>TOCTOU</strong> (Time of Check to Time of Use).</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>TOCTOU Attack</h4>
+                <p>The program checks a condition, then acts on it. Between the check and the action, an attacker changes the state:</p>
+                <ol>
+                    <li><strong>Time of Check:</strong> Program verifies the user has permission to access file X</li>
+                    <li><strong>Attacker swaps:</strong> Between check and use, attacker replaces file X with a symlink to /etc/passwd</li>
+                    <li><strong>Time of Use:</strong> Program accesses the file, now operating on /etc/passwd</li>
+                </ol>
+            </article>
+
+            <div class="warning-box">
+                <h4>Defenses Against Race Conditions</h4>
+                <ul>
+                    <li><strong>Atomic operations:</strong> Combine check and use into a single indivisible operation</li>
+                    <li><strong>File locks:</strong> Prevent concurrent access to shared resources</li>
+                    <li><strong>Avoid shared state:</strong> Minimize shared mutable resources between processes</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 6: Malware Overview -->
+        <section id="malware" class="content-section">
+            <h2>6. Malware Overview</h2>
+
+            <div class="definition">
+                <h3>What is Malware?</h3>
+                <p><strong>Malware</strong> (malicious software) is any software intentionally designed to cause damage, steal data, or gain unauthorized access.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Types of Malware</h3>
+                </div>
+                <div class="malware-grid">
+                    <div class="malware-card malware-virus">
+                        <h4>Virus</h4>
+                        <p>Attaches to a host program. Spreads when the infected program is executed.</p>
+                        <p><strong>Requires:</strong> Human action to spread</p>
+                    </div>
+                    <div class="malware-card malware-worm">
+                        <h4>Worm</h4>
+                        <p>Self-replicating program that spreads automatically across networks without human intervention.</p>
+                        <p><strong>Requires:</strong> Network vulnerability</p>
+                    </div>
+                    <div class="malware-card malware-trojan">
+                        <h4>Trojan Horse</h4>
+                        <p>Disguised as legitimate software. Performs hidden malicious functions when executed.</p>
+                        <p><strong>Requires:</strong> User to install it</p>
+                    </div>
+                    <div class="malware-card malware-blended">
+                        <h4>Blended Threat</h4>
+                        <p>Combines techniques from viruses, worms, and Trojans for maximum effectiveness.</p>
+                        <p><strong>Example:</strong> Code Red, Nimda</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Historical Malware -->
+        <section id="historical-malware" class="content-section">
+            <h2>7. Historical Malware</h2>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Malware Timeline</h3>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-year">1986</div>
+                        <div class="timeline-content">
+                            <h4>Brain Virus</h4>
+                            <p>First PC virus. Created in Pakistan. Spread via floppy disks. Infected the boot sector.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">1988</div>
+                        <div class="timeline-content">
+                            <h4>Morris Worm</h4>
+                            <p>First internet worm. Exploited buffer overflow in fingerd. Infected ~6,000 machines (10% of the internet).</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2001</div>
+                        <div class="timeline-content">
+                            <h4>Code Red</h4>
+                            <p>Exploited IIS web server vulnerability. Infected 359,000 servers in 14 hours. Launched DDoS attacks.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2003</div>
+                        <div class="timeline-content">
+                            <h4>SQL Slammer</h4>
+                            <p>Exploited SQL Server buffer overflow. Entire worm was just 376 bytes. Infected 75,000 servers in 10 minutes.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: Trojans and Social Engineering -->
+        <section id="trojans" class="content-section">
+            <h2>8. Trojans and Social Engineering</h2>
+
+            <article class="security-concept">
+                <h4>Trojan Horse Attacks</h4>
+                <p>A Trojan disguises itself as useful or desirable software:</p>
+                <ul>
+                    <li>Free games or utilities that install keyloggers</li>
+                    <li>Fake antivirus software ("scareware")</li>
+                    <li>Backdoor access disguised as system updates</li>
+                    <li>Malicious email attachments posing as documents</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>Social Engineering</h4>
+                <p>Social engineering exploits human psychology rather than technical vulnerabilities:</p>
+                <ul>
+                    <li><strong>Phishing:</strong> Fake emails/websites that trick users into revealing credentials</li>
+                    <li><strong>Pretexting:</strong> Creating a false scenario to gain trust</li>
+                    <li><strong>Baiting:</strong> Leaving infected USB drives in public places</li>
+                    <li><strong>Tailgating:</strong> Following authorized personnel through secure doors</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>The Human Factor:</strong> Social engineering is often the most effective attack vector because it targets the weakest link in security &mdash; people. Technical defenses cannot fully protect against human error and manipulation.</p>
+            </div>
+        </section>
+
+        <!-- Section 9: Detection and Botnets -->
+        <section id="detection" class="content-section">
+            <h2>9. Malware Detection and Botnets</h2>
+
+            <article class="security-concept">
+                <h4>Malware Detection Methods</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>How It Works</th>
+                            <th>Limitation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Signature-based</strong></td>
+                            <td>Match known malware patterns (byte sequences)</td>
+                            <td>Cannot detect new/unknown malware</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Heuristic</strong></td>
+                            <td>Analyze code behavior and structure</td>
+                            <td>Higher false positive rate</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Behavioral</strong></td>
+                            <td>Monitor runtime actions (file access, network calls)</td>
+                            <td>Must execute the malware to detect</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Machine Learning</strong></td>
+                            <td>Train models on malware features</td>
+                            <td>Requires large training datasets</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <article class="security-concept">
+                <h4>Botnets</h4>
+                <p>A <strong>botnet</strong> is a network of compromised computers (zombies) controlled by an attacker (botmaster).</p>
+                <ul>
+                    <li><strong>C&amp;C (Command and Control):</strong> Botmaster sends commands via IRC, HTTP, or peer-to-peer networks</li>
+                    <li><strong>DDoS attacks:</strong> Coordinate thousands of zombies to flood a target</li>
+                    <li><strong>Spam distribution:</strong> Send millions of spam emails</li>
+                    <li><strong>Credential theft:</strong> Harvest login credentials from infected machines</li>
+                    <li><strong>Cryptocurrency mining:</strong> Use victims' resources for mining</li>
+                </ul>
+            </article>
+        </section>
+
+        <!-- Section 10: Software Protection and DRM -->
+        <section id="protection" class="content-section">
+            <h2>10. Software Protection and DRM</h2>
+
+            <article class="security-concept">
+                <h4>Software Protection Techniques</h4>
+                <ul>
+                    <li><strong>Code obfuscation:</strong> Make code difficult to understand through reverse engineering</li>
+                    <li><strong>Tamper resistance:</strong> Detect and respond to unauthorized modifications</li>
+                    <li><strong>Code signing:</strong> Digitally sign software to prove authenticity and integrity</li>
+                    <li><strong>Watermarking:</strong> Embed identifying information in the software</li>
+                </ul>
+            </article>
+
+            <div class="definition">
+                <h3>Digital Rights Management (DRM)</h3>
+                <p><strong>DRM</strong> is technology used to control access to and copying of digital content (software, music, video, ebooks). It enforces licensing terms through technical means.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>DRM Examples</h4>
+                <ul>
+                    <li><strong>Software activation:</strong> Product keys, online activation (Windows, Office)</li>
+                    <li><strong>Streaming services:</strong> Widevine DRM prevents recording Netflix/Spotify content</li>
+                    <li><strong>Gaming:</strong> Always-online requirements, hardware dongles</li>
+                    <li><strong>Ebooks:</strong> Kindle DRM restricts copying and sharing</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>DRM Limitations</h4>
+                <p>DRM is fundamentally flawed because the user must be able to decrypt the content to consume it. This means the decryption key must be accessible on the user's device, making it theoretically possible to extract. DRM raises the barrier but cannot prevent determined circumvention.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>Software vulnerabilities</strong> are the primary attack surface. Complex code inevitably contains bugs that attackers exploit.</li>
+
+                <li><strong>Software flaws</strong> fall into three categories: design errors, implementation bugs, and environment interactions.</li>
+
+                <li><strong>Buffer overflow</strong> overwrites memory beyond a buffer's bounds, potentially hijacking program execution. Defenses include stack canaries, ASLR, DEP, and memory-safe languages.</li>
+
+                <li><strong>Incomplete mediation</strong> results from failing to validate user input. Always validate on the server side.</li>
+
+                <li><strong>Race conditions</strong> (TOCTOU) exploit timing gaps between checking and using a resource.</li>
+
+                <li><strong>Malware</strong> includes viruses (need a host), worms (self-replicating), Trojans (disguised), and blended threats (combined).</li>
+
+                <li><strong>Historical malware</strong> like the Morris Worm (1988) and SQL Slammer (2003) demonstrated the devastating impact of software vulnerabilities.</li>
+
+                <li><strong>Social engineering</strong> targets human psychology and is often more effective than technical attacks.</li>
+
+                <li><strong>Malware detection</strong> uses signature, heuristic, behavioral, and machine learning approaches.</li>
+
+                <li><strong>DRM and software protection</strong> use obfuscation, tamper resistance, and code signing, but face fundamental limitations.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Final Thought:</strong> Security is not a product &mdash; it's a process. Building secure software requires security awareness throughout the entire development lifecycle, from design through deployment and maintenance.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>Credits and Attributions</h2>
+            <p class="credits-intro">All diagrams in this document are original educational works created specifically for this course.</p>
+            <ul class="credits-list">
+                <li><strong>Software Flaw Categories:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Stack Buffer Overflow Diagram:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Malware Taxonomy Grid:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Malware Timeline:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 11 specific styles */
+        .flaw-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .flaw-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid var(--border-color);
+        }
+
+        .flaw-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .stack-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stack-normal, .stack-overflow {
+            text-align: center;
+        }
+
+        .stack-normal h4, .stack-overflow h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stack-frame {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            min-width: 200px;
+        }
+
+        .stack-cell {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .stack-cell:last-child {
+            border-bottom: none;
+        }
+
+        .stack-ret {
+            background: #e3f2fd;
+        }
+
+        .stack-saved {
+            background: #f3e5f5;
+        }
+
+        .stack-buf {
+            background: #e8f5e9;
+        }
+
+        .stack-overwritten {
+            background: #ffcdd2 !important;
+            color: #c62828;
+        }
+
+        .stack-arrow {
+            font-size: 2em;
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .malware-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .malware-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .malware-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .malware-virus { background: linear-gradient(135deg, #fce4ec, #f8bbd0); border-color: #e91e63; }
+        .malware-worm { background: linear-gradient(135deg, #fff3e0, #ffe0b2); border-color: #ff9800; }
+        .malware-trojan { background: linear-gradient(135deg, #e8eaf6, #c5cae9); border-color: #3f51b5; }
+        .malware-blended { background: linear-gradient(135deg, #fbe9e7, #ffccbc); border-color: #ff5722; }
+
+        .timeline {
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 70px;
+            top: 1.5rem;
+            bottom: 1.5rem;
+            width: 3px;
+            background: var(--secondary-color);
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .timeline-year {
+            min-width: 60px;
+            font-weight: 700;
+            color: white;
+            background: var(--secondary-color);
+            padding: 0.5rem;
+            border-radius: 8px;
+            text-align: center;
+            height: fit-content;
+            z-index: 1;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .timeline-content h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .timeline-content p {
+            margin-bottom: 0;
+        }
+
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+        }
+
+        code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        @media screen and (max-width: 768px) {
+            .flaw-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .malware-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stack-diagram {
+                flex-direction: column;
+            }
+
+            .stack-arrow {
+                transform: rotate(90deg);
+            }
+
+            .timeline::before {
+                display: none;
+            }
+
+            .timeline-item {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</body>
+</html>

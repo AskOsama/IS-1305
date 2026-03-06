@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1: Introduction to Network Security</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter1_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>Introduction to Network Security</h1>
+        <p class="subtitle">Chapter 1: Fundamentals of Information Security</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#intro">1. Introduction to Information Security</a></li>
+            <li><a href="#characters">2. The Cast of Characters</a></li>
+            <li><a href="#cia-triad">3. The CIA Triad</a></li>
+            <li><a href="#bank-example">4. Alice's Online Bank Example</a></li>
+            <li><a href="#beyond-cia">5. Beyond the CIA Triad</a></li>
+            <li><a href="#core-areas">6. Core Areas of Information Security</a></li>
+            <li><a href="#people-problem">7. The People Problem</a></li>
+            <li><a href="#principles">8. Principles and Practice</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this chapter, you will be able to:</p>
+            <ul>
+                <li>Define information security and explain why it matters</li>
+                <li>Identify the key players in security scenarios (Alice, Bob, Trudy)</li>
+                <li>Explain the CIA Triad and its three pillars</li>
+                <li>Analyze security from multiple perspectives (bank, customer, attacker)</li>
+                <li>Distinguish between authentication, authorization, and accountability</li>
+                <li>Identify the four core areas of information security</li>
+                <li>Understand why humans are often the weakest link in security</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction to Information Security -->
+        <section id="intro" class="content-section">
+            <h2>1. Introduction to Information Security</h2>
+
+            <div class="definition">
+                <h3>What is Information Security?</h3>
+                <p><strong>Information Security</strong> is the practice of protecting information by mitigating information risks. It involves preventing or reducing the probability of unauthorized access, use, disclosure, disruption, modification, or destruction of information.</p>
+            </div>
+
+            <h3>Why Security Matters</h3>
+            <p>In today's digital world, security is not optional - it's essential. Consider these facts:</p>
+            <ul>
+                <li><strong>Financial Impact:</strong> Data breaches cost organizations millions of dollars annually</li>
+                <li><strong>Privacy Concerns:</strong> Personal information is constantly at risk of exposure</li>
+                <li><strong>Trust:</strong> Customers expect their data to be protected</li>
+                <li><strong>Legal Requirements:</strong> Many industries have mandatory security regulations</li>
+                <li><strong>National Security:</strong> Critical infrastructure depends on secure systems</li>
+            </ul>
+
+            <div class="key-message">
+                <p><strong>Key Insight:</strong> Security is not just about technology - it requires a combination of <em>technology</em>, <em>policies</em>, and <em>people</em> working together. The strongest encryption is useless if people share their passwords.</p>
+            </div>
+
+            <h3>The Security Mindset</h3>
+            <p>To think about security effectively, you need to:</p>
+            <ol>
+                <li><strong>Think like an attacker</strong> - Consider how systems could be exploited</li>
+                <li><strong>Assume compromise</strong> - Plan for when (not if) defenses fail</li>
+                <li><strong>Defense in depth</strong> - Use multiple layers of protection</li>
+                <li><strong>Least privilege</strong> - Give only the minimum access needed</li>
+            </ol>
+        </section>
+
+        <!-- Section 2: The Cast of Characters -->
+        <section id="characters" class="content-section">
+            <h2>2. The Cast of Characters</h2>
+
+            <p>In security discussions, we use fictional characters to represent different roles. This convention makes it easier to discuss complex scenarios.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Meet the Players</h3>
+                </div>
+                <div class="character-grid">
+                    <div class="character-card character-alice">
+                        <div class="character-icon">👩</div>
+                        <h4>Alice</h4>
+                        <p><strong>The Sender</strong></p>
+                        <p>Legitimate user who wants to send secure messages</p>
+                    </div>
+                    <div class="character-card character-bob">
+                        <div class="character-icon">👨</div>
+                        <h4>Bob</h4>
+                        <p><strong>The Receiver</strong></p>
+                        <p>Legitimate user who wants to receive Alice's messages</p>
+                    </div>
+                    <div class="character-card character-trudy">
+                        <div class="character-icon">🦹</div>
+                        <h4>Trudy</h4>
+                        <p><strong>The Attacker</strong></p>
+                        <p>Adversary who wants to intercept or manipulate communications</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Why These Names?</h3>
+            <ul>
+                <li><strong>Alice</strong> - Starts with 'A', the first person in a communication</li>
+                <li><strong>Bob</strong> - Starts with 'B', the second person (recipient)</li>
+                <li><strong>Trudy</strong> - From "intruder" - represents the attacker</li>
+            </ul>
+
+            <p>Other characters you might encounter:</p>
+            <ul>
+                <li><strong>Eve</strong> - An eavesdropper (passive attacker)</li>
+                <li><strong>Mallory</strong> - A malicious attacker (active)</li>
+                <li><strong>Trent</strong> - A trusted third party</li>
+            </ul>
+
+            <div class="warning-box">
+                <h4>Always Assume an Active Attacker!</h4>
+                <p>When designing security systems, always assume that Trudy is:</p>
+                <ul>
+                    <li>Listening to all network traffic</li>
+                    <li>Capable of modifying messages in transit</li>
+                    <li>Able to impersonate legitimate users</li>
+                    <li>Patient and persistent</li>
+                </ul>
+            </div>
+
+            <a href="../demos/alice_bob_trudy_demo.html" class="demo-link">Launch Alice-Bob-Trudy Interactive Demo</a>
+        </section>
+
+        <!-- Section 3: The CIA Triad -->
+        <section id="cia-triad" class="content-section">
+            <h2>3. The CIA Triad</h2>
+
+            <p>The <strong>CIA Triad</strong> represents the three fundamental goals of information security. Every security measure aims to protect one or more of these properties.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">The Three Pillars of Security</h3>
+                </div>
+                <div class="cia-triad-container">
+                    <div class="cia-triangle">
+                        <div class="cia-pillar pillar-confidentiality">
+                            Confidentiality
+                        </div>
+                        <div class="cia-pillar pillar-integrity">
+                            Integrity
+                        </div>
+                        <div class="cia-pillar pillar-availability">
+                            Availability
+                        </div>
+                        <div class="cia-center">
+                            <strong>CIA</strong><br>
+                            <small>Triad</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Confidentiality</h4>
+                <p><strong>Definition:</strong> Protecting information from unauthorized access or disclosure.</p>
+                <p><strong>Goal:</strong> Only authorized parties can read the information.</p>
+                <p><strong>Examples:</strong></p>
+                <ul>
+                    <li>Encrypting sensitive emails</li>
+                    <li>Password-protecting documents</li>
+                    <li>Using HTTPS for web browsing</li>
+                </ul>
+                <p><strong>Attacks on Confidentiality:</strong></p>
+                <ul>
+                    <li>Eavesdropping on network traffic</li>
+                    <li>Stealing passwords</li>
+                    <li>Social engineering to extract information</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>Integrity</h4>
+                <p><strong>Definition:</strong> Ensuring information is accurate and has not been modified by unauthorized parties.</p>
+                <p><strong>Goal:</strong> Detect any unauthorized changes to data.</p>
+                <p><strong>Examples:</strong></p>
+                <ul>
+                    <li>Digital signatures on documents</li>
+                    <li>Checksums for file downloads</li>
+                    <li>Version control systems</li>
+                </ul>
+                <p><strong>Attacks on Integrity:</strong></p>
+                <ul>
+                    <li>Man-in-the-middle attacks (modifying data in transit)</li>
+                    <li>SQL injection to alter database records</li>
+                    <li>Tampering with software updates</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>Availability</h4>
+                <p><strong>Definition:</strong> Ensuring authorized users can access information and systems when needed.</p>
+                <p><strong>Goal:</strong> Systems remain operational and accessible.</p>
+                <p><strong>Examples:</strong></p>
+                <ul>
+                    <li>Redundant servers and backups</li>
+                    <li>DDoS protection services</li>
+                    <li>Disaster recovery plans</li>
+                </ul>
+                <p><strong>Attacks on Availability:</strong></p>
+                <ul>
+                    <li>Denial of Service (DoS) attacks</li>
+                    <li>Ransomware that locks files</li>
+                    <li>Physical destruction of hardware</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Balancing Act:</strong> These three goals can sometimes conflict. For example, adding more security controls (confidentiality) might slow down system performance (availability). Security professionals must find the right balance.</p>
+            </div>
+
+            <a href="../demos/cia_triad_demo.html" class="demo-link">Launch CIA Triad Interactive Demo</a>
+        </section>
+
+        <!-- Section 4: Alice's Online Bank Example -->
+        <section id="bank-example" class="content-section">
+            <h2>4. Alice's Online Bank Example</h2>
+
+            <p>Let's apply security concepts to a real-world scenario: Alice wants to use her online bank account. Different stakeholders have different security concerns.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Three Perspectives on Bank Security</h3>
+                </div>
+                <div class="three-perspectives-grid">
+                    <div class="perspective-card perspective-bank">
+                        <h4>Bank's Perspective</h4>
+                        <p><strong>Primary Concerns:</strong></p>
+                        <p>Protect customer data, prevent fraud, maintain trust, comply with regulations, ensure system uptime</p>
+                    </div>
+                    <div class="perspective-card perspective-customer">
+                        <h4>Customer's Perspective</h4>
+                        <p><strong>Primary Concerns:</strong></p>
+                        <p>Keep money safe, protect personal information, easy access to accounts, quick fraud detection</p>
+                    </div>
+                    <div class="perspective-card perspective-attacker">
+                        <h4>Attacker's Perspective</h4>
+                        <p><strong>Primary Goals:</strong></p>
+                        <p>Steal money, harvest credentials, commit identity theft, disrupt services</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Security Measures in Online Banking</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>CIA Property</th>
+                        <th>Threat</th>
+                        <th>Protection</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Confidentiality</strong></td>
+                        <td>Someone reads Alice's account balance</td>
+                        <td>HTTPS encryption, secure login</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Integrity</strong></td>
+                        <td>Trudy changes transfer amount from $100 to $10,000</td>
+                        <td>Digital signatures, transaction verification</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Availability</strong></td>
+                        <td>DDoS attack takes banking site offline</td>
+                        <td>Redundant servers, DDoS mitigation</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="example">
+                <h4>Scenario: Alice Transfers Money to Bob</h4>
+                <ol>
+                    <li><strong>Authentication:</strong> Alice logs in with username, password, and 2FA code</li>
+                    <li><strong>Confidentiality:</strong> All communication is encrypted via TLS</li>
+                    <li><strong>Integrity:</strong> Transfer details are digitally signed</li>
+                    <li><strong>Authorization:</strong> Bank verifies Alice can access this account</li>
+                    <li><strong>Accountability:</strong> Transaction is logged with timestamp</li>
+                </ol>
+            </div>
+
+            <a href="../demos/bank_security_demo.html" class="demo-link">Launch Bank Security Interactive Demo</a>
+        </section>
+
+        <!-- Section 5: Beyond the CIA Triad -->
+        <section id="beyond-cia" class="content-section">
+            <h2>5. Beyond the CIA Triad</h2>
+
+            <p>While CIA covers the core security goals, modern systems require additional concepts, often called the "AAA" of security.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">The AAA Framework</h3>
+                </div>
+                <div class="aaa-grid">
+                    <div class="aaa-card">
+                        <div class="aaa-icon">🔐</div>
+                        <h4>Authentication</h4>
+                        <p><strong>Who are you?</strong></p>
+                        <p>Verifying the identity of a user, device, or system</p>
+                    </div>
+                    <div class="aaa-card">
+                        <div class="aaa-icon">🚪</div>
+                        <h4>Authorization</h4>
+                        <p><strong>What can you do?</strong></p>
+                        <p>Determining what actions an authenticated entity is allowed to perform</p>
+                    </div>
+                    <div class="aaa-card">
+                        <div class="aaa-icon">📋</div>
+                        <h4>Accountability</h4>
+                        <p><strong>What did you do?</strong></p>
+                        <p>Tracking and logging actions to hold users responsible</p>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Authentication vs Authorization</h4>
+                <p>These two concepts are often confused but are quite different:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Authentication</th>
+                            <th>Authorization</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Verifies identity</td>
+                            <td>Grants permissions</td>
+                        </tr>
+                        <tr>
+                            <td>Happens first</td>
+                            <td>Happens after authentication</td>
+                        </tr>
+                        <tr>
+                            <td>"Are you who you claim to be?"</td>
+                            <td>"Are you allowed to do this?"</td>
+                        </tr>
+                        <tr>
+                            <td>Example: Login with password</td>
+                            <td>Example: Admin vs. regular user privileges</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <div class="example">
+                <h4>Real-World Example: Airport Security</h4>
+                <ul>
+                    <li><strong>Authentication:</strong> Showing your ID and boarding pass (proving who you are)</li>
+                    <li><strong>Authorization:</strong> Your ticket determines which flight you can board</li>
+                    <li><strong>Accountability:</strong> Security cameras and passenger manifests track movements</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 6: Core Areas of Information Security -->
+        <section id="core-areas" class="content-section">
+            <h2>6. Core Areas of Information Security</h2>
+
+            <p>Information security is a broad field that encompasses several specialized areas:</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Four Core Areas</h3>
+                </div>
+                <div class="four-areas-grid">
+                    <div class="area-card">
+                        <div class="area-icon">🔒</div>
+                        <h4>Cryptography</h4>
+                        <p>The science of secure communication in the presence of adversaries.</p>
+                        <ul>
+                            <li>Encryption algorithms</li>
+                            <li>Hash functions</li>
+                            <li>Digital signatures</li>
+                            <li>Key management</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">🚧</div>
+                        <h4>Access Control</h4>
+                        <p>Mechanisms that restrict access to resources based on identity and permissions.</p>
+                        <ul>
+                            <li>Authentication systems</li>
+                            <li>Authorization models</li>
+                            <li>Role-based access control</li>
+                            <li>Multi-factor authentication</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">🔗</div>
+                        <h4>Security Protocols</h4>
+                        <p>Rules and procedures for secure communication between systems.</p>
+                        <ul>
+                            <li>SSL/TLS</li>
+                            <li>SSH</li>
+                            <li>IPSec</li>
+                            <li>Kerberos</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">💻</div>
+                        <h4>Software Security</h4>
+                        <p>Building and maintaining software that resists attacks.</p>
+                        <ul>
+                            <li>Secure coding practices</li>
+                            <li>Vulnerability assessment</li>
+                            <li>Malware analysis</li>
+                            <li>Security testing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Course Preview:</strong> This course will explore each of these areas in depth. We'll start with cryptography basics, then move to access control and authentication, examine real-world protocols, and finish with software security.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: The People Problem -->
+        <section id="people-problem" class="content-section">
+            <h2>7. The People Problem</h2>
+
+            <div class="warning-box">
+                <h4>The Weakest Link</h4>
+                <p>The most sophisticated security system can be defeated by human error. People are often the weakest link in security.</p>
+            </div>
+
+            <h3>Common Human Security Failures</h3>
+
+            <article class="security-concept">
+                <h4>Weak Passwords</h4>
+                <ul>
+                    <li>Using "password123" or "qwerty"</li>
+                    <li>Reusing the same password everywhere</li>
+                    <li>Writing passwords on sticky notes</li>
+                    <li>Sharing passwords with colleagues</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>Social Engineering</h4>
+                <p>Attackers manipulate people into revealing confidential information:</p>
+                <ul>
+                    <li><strong>Phishing:</strong> Fake emails that look legitimate</li>
+                    <li><strong>Pretexting:</strong> Creating false scenarios to gain trust</li>
+                    <li><strong>Baiting:</strong> Leaving infected USB drives in public places</li>
+                    <li><strong>Tailgating:</strong> Following authorized users into secure areas</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>Poor Security Hygiene</h4>
+                <ul>
+                    <li>Not installing security updates</li>
+                    <li>Clicking on suspicious links</li>
+                    <li>Downloading software from untrusted sources</li>
+                    <li>Leaving devices unlocked and unattended</li>
+                </ul>
+            </article>
+
+            <div class="example">
+                <h4>Famous Social Engineering Attack</h4>
+                <p>In 2020, a teenager gained access to high-profile Twitter accounts (including Elon Musk, Barack Obama, and Apple) by calling Twitter employees and pretending to be from the IT department. The attackers didn't hack the system - they hacked the people.</p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Security Awareness:</strong> Technical controls are necessary but not sufficient. Organizations must also invest in security awareness training to help employees recognize and resist social engineering attacks.</p>
+            </div>
+        </section>
+
+        <!-- Section 8: Principles and Practice -->
+        <section id="principles" class="content-section">
+            <h2>8. Principles and Practice of Security</h2>
+
+            <p>Effective security requires attention to four key elements:</p>
+
+            <article class="security-concept">
+                <h4>1. Policy</h4>
+                <p><strong>What do we want to achieve?</strong></p>
+                <p>Security policies define the rules and objectives. They answer questions like:</p>
+                <ul>
+                    <li>Who is allowed to access what?</li>
+                    <li>What constitutes acceptable use?</li>
+                    <li>How should incidents be handled?</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>2. Mechanisms</h4>
+                <p><strong>How do we achieve it?</strong></p>
+                <p>Technical and procedural controls that implement the policy:</p>
+                <ul>
+                    <li>Encryption systems</li>
+                    <li>Firewalls and intrusion detection</li>
+                    <li>Access control systems</li>
+                    <li>Audit logging</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>3. Assurance</h4>
+                <p><strong>Does it actually work?</strong></p>
+                <p>Testing and verification that security measures are effective:</p>
+                <ul>
+                    <li>Security audits and assessments</li>
+                    <li>Penetration testing</li>
+                    <li>Code reviews</li>
+                    <li>Compliance verification</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>4. Human Factors</h4>
+                <p><strong>Will people follow the rules?</strong></p>
+                <p>Making security usable and ensuring compliance:</p>
+                <ul>
+                    <li>Security awareness training</li>
+                    <li>User-friendly security controls</li>
+                    <li>Clear communication of policies</li>
+                    <li>Incentives for secure behavior</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Remember:</strong> Security is a process, not a product. It requires continuous attention, updates, and improvement as threats evolve.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>Information Security</strong> protects data from unauthorized access, modification, and destruction through technology, policies, and people.</li>
+
+                <li><strong>The Cast of Characters</strong> - Alice (sender), Bob (receiver), and Trudy (attacker) help us discuss security scenarios clearly.</li>
+
+                <li><strong>The CIA Triad</strong> defines the three core security goals: Confidentiality (secret), Integrity (unchanged), Availability (accessible).</li>
+
+                <li><strong>Security perspectives vary</strong> - Banks, customers, and attackers all have different goals and concerns.</li>
+
+                <li><strong>Beyond CIA</strong> - Authentication (who are you?), Authorization (what can you do?), and Accountability (what did you do?) complete the security picture.</li>
+
+                <li><strong>Four Core Areas</strong> - Cryptography, Access Control, Security Protocols, and Software Security form the foundation of the field.</li>
+
+                <li><strong>People are the weakest link</strong> - Social engineering and human error bypass even the strongest technical controls.</li>
+
+                <li><strong>Security requires balance</strong> - Policy, mechanisms, assurance, and human factors must work together.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In Chapter 2, we'll dive into the fundamentals of cryptography - the mathematical foundation that enables secure communication.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>Credits and Attributions</h2>
+            <p class="credits-intro">All diagrams in this document are original educational works created specifically for this course.</p>
+            <ul class="credits-list">
+                <li><strong>CIA Triad Diagram:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Character Cards:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Perspectives Grid:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>AAA Framework:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Core Areas Grid:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+</body>
+</html>

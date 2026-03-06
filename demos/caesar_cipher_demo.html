@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caesar Cipher Interactive Demo | Network Security</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --accent-color: #c53030;
+            --success-color: #276749;
+            --warning-color: #c05621;
+            --light-gray: #f8f9fa;
+            --border-color: #e1e4e8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        h1 {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Input Section */
+        .input-section {
+            background: var(--light-gray);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1.1em;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-family: "Courier New", monospace;
+            text-transform: uppercase;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.1);
+        }
+
+        .shift-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--border-color);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--secondary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        .shift-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--secondary-color);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--secondary-color);
+            background: white;
+            color: var(--secondary-color);
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: #e3f2fd;
+        }
+
+        /* Alphabet Mapping */
+        .alphabet-section {
+            margin-bottom: 2rem;
+        }
+
+        .alphabet-section h3 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .alphabet-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 1rem;
+            background: var(--light-gray);
+            border-radius: 12px;
+        }
+
+        .alphabet-row {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .letter-box {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Courier New", monospace;
+            font-weight: 600;
+            font-size: 0.9em;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .letter-box.plain {
+            background: white;
+            border: 2px solid var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .letter-box.cipher {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .letter-box.highlight {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.4);
+        }
+
+        .arrow-row {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .arrow-box {
+            width: 32px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--success-color);
+            font-size: 0.8em;
+        }
+
+        /* Result Section */
+        .result-section {
+            background: #e8f5e9;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 2px solid var(--success-color);
+        }
+
+        .result-section h3 {
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .result-text {
+            font-family: "Courier New", monospace;
+            font-size: 1.5em;
+            letter-spacing: 2px;
+            word-break: break-all;
+            color: var(--primary-color);
+        }
+
+        /* Step-by-step */
+        .steps-section {
+            margin-bottom: 2rem;
+        }
+
+        .steps-section h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .step-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .step-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            background: var(--light-gray);
+            border-radius: 8px;
+            min-width: 60px;
+        }
+
+        .step-original {
+            font-family: "Courier New", monospace;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .step-arrow {
+            color: var(--success-color);
+            font-size: 1em;
+        }
+
+        .step-result {
+            font-family: "Courier New", monospace;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: var(--success-color);
+        }
+
+        /* How it works */
+        .explanation {
+            background: #fff3e0;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .explanation h3 {
+            color: var(--warning-color);
+            margin-bottom: 1rem;
+        }
+
+        .explanation p {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .explanation ul {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .explanation li {
+            margin-bottom: 0.3rem;
+        }
+
+        .formula {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: "Courier New", monospace;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .letter-box {
+                width: 24px;
+                height: 24px;
+                font-size: 0.7em;
+            }
+
+            .arrow-box {
+                width: 24px;
+            }
+
+            .shift-control {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../chapters/chapter2.html#classic-crypto" class="back-link">&larr; Back to Chapter 2</a>
+
+        <header>
+            <h1>Caesar Cipher Interactive Demo</h1>
+            <p class="subtitle">Explore how Julius Caesar encrypted his military messages</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="mode-toggle">
+                <button class="mode-btn active" onclick="setMode('encrypt')" id="encryptBtn">Encrypt</button>
+                <button class="mode-btn" onclick="setMode('decrypt')" id="decryptBtn">Decrypt</button>
+            </div>
+
+            <div class="input-group">
+                <label for="plaintext">Enter your message:</label>
+                <input type="text" id="plaintext" placeholder="Type your message here..." oninput="processText()">
+            </div>
+
+            <div class="input-group">
+                <label>Shift Key (1-25):</label>
+                <div class="shift-control">
+                    <input type="range" id="shiftSlider" min="1" max="25" value="3" oninput="updateShift()">
+                    <span class="shift-value" id="shiftValue">3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alphabet Mapping -->
+        <div class="alphabet-section">
+            <h3>Letter Mapping</h3>
+            <div class="alphabet-container">
+                <div class="alphabet-row" id="plainAlphabet"></div>
+                <div class="arrow-row" id="arrowRow"></div>
+                <div class="alphabet-row" id="cipherAlphabet"></div>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div class="result-section">
+            <h3 id="resultLabel">Ciphertext:</h3>
+            <div class="result-text" id="resultText">-</div>
+        </div>
+
+        <!-- Step by Step -->
+        <div class="steps-section">
+            <h3>Step-by-Step Transformation:</h3>
+            <div class="step-list" id="stepList">
+                <p style="color: #666; font-style: italic;">Enter text above to see the transformation steps</p>
+            </div>
+        </div>
+
+        <!-- Explanation -->
+        <div class="explanation">
+            <h3>How Caesar Cipher Works</h3>
+            <p>The Caesar cipher is a <strong>substitution cipher</strong> where each letter is replaced by a letter a fixed number of positions down the alphabet.</p>
+
+            <div class="formula">
+                <strong>Encryption:</strong> C = (P + K) mod 26<br>
+                <strong>Decryption:</strong> P = (C - K) mod 26
+            </div>
+
+            <p>Where:</p>
+            <ul>
+                <li><strong>P</strong> = Position of plaintext letter (A=0, B=1, ..., Z=25)</li>
+                <li><strong>K</strong> = Shift key (1-25)</li>
+                <li><strong>C</strong> = Position of ciphertext letter</li>
+            </ul>
+
+            <p style="margin-top: 1rem;"><strong>Security Note:</strong> The Caesar cipher is extremely weak because there are only 25 possible keys. A brute-force attack can try all possibilities in seconds!</p>
+        </div>
+    </div>
+
+    <script>
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let mode = 'encrypt';
+        let shift = 3;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            buildAlphabetDisplay();
+            updateShift();
+        });
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.getElementById('encryptBtn').classList.toggle('active', mode === 'encrypt');
+            document.getElementById('decryptBtn').classList.toggle('active', mode === 'decrypt');
+            document.getElementById('resultLabel').textContent = mode === 'encrypt' ? 'Ciphertext:' : 'Plaintext:';
+            processText();
+        }
+
+        function updateShift() {
+            shift = parseInt(document.getElementById('shiftSlider').value);
+            document.getElementById('shiftValue').textContent = shift;
+            buildAlphabetDisplay();
+            processText();
+        }
+
+        function buildAlphabetDisplay() {
+            const plainRow = document.getElementById('plainAlphabet');
+            const arrowRow = document.getElementById('arrowRow');
+            const cipherRow = document.getElementById('cipherAlphabet');
+
+            plainRow.innerHTML = '';
+            arrowRow.innerHTML = '';
+            cipherRow.innerHTML = '';
+
+            for (let i = 0; i < 26; i++) {
+                // Plain letter
+                const plainBox = document.createElement('div');
+                plainBox.className = 'letter-box plain';
+                plainBox.textContent = alphabet[i];
+                plainBox.id = 'plain-' + alphabet[i];
+                plainRow.appendChild(plainBox);
+
+                // Arrow
+                const arrowBox = document.createElement('div');
+                arrowBox.className = 'arrow-box';
+                arrowBox.textContent = '↓';
+                arrowRow.appendChild(arrowBox);
+
+                // Cipher letter (shifted)
+                const cipherIndex = (i + shift) % 26;
+                const cipherBox = document.createElement('div');
+                cipherBox.className = 'letter-box cipher';
+                cipherBox.textContent = alphabet[cipherIndex];
+                cipherBox.id = 'cipher-' + alphabet[i];
+                cipherRow.appendChild(cipherBox);
+            }
+        }
+
+        function caesarShift(char, shiftAmount) {
+            if (!/[A-Z]/i.test(char)) return char;
+
+            const isUpper = char === char.toUpperCase();
+            const charCode = char.toUpperCase().charCodeAt(0) - 65;
+            let shiftedCode = (charCode + shiftAmount) % 26;
+            if (shiftedCode < 0) shiftedCode += 26;
+            const shiftedChar = String.fromCharCode(shiftedCode + 65);
+
+            return isUpper ? shiftedChar : shiftedChar.toLowerCase();
+        }
+
+        function processText() {
+            const input = document.getElementById('plaintext').value.toUpperCase();
+            const effectiveShift = mode === 'encrypt' ? shift : -shift;
+            let result = '';
+            const steps = [];
+
+            // Clear highlights
+            document.querySelectorAll('.letter-box').forEach(box => box.classList.remove('highlight'));
+
+            for (const char of input) {
+                if (/[A-Z]/.test(char)) {
+                    const shifted = caesarShift(char, effectiveShift);
+                    result += shifted;
+                    steps.push({ original: char, result: shifted });
+
+                    // Highlight the mapping
+                    const plainBox = document.getElementById('plain-' + char);
+                    const cipherBox = document.getElementById('cipher-' + char);
+                    if (plainBox) plainBox.classList.add('highlight');
+                    if (cipherBox) cipherBox.classList.add('highlight');
+                } else if (char === ' ') {
+                    result += ' ';
+                    steps.push({ original: '␣', result: '␣' });
+                } else {
+                    result += char;
+                    steps.push({ original: char, result: char });
+                }
+            }
+
+            document.getElementById('resultText').textContent = result || '-';
+
+            // Build step display
+            const stepList = document.getElementById('stepList');
+            if (steps.length === 0) {
+                stepList.innerHTML = '<p style="color: #666; font-style: italic;">Enter text above to see the transformation steps</p>';
+            } else {
+                stepList.innerHTML = steps.map(step => `
+                    <div class="step-item">
+                        <span class="step-original">${step.original}</span>
+                        <span class="step-arrow">↓</span>
+                        <span class="step-result">${step.result}</span>
+                    </div>
+                `).join('');
+            }
+        }
+    </script>
+</body>
+</html>

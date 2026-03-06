@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل الثامن: التفويض</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter8.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>التفويض</h1>
+        <p class="subtitle">الفصل الثامن: التحكم في الوصول، النماذج الأمنية، والجدران النارية</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#intro">1. مقدمة في التفويض</a></li>
+            <li><a href="#acm">2. مصفوفة التحكم في الوصول</a></li>
+            <li><a href="#acl">3. قوائم التحكم في الوصول (ACLs)</a></li>
+            <li><a href="#clists">4. قوائم القدرات (C-Lists)</a></li>
+            <li><a href="#blp">5. نموذج بيل-لابادولا (BLP)</a></li>
+            <li><a href="#captcha">6. كابتشا (CAPTCHA)</a></li>
+            <li><a href="#firewalls">7. الجدران النارية</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذا الفصل، ستكون قادراً على:</p>
+            <ul>
+                <li>التمييز بين المصادقة والتفويض</li>
+                <li>شرح آليات التحكم في الوصول: المصفوفات، وACLs، وقوائم القدرات</li>
+                <li>وصف نموذج بيل-لابادولا الأمني الرسمي</li>
+                <li>فهم CAPTCHA كآلية للتحقق من البشر</li>
+                <li>مقارنة أنواع مختلفة من الجدران النارية وأنظمة كشف التسلل</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="content-section">
+            <h2>1. مقدمة في التفويض</h2>
+
+            <div class="definition">
+                <h3>التفويض مقابل المصادقة</h3>
+                <p><strong>المصادقة</strong> تتحقق من <em>هويتك</em>. <strong>التفويض</strong> يحدد <em>ما يُسمح لك بفعله</em>. يجب أن تحدث المصادقة أولاً؛ ثم يقرر التفويض الصلاحيات بعد إثبات الهوية.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>الفروقات الرئيسية</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الجانب</th>
+                            <th>المصادقة</th>
+                            <th>التفويض</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>السؤال</strong></td>
+                            <td>من أنت؟</td>
+                            <td>ماذا يمكنك أن تفعل؟</td>
+                        </tr>
+                        <tr>
+                            <td><strong>الغرض</strong></td>
+                            <td>التحقق من الهوية</td>
+                            <td>منح/رفض الصلاحيات</td>
+                        </tr>
+                        <tr>
+                            <td><strong>الترتيب</strong></td>
+                            <td>يحدث أولاً</td>
+                            <td>يحدث بعد المصادقة</td>
+                        </tr>
+                        <tr>
+                            <td><strong>مثال</strong></td>
+                            <td>تسجيل الدخول باسم المستخدم وكلمة المرور</td>
+                            <td>المستخدم يمكنه قراءة الملفات لكن لا يحذفها</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <div class="key-message">
+                <p><strong>رؤية أساسية:</strong> التفويض يتعلق بالتحكم في الوصول إلى الموارد. يجب أن يحصل المستخدم المصادق عليه فقط على الحد الأدنى من الصلاحيات اللازمة لأداء مهامه (<strong>مبدأ الحد الأدنى من الامتيازات</strong>).</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Access Control Matrix -->
+        <section id="acm" class="content-section">
+            <h2>2. مصفوفة التحكم في الوصول</h2>
+
+            <div class="definition">
+                <h3>ما هي مصفوفة التحكم في الوصول؟</h3>
+                <p><strong>مصفوفة التحكم في الوصول</strong> هي نموذج مفاهيمي يحدد صلاحيات كل موضوع (مستخدم/عملية) لكل كائن (ملف/مورد) في النظام.</p>
+            </div>
+
+            <p>تتكون المصفوفة من ثلاثة مكونات:</p>
+            <ul>
+                <li><strong>الموضوعات (الصفوف):</strong> المستخدمون أو العمليات أو البرامج التي تطلب الوصول</li>
+                <li><strong>الكائنات (الأعمدة):</strong> الملفات أو الموارد أو الأجهزة المراد الوصول إليها</li>
+                <li><strong>الإجراءات (الخلايا):</strong> قراءة، كتابة، تنفيذ، ملكية، إلخ.</li>
+            </ul>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">مثال على مصفوفة التحكم في الوصول</h3>
+                </div>
+                <table class="acm-table">
+                    <thead>
+                        <tr>
+                            <th>الموضوع \ الكائن</th>
+                            <th>ملف A</th>
+                            <th>ملف B</th>
+                            <th>الطابعة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>أليس</strong></td>
+                            <td>قراءة، كتابة، ملكية</td>
+                            <td>قراءة</td>
+                            <td>طباعة</td>
+                        </tr>
+                        <tr>
+                            <td><strong>بوب</strong></td>
+                            <td>قراءة</td>
+                            <td>قراءة، كتابة، ملكية</td>
+                            <td>طباعة</td>
+                        </tr>
+                        <tr>
+                            <td><strong>تشارلي</strong></td>
+                            <td>&mdash;</td>
+                            <td>قراءة</td>
+                            <td>&mdash;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning-box">
+                <h4>مشكلة قابلية التوسع</h4>
+                <p>عملياً، مصفوفة التحكم في الوصول الكاملة كبيرة جداً ومتناثرة لتخزينها بكفاءة. مع آلاف المستخدمين وملايين الملفات، معظم الخلايا ستكون فارغة. هذا يؤدي إلى تنفيذين عمليين: ACLs وC-Lists.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: ACLs -->
+        <section id="acl" class="content-section">
+            <h2>3. قوائم التحكم في الوصول (ACLs)</h2>
+
+            <div class="definition">
+                <h3>ما هي ACL؟</h3>
+                <p><strong>قائمة التحكم في الوصول (ACL)</strong> تخزن الصلاحيات <strong>لكل كائن</strong>. كل ملف أو مورد يحتفظ بقائمة بالموضوعات التي يمكنها الوصول إليه والإجراءات التي يمكنها تنفيذها.</p>
+            </div>
+
+            <p>ACLs هي أعمدة مصفوفة التحكم في الوصول. لكل كائن، نسرد الموضوعات وصلاحياتها.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">مقارنة ACL مع قائمة القدرات</h3>
+                </div>
+                <div class="acl-clist-grid">
+                    <div class="acl-card">
+                        <h4>ACL (لكل كائن)</h4>
+                        <div class="acl-example">
+                            <p><strong>ملف A:</strong></p>
+                            <ul>
+                                <li>أليس: قراءة، كتابة، ملكية</li>
+                                <li>بوب: قراءة</li>
+                            </ul>
+                            <p><strong>ملف B:</strong></p>
+                            <ul>
+                                <li>بوب: قراءة، كتابة، ملكية</li>
+                                <li>تشارلي: قراءة</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="clist-card">
+                        <h4>C-List (لكل مستخدم)</h4>
+                        <div class="clist-example">
+                            <p><strong>أليس:</strong></p>
+                            <ul>
+                                <li>ملف A: قراءة، كتابة، ملكية</li>
+                                <li>ملف B: قراءة</li>
+                                <li>الطابعة: طباعة</li>
+                            </ul>
+                            <p><strong>بوب:</strong></p>
+                            <ul>
+                                <li>ملف A: قراءة</li>
+                                <li>ملف B: قراءة، كتابة، ملكية</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>مثال واقعي:</strong> صلاحيات نظام الملفات في لينكس تستخدم ACLs. كل ملف له صلاحيات المالك والمجموعة والآخرين (rwx). ويندوز NTFS يستخدم أيضاً ACLs للتحكم في الوصول إلى الملفات والمجلدات.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Capability Lists -->
+        <section id="clists" class="content-section">
+            <h2>4. قوائم القدرات (C-Lists)</h2>
+
+            <div class="definition">
+                <h3>ما هي قائمة القدرات؟</h3>
+                <p><strong>قائمة القدرات (C-List)</strong> تخزن الصلاحيات <strong>لكل موضوع</strong>. كل مستخدم يحمل مجموعة من الرموز (القدرات) التي تحدد الكائنات التي يمكنه الوصول إليها وبأي صلاحيات.</p>
+            </div>
+
+            <p>C-Lists هي صفوف مصفوفة التحكم في الوصول. كل موضوع يحمل قائمة صلاحياته الخاصة.</p>
+
+            <article class="security-concept">
+                <h4>مقارنة ACL مقابل C-List</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الميزة</th>
+                            <th>ACL</th>
+                            <th>C-List</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>منظمة حسب</strong></td>
+                            <td>الكائن (المورد)</td>
+                            <td>الموضوع (المستخدم)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>سهلة الإجابة عن</strong></td>
+                            <td>"من يمكنه الوصول لهذا الملف؟"</td>
+                            <td>"ما الذي يمكن لهذا المستخدم الوصول إليه؟"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>الإلغاء</strong></td>
+                            <td>سهل (تعديل ACL للملف)</td>
+                            <td>صعب (يجب إيجاد جميع نسخ الرمز)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>التفويض</strong></td>
+                            <td>أصعب</td>
+                            <td>سهل (تمرير الرمز)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>يُستخدم في</strong></td>
+                            <td>أنظمة الملفات (لينكس، ويندوز)</td>
+                            <td>تذاكر Kerberos، رموز OAuth</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+        </section>
+
+        <!-- Section 5: Bell-LaPadula -->
+        <section id="blp" class="content-section">
+            <h2>5. نموذج بيل-لابادولا (BLP)</h2>
+
+            <div class="definition">
+                <h3>ما هو نموذج BLP؟</h3>
+                <p><strong>نموذج بيل-لابادولا</strong> هو نموذج أمني رسمي صُمم لفرض <strong>السرية</strong> في أنظمة الأمان متعددة المستويات (مثل المعلومات العسكرية المصنفة).</p>
+            </div>
+
+            <p>يعيّن نموذج BLP مستويات أمنية لكل من الموضوعات والكائنات (مثلاً: سري للغاية > سري > مقيد > غير مصنف) ويفرض قاعدتين رئيسيتين:</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">قواعد نموذج BLP</h3>
+                </div>
+                <div class="blp-rules-grid">
+                    <div class="blp-rule blp-no-read-up">
+                        <h4>لا قراءة لأعلى (الأمان البسيط)</h4>
+                        <div class="blp-icon">🚫📖⬆️</div>
+                        <p>الموضوع في مستوى أمني أدنى <strong>لا يمكنه قراءة</strong> كائن في مستوى أمني أعلى.</p>
+                        <div class="blp-example">
+                            <p><em>مثال:</em> مستخدم "سري" لا يمكنه قراءة وثائق "سري للغاية".</p>
+                        </div>
+                    </div>
+                    <div class="blp-rule blp-no-write-down">
+                        <h4>لا كتابة لأسفل (خاصية النجمة)</h4>
+                        <div class="blp-icon">🚫✏️⬇️</div>
+                        <p>الموضوع في مستوى أمني أعلى <strong>لا يمكنه الكتابة</strong> إلى كائن في مستوى أمني أدنى.</p>
+                        <div class="blp-example">
+                            <p><em>مثال:</em> مستخدم "سري للغاية" لا يمكنه الكتابة في ملف "سري" (يمنع تسرب المعلومات لأسفل).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>الغرض:</strong> قاعدة "لا كتابة لأسفل" تمنع مستخدماً عالي التصريح (أو حصان طروادة يعمل بامتيازاته) من نسخ معلومات مصنفة إلى مستوى أمني أدنى حيث يمكن للمستخدمين غير المصرح لهم قراءتها.</p>
+            </div>
+
+            <div class="warning-box">
+                <h4>قيود BLP</h4>
+                <p>يركز نموذج BLP فقط على <strong>السرية</strong>، وليس السلامة. لا يمنع مستخدماً منخفض المستوى من الكتابة في وثيقة عالية المستوى (مما قد يُفسدها). نموذج Biba يعالج السلامة بقواعد معاكسة.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: CAPTCHA -->
+        <section id="captcha" class="content-section">
+            <h2>6. كابتشا (CAPTCHA)</h2>
+
+            <div class="definition">
+                <h3>ما هو CAPTCHA؟</h3>
+                <p><strong>CAPTCHA</strong> يرمز إلى "اختبار تورينج العام المؤتمت بالكامل للتمييز بين الحاسوب والإنسان". وهو اختبار تحدٍ واستجابة مصمم لتحديد ما إذا كان المستخدم إنساناً أم روبوتاً آلياً.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>كيف يعمل CAPTCHA</h4>
+                <ul>
+                    <li>يولد الخادم تحدياً سهلاً للبشر لكنه صعب على الحواسيب</li>
+                    <li>الأنواع الشائعة: نص مشوه، التعرف على الصور، تحديات صوتية</li>
+                    <li>reCAPTCHA الحديث يستخدم التحليل السلوكي (حركات الماوس، أنماط التصفح)</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>تطبيقات CAPTCHA</h4>
+                <ul>
+                    <li><strong>تسجيل الحسابات:</strong> منع إنشاء حسابات جماعية بواسطة الروبوتات</li>
+                    <li><strong>حماية تسجيل الدخول:</strong> حجب هجمات القوة الغاشمة على كلمات المرور</li>
+                    <li><strong>الاستطلاعات الإلكترونية:</strong> منع التلاعب بالتصويت</li>
+                    <li><strong>جمع البيانات:</strong> حماية المحتوى من الحصاد الآلي</li>
+                    <li><strong>شراء التذاكر:</strong> منع روبوتات المضاربين</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>تحديات CAPTCHA</h4>
+                <p>CAPTCHA هي سباق تسلح. مع تحسن الذكاء الاصطناعي، تصبح CAPTCHAs التقليدية أقل فعالية. يمكن لتطورات التعلم الآلي الآن حل العديد من CAPTCHAs النصية والصورية. تعتمد الأنظمة الحديثة على التحليل السلوكي بدلاً من التحديات الصريحة.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: Firewalls -->
+        <section id="firewalls" class="content-section">
+            <h2>7. الجدران النارية</h2>
+
+            <div class="definition">
+                <h3>ما هو الجدار الناري؟</h3>
+                <p><strong>الجدار الناري</strong> هو جهاز أمن شبكات يراقب ويتحكم في حركة مرور الشبكة الواردة والصادرة بناءً على قواعد أمنية محددة مسبقاً. يُنشئ حاجزاً بين الشبكات الداخلية الموثوقة والشبكات الخارجية غير الموثوقة.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">أنواع الجدران النارية</h3>
+                </div>
+                <div class="firewall-grid">
+                    <div class="fw-card">
+                        <h4>تصفية الحزم</h4>
+                        <p>يفحص رأس كل حزمة (عنوان IP المصدر/الوجهة، المنفذ، البروتوكول) مقابل القواعد.</p>
+                        <ul>
+                            <li>سريع وبسيط</li>
+                            <li>لا وعي بالجلسات</li>
+                            <li>لا يمكنه فحص المحتوى</li>
+                        </ul>
+                    </div>
+                    <div class="fw-card">
+                        <h4>الفحص ذو الحالة</h4>
+                        <p>يتتبع حالة الاتصالات النشطة ويتخذ القرارات بناءً على السياق.</p>
+                        <ul>
+                            <li>يفهم حالة الاتصال</li>
+                            <li>أكثر أماناً من تصفية الحزم</li>
+                            <li>تكلفة أداء معتدلة</li>
+                        </ul>
+                    </div>
+                    <div class="fw-card">
+                        <h4>وكيل التطبيق</h4>
+                        <p>يعمل كوسيط، يفحص محتوى طبقة التطبيق بالكامل.</p>
+                        <ul>
+                            <li>فحص عميق للمحتوى</li>
+                            <li>يمكنه تصفية تطبيقات محددة</li>
+                            <li>زمن استجابة أعلى</li>
+                        </ul>
+                    </div>
+                    <div class="fw-card">
+                        <h4>الجيل التالي (NGFW)</h4>
+                        <p>يجمع بين الجدار الناري التقليدي مع IDS/IPS، والوعي بالتطبيقات، واستخبارات التهديدات.</p>
+                        <ul>
+                            <li>فحص عميق للحزم</li>
+                            <li>تحديد التطبيقات</li>
+                            <li>منع تهديدات متكامل</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>أنظمة كشف التسلل (IDS)</h4>
+                <p><strong>IDS</strong> يراقب حركة مرور الشبكة بحثاً عن نشاط مشبوه ويولد تنبيهات. على عكس الجدران النارية، IDS سلبي &mdash; يكتشف لكنه لا يحجب.</p>
+                <ul>
+                    <li><strong>قائم على التوقيع:</strong> يطابق أنماط الهجمات المعروفة</li>
+                    <li><strong>قائم على الشذوذ:</strong> يكتشف الانحرافات عن السلوك العادي</li>
+                    <li><strong>IPS (نظام منع التسلل):</strong> النسخة النشطة التي يمكنها حجب التهديدات تلقائياً</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>الجدران النارية الشخصية</h4>
+                <p>جدران نارية برمجية تعمل على الحواسيب الفردية (مثل جدار حماية ويندوز، جدار حماية macOS). تحمي الأجهزة الفردية ويمكنها التحكم في التطبيقات المسموح لها بالوصول إلى الشبكة.</p>
+            </article>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>التفويض</strong> يحدد ما يُسمح للمستخدمين المصادق عليهم بفعله. وهو متميز عن المصادقة (التحقق من الهوية).</li>
+
+                <li><strong>مصفوفة التحكم في الوصول</strong> هي نموذج مفاهيمي بالموضوعات (صفوف) والكائنات (أعمدة) والصلاحيات (خلايا).</li>
+
+                <li><strong>ACLs</strong> تخزن الصلاحيات لكل كائن &mdash; سهلة الإجابة عن "من يمكنه الوصول لهذا المورد؟"</li>
+
+                <li><strong>قوائم القدرات</strong> تخزن الصلاحيات لكل مستخدم &mdash; سهلة الإجابة عن "ما الذي يمكن لهذا المستخدم الوصول إليه؟" وسهلة التفويض.</li>
+
+                <li><strong>نموذج بيل-لابادولا</strong> يفرض السرية بقاعدتين: لا قراءة لأعلى ولا كتابة لأسفل.</li>
+
+                <li><strong>CAPTCHA</strong> يميز البشر عن الروبوتات، رغم مواجهته تحديات متزايدة من تطورات الذكاء الاصطناعي.</li>
+
+                <li><strong>الجدران النارية</strong> تتراوح من تصفية الحزم البسيطة إلى أنظمة الجيل التالي مع فحص عميق للحزم واستخبارات التهديدات.</li>
+
+                <li><strong>IDS/IPS</strong> يراقبان التسلل: IDS يكتشف وينبه، IPS يحجب التهديدات بنشاط.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>التطلع إلى الأمام:</strong> في الفصل التاسع، سنستكشف بروتوكولات المصادقة البسيطة &mdash; الآليات المستخدمة للتحقق من الهوية قبل اتخاذ قرارات التفويض.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>الاعتمادات والإسناد</h2>
+            <p class="credits-intro">جميع الرسوم البيانية في هذه الوثيقة هي أعمال تعليمية أصلية تم إنشاؤها خصيصاً لهذا المقرر.</p>
+            <ul class="credits-list">
+                <li><strong>مصفوفة التحكم في الوصول:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>مقارنة ACL مع C-List:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>رسم نموذج BLP:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>شبكة أنواع الجدران النارية:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">&rarr; العودة إلى الصفحة الرئيسية</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 8 specific styles */
+        .acm-table {
+            width: 100%;
+        }
+
+        .acl-clist-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .acl-card, .clist-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .acl-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2196f3;
+        }
+
+        .clist-card {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-color: #4caf50;
+        }
+
+        .acl-card h4, .clist-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2em;
+        }
+
+        .blp-rules-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .blp-rule {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            text-align: center;
+        }
+
+        .blp-no-read-up {
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+            border-color: #e91e63;
+        }
+
+        .blp-no-write-down {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-color: #ff9800;
+        }
+
+        .blp-icon {
+            font-size: 2em;
+            margin: 0.5rem 0;
+        }
+
+        .blp-rule h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .blp-example {
+            margin-top: 0.5rem;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .firewall-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .fw-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid var(--border-color);
+        }
+
+        .fw-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        @media screen and (max-width: 768px) {
+            .acl-clist-grid,
+            .blp-rules-grid,
+            .firewall-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+            direction: ltr;
+            text-align: left;
+        }
+
+        code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+            direction: ltr;
+        }
+    </style>
+</body>
+</html>

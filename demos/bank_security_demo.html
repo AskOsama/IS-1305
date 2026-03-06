@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Bank Security Demo | Network Security</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --accent-color: #c53030;
+            --success-color: #276749;
+            --warning-color: #c05621;
+            --light-gray: #f8f9fa;
+            --bank-color: #1a365d;
+            --customer-color: #276749;
+            --attacker-color: #c53030;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        h1 {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Perspective Tabs */
+        .perspective-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid var(--secondary-color);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            border: none;
+            background: white;
+            color: var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .tab-btn:not(:last-child) {
+            border-right: 2px solid var(--secondary-color);
+        }
+
+        .tab-btn:hover {
+            background: var(--light-gray);
+        }
+
+        .tab-btn.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .tab-btn.bank-tab.active { background: var(--bank-color); }
+        .tab-btn.customer-tab.active { background: var(--customer-color); }
+        .tab-btn.attacker-tab.active { background: var(--attacker-color); }
+
+        /* Perspective Content */
+        .perspective-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .perspective-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .perspective-header {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .perspective-header.bank { background: linear-gradient(135deg, var(--bank-color), #2c5282); }
+        .perspective-header.customer { background: linear-gradient(135deg, var(--customer-color), #2f855a); }
+        .perspective-header.attacker { background: linear-gradient(135deg, var(--attacker-color), #9b2c2c); }
+
+        .perspective-header h2 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .perspective-header p {
+            opacity: 0.9;
+        }
+
+        /* Info Cards */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background: var(--light-gray);
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .info-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .info-card ul {
+            margin-left: 1.5rem;
+        }
+
+        .info-card li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        /* Scenario Simulator */
+        .simulator {
+            background: var(--light-gray);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .simulator h3 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        /* Transaction Display */
+        .transaction-display {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 2px solid var(--border-color);
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .transaction-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .status-secure {
+            background: #d4edda;
+            color: var(--success-color);
+        }
+
+        .status-warning {
+            background: #fff3cd;
+            color: var(--warning-color);
+        }
+
+        .status-danger {
+            background: #f8d7da;
+            color: var(--accent-color);
+        }
+
+        .transaction-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .detail-item {
+            padding: 0.75rem;
+            background: var(--light-gray);
+            border-radius: 6px;
+        }
+
+        .detail-label {
+            font-size: 0.8em;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Security Measures */
+        .security-measures {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .measure {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .measure.active {
+            border: 2px solid var(--success-color);
+            background: #f0fff4;
+        }
+
+        .measure.inactive {
+            opacity: 0.5;
+            border: 2px solid #ccc;
+        }
+
+        .measure.breached {
+            border: 2px solid var(--accent-color);
+            background: #fff5f5;
+        }
+
+        .measure-icon {
+            font-size: 1.5em;
+        }
+
+        .measure-text {
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        /* Scenario Buttons */
+        .scenario-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .scenario-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            background: white;
+            color: var(--secondary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scenario-btn:hover {
+            background: var(--light-gray);
+        }
+
+        .scenario-btn.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .scenario-btn.secure {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .scenario-btn.secure.active {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .scenario-btn.attack {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .scenario-btn.attack.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Attack Explanation */
+        .attack-explanation {
+            background: #fff5f5;
+            border: 2px solid var(--accent-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .attack-explanation.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .attack-explanation h4 {
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* CIA Impact */
+        .cia-impact {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .impact-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .impact-c { background: #e3f2fd; color: #2b6cb0; }
+        .impact-i { background: #e8f5e9; color: #276749; }
+        .impact-a { background: #fff3e0; color: #c05621; }
+        .impact-breached { background: #f8d7da; color: #c53030; text-decoration: line-through; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .perspective-tabs {
+                flex-direction: column;
+            }
+
+            .tab-btn:not(:last-child) {
+                border-right: none;
+                border-bottom: 2px solid var(--secondary-color);
+            }
+
+            .transaction-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../chapters/chapter1.html#bank-example" class="back-link">&larr; Back to Chapter 1</a>
+
+        <header>
+            <h1>Online Bank Security Scenario</h1>
+            <p class="subtitle">Experience security from three different perspectives: Bank, Customer, and Attacker</p>
+        </header>
+
+        <!-- Perspective Tabs -->
+        <div class="perspective-tabs">
+            <button class="tab-btn bank-tab active" onclick="switchPerspective('bank')">
+                🏦 Bank
+            </button>
+            <button class="tab-btn customer-tab" onclick="switchPerspective('customer')">
+                👤 Customer
+            </button>
+            <button class="tab-btn attacker-tab" onclick="switchPerspective('attacker')">
+                🦹 Attacker
+            </button>
+        </div>
+
+        <!-- Bank Perspective -->
+        <div class="perspective-content active" id="bank-perspective">
+            <div class="perspective-header bank">
+                <h2>🏦 Bank's Perspective</h2>
+                <p>Protecting assets, maintaining trust, and ensuring compliance</p>
+            </div>
+
+            <div class="info-cards">
+                <div class="info-card">
+                    <h4>🎯 Primary Goals</h4>
+                    <ul>
+                        <li>Protect customer funds and data</li>
+                        <li>Prevent fraudulent transactions</li>
+                        <li>Maintain regulatory compliance</li>
+                        <li>Preserve customer trust</li>
+                        <li>Ensure 24/7 service availability</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h4>🔒 Security Measures</h4>
+                    <ul>
+                        <li>Multi-factor authentication</li>
+                        <li>End-to-end encryption (TLS)</li>
+                        <li>Fraud detection algorithms</li>
+                        <li>Transaction limits and alerts</li>
+                        <li>Regular security audits</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h4>⚠️ Risk Concerns</h4>
+                    <ul>
+                        <li>Data breaches and leaks</li>
+                        <li>Account takeover attacks</li>
+                        <li>Insider threats</li>
+                        <li>DDoS attacks on services</li>
+                        <li>Regulatory penalties</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Perspective -->
+        <div class="perspective-content" id="customer-perspective">
+            <div class="perspective-header customer">
+                <h2>👤 Customer's Perspective</h2>
+                <p>Convenient access while keeping money and identity safe</p>
+            </div>
+
+            <div class="info-cards">
+                <div class="info-card">
+                    <h4>🎯 Primary Goals</h4>
+                    <ul>
+                        <li>Keep money safe and secure</li>
+                        <li>Easy access to accounts anytime</li>
+                        <li>Protect personal information</li>
+                        <li>Quick notification of suspicious activity</li>
+                        <li>Simple and intuitive interface</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h4>🛡️ Customer Responsibilities</h4>
+                    <ul>
+                        <li>Use strong, unique passwords</li>
+                        <li>Enable two-factor authentication</li>
+                        <li>Check for HTTPS in browser</li>
+                        <li>Never share credentials</li>
+                        <li>Report suspicious emails</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h4>⚠️ Common Mistakes</h4>
+                    <ul>
+                        <li>Using weak passwords</li>
+                        <li>Falling for phishing emails</li>
+                        <li>Banking on public WiFi</li>
+                        <li>Ignoring security alerts</li>
+                        <li>Sharing account access</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attacker Perspective -->
+        <div class="perspective-content" id="attacker-perspective">
+            <div class="perspective-header attacker">
+                <h2>🦹 Attacker's Perspective</h2>
+                <p>Understanding threats helps build better defenses</p>
+            </div>
+
+            <div class="info-cards">
+                <div class="info-card">
+                    <h4>🎯 Attack Goals</h4>
+                    <ul>
+                        <li>Steal money from accounts</li>
+                        <li>Harvest login credentials</li>
+                        <li>Commit identity theft</li>
+                        <li>Sell stolen data on dark web</li>
+                        <li>Disrupt banking services</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h4>⚔️ Common Attack Methods</h4>
+                    <ul>
+                        <li>Phishing emails and websites</li>
+                        <li>Malware and keyloggers</li>
+                        <li>Man-in-the-middle attacks</li>
+                        <li>Social engineering calls</li>
+                        <li>Session hijacking</li>
+                    </ul>
+                </div>
+
+                <div class="info-card">
+                    <h4>🎪 What Stops Attackers</h4>
+                    <ul>
+                        <li>Strong encryption (breaks interception)</li>
+                        <li>MFA (makes stolen passwords useless)</li>
+                        <li>Fraud detection (catches anomalies)</li>
+                        <li>Security awareness (users don't fall for tricks)</li>
+                        <li>Regular monitoring (quick response)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction Simulator -->
+        <div class="simulator">
+            <h3>Transaction Security Simulator</h3>
+            <p style="text-align: center; margin-bottom: 1.5rem; color: #666;">
+                See how security measures protect a bank transaction - or how attacks can compromise it
+            </p>
+
+            <div class="transaction-display">
+                <div class="transaction-header">
+                    <div>
+                        <strong>Transaction: Transfer to Bob</strong>
+                        <div style="color: #666; font-size: 0.9em;">Alice's Checking → Bob's Savings</div>
+                    </div>
+                    <span class="transaction-status status-secure" id="transaction-status">
+                        ✅ Secure
+                    </span>
+                </div>
+
+                <div class="transaction-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Amount</div>
+                        <div class="detail-value" id="amount-display">$100.00</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Encryption</div>
+                        <div class="detail-value" id="encryption-display">TLS 1.3 Active</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Authentication</div>
+                        <div class="detail-value" id="auth-display">Password + 2FA</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Verification</div>
+                        <div class="detail-value" id="verify-display">Digital Signature</div>
+                    </div>
+                </div>
+
+                <div class="security-measures">
+                    <div class="measure active" id="measure-encryption">
+                        <span class="measure-icon">🔒</span>
+                        <span class="measure-text">Encryption</span>
+                    </div>
+                    <div class="measure active" id="measure-auth">
+                        <span class="measure-icon">🔐</span>
+                        <span class="measure-text">Authentication</span>
+                    </div>
+                    <div class="measure active" id="measure-integrity">
+                        <span class="measure-icon">✓</span>
+                        <span class="measure-text">Integrity Check</span>
+                    </div>
+                    <div class="measure active" id="measure-logging">
+                        <span class="measure-icon">📋</span>
+                        <span class="measure-text">Audit Logging</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scenario-buttons">
+                <button class="scenario-btn secure active" onclick="runScenario('secure')">
+                    ✅ Secure Transaction
+                </button>
+                <button class="scenario-btn attack" onclick="runScenario('phishing')">
+                    🎣 Phishing Attack
+                </button>
+                <button class="scenario-btn attack" onclick="runScenario('mitm')">
+                    🔄 MITM Attack
+                </button>
+                <button class="scenario-btn attack" onclick="runScenario('session')">
+                    🍪 Session Hijack
+                </button>
+            </div>
+
+            <div class="attack-explanation" id="attack-explanation">
+                <!-- Filled by JavaScript -->
+            </div>
+
+            <!-- CIA Impact Display -->
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <strong>CIA Status:</strong>
+                <div class="cia-impact" id="cia-impact" style="justify-content: center;">
+                    <span class="impact-badge impact-c">🔒 Confidentiality</span>
+                    <span class="impact-badge impact-i">✓ Integrity</span>
+                    <span class="impact-badge impact-a">⚡ Availability</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function switchPerspective(perspective) {
+            // Update tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.${perspective}-tab`).classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.perspective-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${perspective}-perspective`).classList.add('active');
+        }
+
+        const scenarios = {
+            secure: {
+                status: { text: '✅ Secure', class: 'status-secure' },
+                amount: '$100.00',
+                encryption: 'TLS 1.3 Active',
+                auth: 'Password + 2FA',
+                verify: 'Digital Signature',
+                measures: {
+                    encryption: 'active',
+                    auth: 'active',
+                    integrity: 'active',
+                    logging: 'active'
+                },
+                cia: { c: false, i: false, a: false },
+                explanation: null
+            },
+            phishing: {
+                status: { text: '⚠️ Credentials Stolen', class: 'status-danger' },
+                amount: '$100.00',
+                encryption: 'Fake Site - No TLS',
+                auth: 'Captured by Attacker!',
+                verify: 'Bypassed',
+                measures: {
+                    encryption: 'breached',
+                    auth: 'breached',
+                    integrity: 'inactive',
+                    logging: 'active'
+                },
+                cia: { c: true, i: false, a: false },
+                explanation: {
+                    title: '🎣 Phishing Attack',
+                    text: 'Alice received a fake email that looked like it came from her bank. She clicked the link and entered her credentials on a convincing but fraudulent website. The attacker now has her username and password.',
+                    prevention: 'Always verify the URL, look for HTTPS, and never click links in suspicious emails. Use bookmarks to access your bank.'
+                }
+            },
+            mitm: {
+                status: { text: '⚠️ Data Intercepted', class: 'status-warning' },
+                amount: '$10,000.00 (Modified!)',
+                encryption: 'Downgraded/Broken',
+                auth: 'Session Captured',
+                verify: 'Signature Forged',
+                measures: {
+                    encryption: 'breached',
+                    auth: 'active',
+                    integrity: 'breached',
+                    logging: 'active'
+                },
+                cia: { c: true, i: true, a: false },
+                explanation: {
+                    title: '🔄 Man-in-the-Middle Attack',
+                    text: 'An attacker on the same network (like public WiFi) intercepted Alice\'s connection. They can read all data and even modify the transaction amount from $100 to $10,000 before forwarding it to the bank.',
+                    prevention: 'Avoid banking on public WiFi. Use VPN if necessary. Modern TLS with certificate pinning helps prevent this.'
+                }
+            },
+            session: {
+                status: { text: '⚠️ Session Stolen', class: 'status-danger' },
+                amount: '$100.00',
+                encryption: 'TLS Active',
+                auth: 'Session Cookie Stolen!',
+                verify: 'Attacker Authorized',
+                measures: {
+                    encryption: 'active',
+                    auth: 'breached',
+                    integrity: 'inactive',
+                    logging: 'active'
+                },
+                cia: { c: true, i: false, a: false },
+                explanation: {
+                    title: '🍪 Session Hijacking',
+                    text: 'Malware or XSS attack on Alice\'s browser captured her session cookie. The attacker can now make requests as if they were Alice, without needing her password.',
+                    prevention: 'Keep browser updated, use secure cookies, implement session timeouts, and re-authenticate for sensitive operations.'
+                }
+            }
+        };
+
+        function runScenario(scenario) {
+            const data = scenarios[scenario];
+
+            // Update buttons
+            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update status
+            const status = document.getElementById('transaction-status');
+            status.textContent = data.status.text;
+            status.className = `transaction-status ${data.status.class}`;
+
+            // Update details
+            document.getElementById('amount-display').textContent = data.amount;
+            document.getElementById('encryption-display').textContent = data.encryption;
+            document.getElementById('auth-display').textContent = data.auth;
+            document.getElementById('verify-display').textContent = data.verify;
+
+            // Update measures
+            Object.keys(data.measures).forEach(key => {
+                const measure = document.getElementById(`measure-${key}`);
+                measure.className = `measure ${data.measures[key]}`;
+            });
+
+            // Update CIA impact
+            const ciaImpact = document.getElementById('cia-impact');
+            ciaImpact.innerHTML = `
+                <span class="impact-badge ${data.cia.c ? 'impact-breached' : 'impact-c'}">
+                    🔒 Confidentiality ${data.cia.c ? '(Breached!)' : ''}
+                </span>
+                <span class="impact-badge ${data.cia.i ? 'impact-breached' : 'impact-i'}">
+                    ✓ Integrity ${data.cia.i ? '(Breached!)' : ''}
+                </span>
+                <span class="impact-badge ${data.cia.a ? 'impact-breached' : 'impact-a'}">
+                    ⚡ Availability ${data.cia.a ? '(Breached!)' : ''}
+                </span>
+            `;
+
+            // Update explanation
+            const explanation = document.getElementById('attack-explanation');
+            if (data.explanation) {
+                explanation.innerHTML = `
+                    <h4>${data.explanation.title}</h4>
+                    <p>${data.explanation.text}</p>
+                    <p style="margin-top: 1rem;"><strong>Prevention:</strong> ${data.explanation.prevention}</p>
+                `;
+                explanation.classList.add('visible');
+            } else {
+                explanation.classList.remove('visible');
+            }
+        }
+    </script>
+</body>
+</html>

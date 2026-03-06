@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 8: Authorization</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter8_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>Authorization</h1>
+        <p class="subtitle">Chapter 8: Access Control, Security Models, and Firewalls</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#intro">1. Introduction to Authorization</a></li>
+            <li><a href="#acm">2. Access Control Matrix</a></li>
+            <li><a href="#acl">3. Access Control Lists (ACLs)</a></li>
+            <li><a href="#clists">4. Capability Lists (C-Lists)</a></li>
+            <li><a href="#blp">5. Bell-LaPadula (BLP) Model</a></li>
+            <li><a href="#captcha">6. CAPTCHA</a></li>
+            <li><a href="#firewalls">7. Firewalls</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this chapter, you will be able to:</p>
+            <ul>
+                <li>Distinguish between authentication and authorization</li>
+                <li>Explain access control mechanisms: matrices, ACLs, and capability lists</li>
+                <li>Describe the Bell-LaPadula formal security model</li>
+                <li>Understand CAPTCHA as a human verification mechanism</li>
+                <li>Compare different types of firewalls and intrusion detection systems</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="content-section">
+            <h2>1. Introduction to Authorization</h2>
+
+            <div class="definition">
+                <h3>Authorization vs Authentication</h3>
+                <p><strong>Authentication</strong> verifies <em>who you are</em>. <strong>Authorization</strong> determines <em>what you are allowed to do</em>. Authentication must happen first; authorization decides permissions after identity is established.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>Key Differences</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Aspect</th>
+                            <th>Authentication</th>
+                            <th>Authorization</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Question</strong></td>
+                            <td>Who are you?</td>
+                            <td>What can you do?</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Purpose</strong></td>
+                            <td>Verify identity</td>
+                            <td>Grant/deny permissions</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Order</strong></td>
+                            <td>Happens first</td>
+                            <td>Happens after authentication</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Example</strong></td>
+                            <td>Login with username/password</td>
+                            <td>User can read files but not delete</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Key Insight:</strong> Authorization is about controlling access to resources. A properly authenticated user should only have the minimum permissions needed to perform their tasks (the <strong>Principle of Least Privilege</strong>).</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Access Control Matrix -->
+        <section id="acm" class="content-section">
+            <h2>2. Access Control Matrix</h2>
+
+            <div class="definition">
+                <h3>What is an Access Control Matrix?</h3>
+                <p>An <strong>Access Control Matrix</strong> is a conceptual model that defines the permissions of every subject (user/process) for every object (file/resource) in the system.</p>
+            </div>
+
+            <p>The matrix has three components:</p>
+            <ul>
+                <li><strong>Subjects (rows):</strong> Users, processes, or programs requesting access</li>
+                <li><strong>Objects (columns):</strong> Files, resources, devices being accessed</li>
+                <li><strong>Actions (cells):</strong> Read, Write, Execute, Own, etc.</li>
+            </ul>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Access Control Matrix Example</h3>
+                </div>
+                <table class="acm-table">
+                    <thead>
+                        <tr>
+                            <th>Subject \ Object</th>
+                            <th>File A</th>
+                            <th>File B</th>
+                            <th>Printer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Alice</strong></td>
+                            <td>Read, Write, Own</td>
+                            <td>Read</td>
+                            <td>Print</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bob</strong></td>
+                            <td>Read</td>
+                            <td>Read, Write, Own</td>
+                            <td>Print</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Charlie</strong></td>
+                            <td>&mdash;</td>
+                            <td>Read</td>
+                            <td>&mdash;</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning-box">
+                <h4>Scalability Problem</h4>
+                <p>In practice, the full access control matrix is too large and sparse to store efficiently. With thousands of users and millions of files, most cells would be empty. This leads to two practical implementations: ACLs and C-Lists.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: ACLs -->
+        <section id="acl" class="content-section">
+            <h2>3. Access Control Lists (ACLs)</h2>
+
+            <div class="definition">
+                <h3>What is an ACL?</h3>
+                <p>An <strong>Access Control List (ACL)</strong> stores permissions <strong>per object</strong>. Each file or resource maintains a list of which subjects can access it and what actions they can perform.</p>
+            </div>
+
+            <p>ACLs are the columns of the access control matrix. For each object, we list the subjects and their permissions.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">ACL vs Capability List Comparison</h3>
+                </div>
+                <div class="acl-clist-grid">
+                    <div class="acl-card">
+                        <h4>ACL (Per Object)</h4>
+                        <div class="acl-example">
+                            <p><strong>File A:</strong></p>
+                            <ul>
+                                <li>Alice: Read, Write, Own</li>
+                                <li>Bob: Read</li>
+                            </ul>
+                            <p><strong>File B:</strong></p>
+                            <ul>
+                                <li>Bob: Read, Write, Own</li>
+                                <li>Charlie: Read</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="clist-card">
+                        <h4>C-List (Per User)</h4>
+                        <div class="clist-example">
+                            <p><strong>Alice:</strong></p>
+                            <ul>
+                                <li>File A: Read, Write, Own</li>
+                                <li>File B: Read</li>
+                                <li>Printer: Print</li>
+                            </ul>
+                            <p><strong>Bob:</strong></p>
+                            <ul>
+                                <li>File A: Read</li>
+                                <li>File B: Read, Write, Own</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Real-World Example:</strong> File system permissions in Linux use ACLs. Each file has owner, group, and other permissions (rwx). Windows NTFS also uses ACLs to control file and folder access.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Capability Lists -->
+        <section id="clists" class="content-section">
+            <h2>4. Capability Lists (C-Lists)</h2>
+
+            <div class="definition">
+                <h3>What is a Capability List?</h3>
+                <p>A <strong>Capability List (C-List)</strong> stores permissions <strong>per subject</strong>. Each user holds a set of tokens (capabilities) that specify which objects they can access and with what permissions.</p>
+            </div>
+
+            <p>C-Lists are the rows of the access control matrix. Each subject carries their own list of permissions.</p>
+
+            <article class="security-concept">
+                <h4>ACL vs C-List Trade-offs</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>ACL</th>
+                            <th>C-List</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Organized by</strong></td>
+                            <td>Object (resource)</td>
+                            <td>Subject (user)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Easy to answer</strong></td>
+                            <td>"Who can access this file?"</td>
+                            <td>"What can this user access?"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Revocation</strong></td>
+                            <td>Easy (edit the file's ACL)</td>
+                            <td>Hard (must find all copies of token)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Delegation</strong></td>
+                            <td>Harder</td>
+                            <td>Easy (pass the token)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Used in</strong></td>
+                            <td>File systems (Linux, Windows)</td>
+                            <td>Kerberos tickets, OAuth tokens</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+        </section>
+
+        <!-- Section 5: Bell-LaPadula -->
+        <section id="blp" class="content-section">
+            <h2>5. Bell-LaPadula (BLP) Model</h2>
+
+            <div class="definition">
+                <h3>What is the BLP Model?</h3>
+                <p>The <strong>Bell-LaPadula Model</strong> is a formal security model designed to enforce <strong>confidentiality</strong> in multi-level security systems (e.g., military classified information).</p>
+            </div>
+
+            <p>The BLP model assigns security levels to both subjects and objects (e.g., Top Secret > Secret > Confidential > Unclassified) and enforces two key rules:</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">BLP Model Rules</h3>
+                </div>
+                <div class="blp-rules-grid">
+                    <div class="blp-rule blp-no-read-up">
+                        <h4>No Read Up (Simple Security)</h4>
+                        <div class="blp-icon">🚫📖⬆️</div>
+                        <p>A subject at a lower security level <strong>cannot read</strong> an object at a higher security level.</p>
+                        <div class="blp-example">
+                            <p><em>Example:</em> A "Secret" user cannot read "Top Secret" documents.</p>
+                        </div>
+                    </div>
+                    <div class="blp-rule blp-no-write-down">
+                        <h4>No Write Down (*-Property)</h4>
+                        <div class="blp-icon">🚫✏️⬇️</div>
+                        <p>A subject at a higher security level <strong>cannot write</strong> to an object at a lower security level.</p>
+                        <div class="blp-example">
+                            <p><em>Example:</em> A "Top Secret" user cannot write to a "Secret" file (prevents information leaking down).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Purpose:</strong> The "No Write Down" rule prevents a high-clearance user (or a Trojan horse running with their privileges) from copying classified information to a lower security level where unauthorized users could read it.</p>
+            </div>
+
+            <div class="warning-box">
+                <h4>BLP Limitations</h4>
+                <p>The BLP model focuses only on <strong>confidentiality</strong>, not integrity. It does not prevent a low-level user from writing to a high-level document (which could corrupt it). The Biba model addresses integrity with opposite rules.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: CAPTCHA -->
+        <section id="captcha" class="content-section">
+            <h2>6. CAPTCHA</h2>
+
+            <div class="definition">
+                <h3>What is CAPTCHA?</h3>
+                <p><strong>CAPTCHA</strong> stands for "Completely Automated Public Turing test to tell Computers and Humans Apart." It is a challenge-response test designed to determine whether the user is a human or an automated bot.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>How CAPTCHA Works</h4>
+                <ul>
+                    <li>The server generates a challenge that is easy for humans but hard for computers</li>
+                    <li>Common types: distorted text, image recognition, audio challenges</li>
+                    <li>Modern reCAPTCHA uses behavioral analysis (mouse movements, browsing patterns)</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>CAPTCHA Applications</h4>
+                <ul>
+                    <li><strong>Account registration:</strong> Prevent mass bot account creation</li>
+                    <li><strong>Login protection:</strong> Block brute-force password attacks</li>
+                    <li><strong>Online polls:</strong> Prevent vote manipulation</li>
+                    <li><strong>Web scraping:</strong> Protect content from automated harvesting</li>
+                    <li><strong>Ticket purchasing:</strong> Prevent scalper bots</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>CAPTCHA Challenges</h4>
+                <p>CAPTCHAs are an arms race. As AI improves, traditional CAPTCHAs become less effective. Advances in machine learning can now solve many text and image CAPTCHAs. Modern systems rely on behavioral analysis rather than explicit challenges.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: Firewalls -->
+        <section id="firewalls" class="content-section">
+            <h2>7. Firewalls</h2>
+
+            <div class="definition">
+                <h3>What is a Firewall?</h3>
+                <p>A <strong>firewall</strong> is a network security device that monitors and controls incoming and outgoing network traffic based on predetermined security rules. It establishes a barrier between trusted internal networks and untrusted external networks.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Types of Firewalls</h3>
+                </div>
+                <div class="firewall-grid">
+                    <div class="fw-card">
+                        <h4>Packet-Filtering</h4>
+                        <p>Examines each packet's header (source/destination IP, port, protocol) against rules.</p>
+                        <ul>
+                            <li>Fast and simple</li>
+                            <li>No session awareness</li>
+                            <li>Cannot inspect content</li>
+                        </ul>
+                    </div>
+                    <div class="fw-card">
+                        <h4>Stateful Inspection</h4>
+                        <p>Tracks the state of active connections and makes decisions based on context.</p>
+                        <ul>
+                            <li>Understands connection state</li>
+                            <li>More secure than packet-filtering</li>
+                            <li>Moderate performance cost</li>
+                        </ul>
+                    </div>
+                    <div class="fw-card">
+                        <h4>Application Proxy</h4>
+                        <p>Acts as an intermediary, inspecting the full application-layer content.</p>
+                        <ul>
+                            <li>Deep content inspection</li>
+                            <li>Can filter specific applications</li>
+                            <li>Higher latency</li>
+                        </ul>
+                    </div>
+                    <div class="fw-card">
+                        <h4>Next-Generation (NGFW)</h4>
+                        <p>Combines traditional firewall with IDS/IPS, application awareness, and threat intelligence.</p>
+                        <ul>
+                            <li>Deep packet inspection</li>
+                            <li>Application identification</li>
+                            <li>Integrated threat prevention</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Intrusion Detection Systems (IDS)</h4>
+                <p>An <strong>IDS</strong> monitors network traffic for suspicious activity and generates alerts. Unlike firewalls, IDS is passive &mdash; it detects but does not block.</p>
+                <ul>
+                    <li><strong>Signature-based:</strong> Matches known attack patterns</li>
+                    <li><strong>Anomaly-based:</strong> Detects deviations from normal behavior</li>
+                    <li><strong>IPS (Intrusion Prevention System):</strong> Active version that can block threats automatically</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>Personal Firewalls</h4>
+                <p>Software firewalls running on individual computers (e.g., Windows Firewall, macOS Firewall). They protect single devices and can control which applications are allowed to access the network.</p>
+            </article>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>Authorization</strong> determines what authenticated users are allowed to do. It is distinct from authentication (identity verification).</li>
+
+                <li>The <strong>Access Control Matrix</strong> is a conceptual model with subjects (rows), objects (columns), and permissions (cells).</li>
+
+                <li><strong>ACLs</strong> store permissions per object &mdash; easy to answer "who can access this resource?"</li>
+
+                <li><strong>Capability Lists</strong> store permissions per user &mdash; easy to answer "what can this user access?" and easy to delegate.</li>
+
+                <li>The <strong>Bell-LaPadula model</strong> enforces confidentiality with two rules: No Read Up and No Write Down.</li>
+
+                <li><strong>CAPTCHA</strong> distinguishes humans from bots, though it faces increasing challenges from AI advances.</li>
+
+                <li><strong>Firewalls</strong> range from simple packet-filtering to next-generation systems with deep packet inspection and threat intelligence.</li>
+
+                <li><strong>IDS/IPS</strong> monitor for intrusions: IDS detects and alerts, IPS actively blocks threats.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In Chapter 9, we'll explore simple authentication protocols &mdash; the mechanisms used to verify identity before authorization decisions can be made.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>Credits and Attributions</h2>
+            <p class="credits-intro">All diagrams in this document are original educational works created specifically for this course.</p>
+            <ul class="credits-list">
+                <li><strong>Access Control Matrix:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>ACL vs C-List Comparison:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>BLP Model Diagram:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Firewall Types Grid:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 8 specific styles */
+        .acm-table {
+            width: 100%;
+        }
+
+        .acl-clist-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .acl-card, .clist-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .acl-card {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2196f3;
+        }
+
+        .clist-card {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-color: #4caf50;
+        }
+
+        .acl-card h4, .clist-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2em;
+        }
+
+        .blp-rules-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .blp-rule {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            text-align: center;
+        }
+
+        .blp-no-read-up {
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+            border-color: #e91e63;
+        }
+
+        .blp-no-write-down {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-color: #ff9800;
+        }
+
+        .blp-icon {
+            font-size: 2em;
+            margin: 0.5rem 0;
+        }
+
+        .blp-rule h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .blp-example {
+            margin-top: 0.5rem;
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .firewall-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .fw-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid var(--border-color);
+        }
+
+        .fw-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        @media screen and (max-width: 768px) {
+            .acl-clist-grid,
+            .blp-rules-grid,
+            .firewall-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

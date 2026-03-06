@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل الحادي عشر: البرمجيات والأمان</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter11.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>البرمجيات والأمان</h1>
+        <p class="subtitle">الفصل الحادي عشر: الثغرات، البرمجيات الخبيثة، وحماية البرمجيات</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#overview">1. نظرة عامة على البرمجيات والأمان</a></li>
+            <li><a href="#flaws">2. أنواع عيوب البرمجيات</a></li>
+            <li><a href="#buffer-overflow">3. طفحان المخزن المؤقت</a></li>
+            <li><a href="#incomplete-mediation">4. الوساطة غير المكتملة</a></li>
+            <li><a href="#race-conditions">5. حالات السباق</a></li>
+            <li><a href="#malware">6. نظرة عامة على البرمجيات الخبيثة</a></li>
+            <li><a href="#historical-malware">7. البرمجيات الخبيثة التاريخية</a></li>
+            <li><a href="#trojans">8. أحصنة طروادة والهندسة الاجتماعية</a></li>
+            <li><a href="#detection">9. اكتشاف البرمجيات الخبيثة وشبكات البوت</a></li>
+            <li><a href="#protection">10. حماية البرمجيات وإدارة الحقوق الرقمية</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذا الفصل، ستكون قادراً على:</p>
+            <ul>
+                <li>شرح لماذا ثغرات البرمجيات هي السبب الرئيسي للهجمات السيبرانية</li>
+                <li>وصف عيوب البرمجيات الشائعة: طفحان المخزن المؤقت، الوساطة غير المكتملة، وحالات السباق</li>
+                <li>تحديد الأنواع الرئيسية للبرمجيات الخبيثة: الفيروسات، الديدان، أحصنة طروادة، والتهديدات المختلطة</li>
+                <li>فهم تقنيات اكتشاف البرمجيات الخبيثة وبنى شبكات البوت</li>
+                <li>شرح آليات حماية البرمجيات بما في ذلك إدارة الحقوق الرقمية والتعتيم</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Overview -->
+        <section id="overview" class="content-section">
+            <h2>1. نظرة عامة على البرمجيات والأمان</h2>
+
+            <div class="definition">
+                <h3>لماذا أمن البرمجيات مهم</h3>
+                <p>ثغرات البرمجيات هي <strong>السبب الأول للهجمات السيبرانية</strong>. بغض النظر عن قوة التشفير أو المصادقة، يمكن لخطأ برمجي واحد تجاوز جميع إجراءات الأمان.</p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>رؤية أساسية:</strong> الأمان قوي بقوة أضعف حلقة. يستهدف المهاجمون البرمجيات لأنها معقدة، يكتبها بشر، وتحتوي دائماً تقريباً على أخطاء. مشروع برمجي نموذجي يحتوي على 15&ndash;50 خطأ لكل 1,000 سطر من الكود.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Types of Software Flaws -->
+        <section id="flaws" class="content-section">
+            <h2>2. أنواع عيوب البرمجيات</h2>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">فئات عيوب البرمجيات</h3>
+                </div>
+                <div class="flaw-grid">
+                    <div class="flaw-card">
+                        <h4>أخطاء التصميم</h4>
+                        <p>عيوب جوهرية في بنية أو منطق البرمجيات.</p>
+                        <ul>
+                            <li>صعبة الإصلاح (قد تتطلب إعادة تصميم)</li>
+                            <li>مثال: عدم تحديد معدل محاولات تسجيل الدخول</li>
+                        </ul>
+                    </div>
+                    <div class="flaw-card">
+                        <h4>أخطاء التنفيذ</h4>
+                        <p>أخطاء تُدخل أثناء البرمجة، حتى لو كان التصميم صحيحاً.</p>
+                        <ul>
+                            <li>أكثر أنواع العيوب شيوعاً</li>
+                            <li>أمثلة: طفحان المخزن المؤقت، حقن SQL</li>
+                        </ul>
+                    </div>
+                    <div class="flaw-card">
+                        <h4>تفاعلات البيئة</h4>
+                        <p>مشاكل تنشأ من كيفية تفاعل البرمجيات مع بيئة التشغيل.</p>
+                        <ul>
+                            <li>غالباً خفية وصعبة الاكتشاف</li>
+                            <li>أمثلة: حالات السباق، تعارضات الموارد المشتركة</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Buffer Overflow -->
+        <section id="buffer-overflow" class="content-section">
+            <h2>3. طفحان المخزن المؤقت</h2>
+
+            <div class="definition">
+                <h3>ما هو طفحان المخزن المؤقت؟</h3>
+                <p><strong>طفحان المخزن المؤقت</strong> يحدث عندما يكتب برنامج بيانات أكثر مما يستوعبه المخزن المؤقت (كتلة ذاكرة بحجم ثابت). البيانات الزائدة تكتب فوق الذاكرة المجاورة، بما في ذلك <strong>عنوان الإرجاع</strong> على المكدس.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">طفحان مخزن المكدس المؤقت</h3>
+                </div>
+                <div class="stack-diagram">
+                    <div class="stack-normal">
+                        <h4>المكدس العادي</h4>
+                        <div class="stack-frame">
+                            <div class="stack-cell stack-ret">عنوان الإرجاع</div>
+                            <div class="stack-cell stack-saved">مؤشر الإطار المحفوظ</div>
+                            <div class="stack-cell stack-buf">المخزن المؤقت [64 بايت]</div>
+                        </div>
+                    </div>
+                    <div class="stack-arrow">←</div>
+                    <div class="stack-overflow">
+                        <h4>بعد الطفحان</h4>
+                        <div class="stack-frame">
+                            <div class="stack-cell stack-ret stack-overwritten">تمت الكتابة فوقه!</div>
+                            <div class="stack-cell stack-saved stack-overwritten">تمت الكتابة فوقه!</div>
+                            <div class="stack-cell stack-buf stack-overwritten">بيانات المهاجم...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>مثال كلاسيكي: ()gets في C</h4>
+                <p>دالة C <code>gets()</code> تقرأ المدخلات دون التحقق من الطول:</p>
+                <pre>char buffer[64];
+gets(buffer);  // خطير: لا فحص للحدود!</pre>
+                <p>إذا أدخل المستخدم أكثر من 64 حرفاً، يكتب الزائد فوق المكدس، مما قد يختطف تنفيذ البرنامج.</p>
+            </article>
+
+            <article class="security-concept">
+                <h4>دودة موريس (1988)</h4>
+                <p>واحدة من أولى ديدان الإنترنت استغلت طفحان المخزن المؤقت في برنامج <code>fingerd</code> لنظام يونكس. أصابت حوالي 6,000 جهاز (10% من الإنترنت وقتها) وتسببت في أضرار تقدر بـ 10&ndash;100 مليون دولار.</p>
+            </article>
+
+            <div class="warning-box">
+                <h4>الدفاعات ضد طفحان المخزن المؤقت</h4>
+                <ul>
+                    <li><strong>استخدام دوال آمنة:</strong> استبدال ()gets بـ ()fgets، و()strcpy بـ ()strncpy</li>
+                    <li><strong>حراس المكدس:</strong> وضع قيم معروفة قبل عنوان الإرجاع؛ اكتشاف الكتابة فوقها</li>
+                    <li><strong>ASLR:</strong> عشوائية تخطيط مساحة العناوين تجعل العناوين غير قابلة للتنبؤ</li>
+                    <li><strong>DEP/NX:</strong> تحديد ذاكرة المكدس كغير قابلة للتنفيذ</li>
+                    <li><strong>لغات آمنة للذاكرة:</strong> استخدام Rust أو Go أو Java بدلاً من C/C++</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 4: Incomplete Mediation -->
+        <section id="incomplete-mediation" class="content-section">
+            <h2>4. الوساطة غير المكتملة</h2>
+
+            <div class="definition">
+                <h3>ما هي الوساطة غير المكتملة؟</h3>
+                <p><strong>الوساطة غير المكتملة</strong> تحدث عندما يفشل برنامج في التحقق من مدخلات المستخدم بشكل صحيح قبل استخدامها. يثق البرنامج بأن المدخلات صحيحة دون التحقق.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>أمثلة</h4>
+                <ul>
+                    <li><strong>التلاعب بالرابط:</strong> تغيير قيم الأسعار في حقول النماذج المخفية أو معاملات الرابط</li>
+                    <li><strong>اختراق المسار:</strong> استخدام <code>../../etc/passwd</code> للوصول إلى ملفات خارج الدليل المقصود</li>
+                    <li><strong>حقن SQL:</strong> إدراج أوامر SQL من خلال حقول الإدخال</li>
+                    <li><strong>التحقق من جانب العميل فقط:</strong> الاعتماد على فحوصات JavaScript يمكن تجاوزها</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>القاعدة الذهبية:</strong> لا تثق أبداً بمدخلات المستخدم. <strong>تحقق دائماً من جانب الخادم.</strong> التحقق من جانب العميل لراحة المستخدم فقط؛ لا يوفر أي أمان.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Race Conditions -->
+        <section id="race-conditions" class="content-section">
+            <h2>5. حالات السباق</h2>
+
+            <div class="definition">
+                <h3>ما هي حالة السباق؟</h3>
+                <p><strong>حالة السباق</strong> تحدث عندما يعتمد سلوك البرنامج على التوقيت النسبي للأحداث (مثل عمليتين تصلان إلى مورد مشترك). حالة السباق الأمنية الكلاسيكية هي <strong>TOCTOU</strong> (وقت الفحص إلى وقت الاستخدام).</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>هجوم TOCTOU</h4>
+                <p>يفحص البرنامج شرطاً، ثم يتصرف بناءً عليه. بين الفحص والتصرف، يغير المهاجم الحالة:</p>
+                <ol>
+                    <li><strong>وقت الفحص:</strong> يتحقق البرنامج من أن المستخدم لديه صلاحية الوصول إلى الملف X</li>
+                    <li><strong>المهاجم يبدّل:</strong> بين الفحص والاستخدام، يستبدل المهاجم الملف X برابط رمزي إلى /etc/passwd</li>
+                    <li><strong>وقت الاستخدام:</strong> يصل البرنامج إلى الملف، الآن يعمل على /etc/passwd</li>
+                </ol>
+            </article>
+
+            <div class="warning-box">
+                <h4>الدفاعات ضد حالات السباق</h4>
+                <ul>
+                    <li><strong>العمليات الذرية:</strong> دمج الفحص والاستخدام في عملية واحدة غير قابلة للتجزئة</li>
+                    <li><strong>أقفال الملفات:</strong> منع الوصول المتزامن إلى الموارد المشتركة</li>
+                    <li><strong>تجنب الحالة المشتركة:</strong> تقليل الموارد المتغيرة المشتركة بين العمليات</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 6: Malware Overview -->
+        <section id="malware" class="content-section">
+            <h2>6. نظرة عامة على البرمجيات الخبيثة</h2>
+
+            <div class="definition">
+                <h3>ما هي البرمجيات الخبيثة؟</h3>
+                <p><strong>البرمجيات الخبيثة</strong> (Malware) هي أي برمجيات مصممة عمداً لإحداث ضرر أو سرقة بيانات أو الحصول على وصول غير مصرح به.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">أنواع البرمجيات الخبيثة</h3>
+                </div>
+                <div class="malware-grid">
+                    <div class="malware-card malware-virus">
+                        <h4>الفيروس</h4>
+                        <p>يلتصق ببرنامج مضيف. ينتشر عند تنفيذ البرنامج المصاب.</p>
+                        <p><strong>يتطلب:</strong> فعل بشري للانتشار</p>
+                    </div>
+                    <div class="malware-card malware-worm">
+                        <h4>الدودة</h4>
+                        <p>برنامج ذاتي التكاثر ينتشر تلقائياً عبر الشبكات دون تدخل بشري.</p>
+                        <p><strong>يتطلب:</strong> ثغرة في الشبكة</p>
+                    </div>
+                    <div class="malware-card malware-trojan">
+                        <h4>حصان طروادة</h4>
+                        <p>متنكر كبرمجيات شرعية. ينفذ وظائف خبيثة مخفية عند تشغيله.</p>
+                        <p><strong>يتطلب:</strong> المستخدم لتثبيته</p>
+                    </div>
+                    <div class="malware-card malware-blended">
+                        <h4>التهديد المختلط</h4>
+                        <p>يجمع تقنيات من الفيروسات والديدان وأحصنة طروادة لأقصى فعالية.</p>
+                        <p><strong>مثال:</strong> Code Red, Nimda</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Historical Malware -->
+        <section id="historical-malware" class="content-section">
+            <h2>7. البرمجيات الخبيثة التاريخية</h2>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">الخط الزمني للبرمجيات الخبيثة</h3>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-year">1986</div>
+                        <div class="timeline-content">
+                            <h4>فيروس Brain</h4>
+                            <p>أول فيروس PC. صُنع في باكستان. انتشر عبر الأقراص المرنة. أصاب قطاع الإقلاع.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">1988</div>
+                        <div class="timeline-content">
+                            <h4>دودة موريس</h4>
+                            <p>أول دودة إنترنت. استغلت طفحان المخزن المؤقت في fingerd. أصابت ~6,000 جهاز (10% من الإنترنت).</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2001</div>
+                        <div class="timeline-content">
+                            <h4>Code Red</h4>
+                            <p>استغل ثغرة خادم ويب IIS. أصاب 359,000 خادم في 14 ساعة. شن هجمات DDoS.</p>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2003</div>
+                        <div class="timeline-content">
+                            <h4>SQL Slammer</h4>
+                            <p>استغل طفحان المخزن المؤقت في SQL Server. كانت الدودة بالكامل 376 بايت فقط. أصابت 75,000 خادم في 10 دقائق.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: Trojans and Social Engineering -->
+        <section id="trojans" class="content-section">
+            <h2>8. أحصنة طروادة والهندسة الاجتماعية</h2>
+
+            <article class="security-concept">
+                <h4>هجمات حصان طروادة</h4>
+                <p>يتنكر حصان طروادة كبرمجيات مفيدة أو مرغوبة:</p>
+                <ul>
+                    <li>ألعاب أو أدوات مجانية تثبت راصدات لوحة المفاتيح</li>
+                    <li>برامج مكافحة فيروسات مزيفة ("برامج التخويف")</li>
+                    <li>أبواب خلفية متنكرة كتحديثات نظام</li>
+                    <li>مرفقات بريد إلكتروني خبيثة تتظاهر بأنها مستندات</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>الهندسة الاجتماعية</h4>
+                <p>الهندسة الاجتماعية تستغل علم النفس البشري بدلاً من الثغرات التقنية:</p>
+                <ul>
+                    <li><strong>التصيد:</strong> رسائل بريد إلكتروني/مواقع مزيفة تخدع المستخدمين لكشف بيانات الاعتماد</li>
+                    <li><strong>التذرع:</strong> إنشاء سيناريو كاذب لكسب الثقة</li>
+                    <li><strong>الإغراء:</strong> ترك محركات USB مصابة في أماكن عامة</li>
+                    <li><strong>التتبع:</strong> اتباع الموظفين المصرح لهم عبر الأبواب الآمنة</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>العامل البشري:</strong> الهندسة الاجتماعية غالباً هي أكثر وسائل الهجوم فعالية لأنها تستهدف أضعف حلقة في الأمان &mdash; الناس. لا يمكن للدفاعات التقنية الحماية بالكامل ضد الخطأ البشري والتلاعب.</p>
+            </div>
+        </section>
+
+        <!-- Section 9: Detection and Botnets -->
+        <section id="detection" class="content-section">
+            <h2>9. اكتشاف البرمجيات الخبيثة وشبكات البوت</h2>
+
+            <article class="security-concept">
+                <h4>طرق اكتشاف البرمجيات الخبيثة</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الطريقة</th>
+                            <th>كيف تعمل</th>
+                            <th>القيود</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>قائمة على التوقيع</strong></td>
+                            <td>مطابقة أنماط البرمجيات الخبيثة المعروفة (تسلسلات بايت)</td>
+                            <td>لا يمكن اكتشاف برمجيات خبيثة جديدة/مجهولة</td>
+                        </tr>
+                        <tr>
+                            <td><strong>استكشافية</strong></td>
+                            <td>تحليل سلوك وبنية الكود</td>
+                            <td>معدل أعلى من الإيجابيات الكاذبة</td>
+                        </tr>
+                        <tr>
+                            <td><strong>سلوكية</strong></td>
+                            <td>مراقبة الإجراءات أثناء التشغيل (وصول الملفات، استدعاءات الشبكة)</td>
+                            <td>يجب تنفيذ البرمجيات الخبيثة للاكتشاف</td>
+                        </tr>
+                        <tr>
+                            <td><strong>التعلم الآلي</strong></td>
+                            <td>تدريب نماذج على خصائص البرمجيات الخبيثة</td>
+                            <td>يتطلب مجموعات بيانات تدريب كبيرة</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <article class="security-concept">
+                <h4>شبكات البوت (Botnets)</h4>
+                <p><strong>شبكة البوت</strong> هي شبكة من الحواسيب المخترقة (الزومبي) يتحكم فيها مهاجم (سيد البوت).</p>
+                <ul>
+                    <li><strong>القيادة والتحكم (C&amp;C):</strong> يرسل سيد البوت أوامر عبر IRC أو HTTP أو شبكات نظير لنظير</li>
+                    <li><strong>هجمات DDoS:</strong> تنسيق آلاف الزومبي لإغراق هدف</li>
+                    <li><strong>توزيع البريد العشوائي:</strong> إرسال ملايين رسائل البريد العشوائي</li>
+                    <li><strong>سرقة بيانات الاعتماد:</strong> حصاد بيانات تسجيل الدخول من الأجهزة المصابة</li>
+                    <li><strong>تعدين العملات المشفرة:</strong> استخدام موارد الضحايا للتعدين</li>
+                </ul>
+            </article>
+        </section>
+
+        <!-- Section 10: Software Protection and DRM -->
+        <section id="protection" class="content-section">
+            <h2>10. حماية البرمجيات وإدارة الحقوق الرقمية</h2>
+
+            <article class="security-concept">
+                <h4>تقنيات حماية البرمجيات</h4>
+                <ul>
+                    <li><strong>تعتيم الكود:</strong> جعل الكود صعب الفهم من خلال الهندسة العكسية</li>
+                    <li><strong>مقاومة التلاعب:</strong> اكتشاف والاستجابة للتعديلات غير المصرح بها</li>
+                    <li><strong>توقيع الكود:</strong> التوقيع الرقمي للبرمجيات لإثبات الأصالة والسلامة</li>
+                    <li><strong>العلامات المائية:</strong> تضمين معلومات تعريفية في البرمجيات</li>
+                </ul>
+            </article>
+
+            <div class="definition">
+                <h3>إدارة الحقوق الرقمية (DRM)</h3>
+                <p><strong>DRM</strong> هي تقنية تُستخدم للتحكم في الوصول إلى ونسخ المحتوى الرقمي (البرمجيات، الموسيقى، الفيديو، الكتب الإلكترونية). تفرض شروط الترخيص من خلال وسائل تقنية.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>أمثلة DRM</h4>
+                <ul>
+                    <li><strong>تنشيط البرمجيات:</strong> مفاتيح المنتج، التنشيط عبر الإنترنت (ويندوز، أوفيس)</li>
+                    <li><strong>خدمات البث:</strong> Widevine DRM يمنع تسجيل محتوى Netflix/Spotify</li>
+                    <li><strong>الألعاب:</strong> متطلبات الاتصال الدائم، مفاتيح الأجهزة</li>
+                    <li><strong>الكتب الإلكترونية:</strong> DRM في Kindle يقيد النسخ والمشاركة</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>قيود DRM</h4>
+                <p>DRM معيب جوهرياً لأن المستخدم يجب أن يكون قادراً على فك تشفير المحتوى لاستهلاكه. هذا يعني أن مفتاح فك التشفير يجب أن يكون متاحاً على جهاز المستخدم، مما يجعل استخراجه ممكناً نظرياً. DRM يرفع الحاجز لكنه لا يمنع التحايل المصمم.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>ثغرات البرمجيات</strong> هي سطح الهجوم الأساسي. الكود المعقد يحتوي حتماً على أخطاء يستغلها المهاجمون.</li>
+
+                <li><strong>عيوب البرمجيات</strong> تنقسم إلى ثلاث فئات: أخطاء التصميم، أخطاء التنفيذ، وتفاعلات البيئة.</li>
+
+                <li><strong>طفحان المخزن المؤقت</strong> يكتب فوق الذاكرة خارج حدود المخزن، مما قد يختطف تنفيذ البرنامج. الدفاعات تشمل حراس المكدس، ASLR، DEP، ولغات آمنة للذاكرة.</li>
+
+                <li><strong>الوساطة غير المكتملة</strong> تنتج من عدم التحقق من مدخلات المستخدم. تحقق دائماً من جانب الخادم.</li>
+
+                <li><strong>حالات السباق</strong> (TOCTOU) تستغل فجوات التوقيت بين فحص واستخدام مورد.</li>
+
+                <li><strong>البرمجيات الخبيثة</strong> تشمل الفيروسات (تحتاج مضيف)، الديدان (ذاتية التكاثر)، أحصنة طروادة (متنكرة)، والتهديدات المختلطة (مجتمعة).</li>
+
+                <li><strong>البرمجيات الخبيثة التاريخية</strong> مثل دودة موريس (1988) وSQL Slammer (2003) أظهرت التأثير المدمر لثغرات البرمجيات.</li>
+
+                <li><strong>الهندسة الاجتماعية</strong> تستهدف علم النفس البشري وغالباً أكثر فعالية من الهجمات التقنية.</li>
+
+                <li><strong>اكتشاف البرمجيات الخبيثة</strong> يستخدم مقاربات التوقيع والاستكشاف والسلوك والتعلم الآلي.</li>
+
+                <li><strong>DRM وحماية البرمجيات</strong> تستخدم التعتيم ومقاومة التلاعب وتوقيع الكود، لكنها تواجه قيوداً جوهرية.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>الفكرة الأخيرة:</strong> الأمان ليس منتجاً &mdash; إنه عملية. بناء برمجيات آمنة يتطلب وعياً أمنياً طوال دورة حياة التطوير بأكملها، من التصميم عبر النشر والصيانة.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>الاعتمادات والإسناد</h2>
+            <p class="credits-intro">جميع الرسوم البيانية في هذه الوثيقة هي أعمال تعليمية أصلية تم إنشاؤها خصيصاً لهذا المقرر.</p>
+            <ul class="credits-list">
+                <li><strong>فئات عيوب البرمجيات:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>رسم طفحان مخزن المكدس:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>شبكة تصنيف البرمجيات الخبيثة:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>الخط الزمني للبرمجيات الخبيثة:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">&rarr; العودة إلى الصفحة الرئيسية</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 11 specific styles */
+        .flaw-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .flaw-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid var(--border-color);
+        }
+
+        .flaw-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .stack-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            padding: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .stack-normal, .stack-overflow {
+            text-align: center;
+        }
+
+        .stack-normal h4, .stack-overflow h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stack-frame {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            min-width: 200px;
+        }
+
+        .stack-cell {
+            padding: 0.8rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .stack-cell:last-child {
+            border-bottom: none;
+        }
+
+        .stack-ret {
+            background: #e3f2fd;
+        }
+
+        .stack-saved {
+            background: #f3e5f5;
+        }
+
+        .stack-buf {
+            background: #e8f5e9;
+        }
+
+        .stack-overwritten {
+            background: #ffcdd2 !important;
+            color: #c62828;
+        }
+
+        .stack-arrow {
+            font-size: 2em;
+            color: #c62828;
+            font-weight: bold;
+        }
+
+        .malware-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .malware-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .malware-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .malware-virus { background: linear-gradient(135deg, #fce4ec, #f8bbd0); border-color: #e91e63; }
+        .malware-worm { background: linear-gradient(135deg, #fff3e0, #ffe0b2); border-color: #ff9800; }
+        .malware-trojan { background: linear-gradient(135deg, #e8eaf6, #c5cae9); border-color: #3f51b5; }
+        .malware-blended { background: linear-gradient(135deg, #fbe9e7, #ffccbc); border-color: #ff5722; }
+
+        .timeline {
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            right: 70px;
+            top: 1.5rem;
+            bottom: 1.5rem;
+            width: 3px;
+            background: var(--secondary-color);
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .timeline-year {
+            min-width: 60px;
+            font-weight: 700;
+            color: white;
+            background: var(--secondary-color);
+            padding: 0.5rem;
+            border-radius: 8px;
+            text-align: center;
+            height: fit-content;
+            z-index: 1;
+        }
+
+        .timeline-content {
+            flex: 1;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .timeline-content h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .timeline-content p {
+            margin-bottom: 0;
+        }
+
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+            direction: ltr;
+            text-align: left;
+        }
+
+        code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+            direction: ltr;
+        }
+
+        @media screen and (max-width: 768px) {
+            .flaw-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .malware-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stack-diagram {
+                flex-direction: column;
+            }
+
+            .stack-arrow {
+                transform: rotate(90deg);
+            }
+
+            .timeline::before {
+                display: none;
+            }
+
+            .timeline-item {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</body>
+</html>

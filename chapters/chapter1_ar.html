@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل الأول: مقدمة في أمن الشبكات</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter1.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>مقدمة في أمن الشبكات</h1>
+        <p class="subtitle">الفصل الأول: أساسيات أمن المعلومات</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#intro">1. مقدمة في أمن المعلومات</a></li>
+            <li><a href="#characters">2. شخصيات القصة</a></li>
+            <li><a href="#cia-triad">3. ثالوث CIA</a></li>
+            <li><a href="#bank-example">4. مثال البنك الإلكتروني لأليس</a></li>
+            <li><a href="#beyond-cia">5. ما وراء ثالوث CIA</a></li>
+            <li><a href="#core-areas">6. المجالات الأساسية لأمن المعلومات</a></li>
+            <li><a href="#people-problem">7. مشكلة العامل البشري</a></li>
+            <li><a href="#principles">8. المبادئ والممارسات</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذا الفصل، ستكون قادراً على:</p>
+            <ul>
+                <li>تعريف أمن المعلومات وشرح أهميته</li>
+                <li>تحديد اللاعبين الرئيسيين في سيناريوهات الأمان (أليس، بوب، ترودي)</li>
+                <li>شرح ثالوث CIA وركائزه الثلاث</li>
+                <li>تحليل الأمان من وجهات نظر متعددة (البنك، العميل، المهاجم)</li>
+                <li>التمييز بين المصادقة والتفويض والمحاسبة</li>
+                <li>تحديد المجالات الأربعة الأساسية لأمن المعلومات</li>
+                <li>فهم لماذا يكون البشر غالباً الحلقة الأضعف في الأمان</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction to Information Security -->
+        <section id="intro" class="content-section">
+            <h2>1. مقدمة في أمن المعلومات</h2>
+
+            <div class="definition">
+                <h3>ما هو أمن المعلومات؟</h3>
+                <p><strong>أمن المعلومات</strong> هو ممارسة حماية المعلومات عن طريق التخفيف من مخاطر المعلومات. يتضمن منع أو تقليل احتمالية الوصول غير المصرح به أو الاستخدام أو الإفشاء أو التعطيل أو التعديل أو تدمير المعلومات.</p>
+            </div>
+
+            <h3>لماذا الأمان مهم</h3>
+            <p>في عالمنا الرقمي اليوم، الأمان ليس اختيارياً - إنه ضروري. ضع في اعتبارك هذه الحقائق:</p>
+            <ul>
+                <li><strong>التأثير المالي:</strong> تكلف خروقات البيانات المنظمات ملايين الدولارات سنوياً</li>
+                <li><strong>مخاوف الخصوصية:</strong> المعلومات الشخصية معرضة باستمرار لخطر الكشف</li>
+                <li><strong>الثقة:</strong> يتوقع العملاء أن تكون بياناتهم محمية</li>
+                <li><strong>المتطلبات القانونية:</strong> العديد من الصناعات لديها لوائح أمنية إلزامية</li>
+                <li><strong>الأمن القومي:</strong> تعتمد البنية التحتية الحيوية على أنظمة آمنة</li>
+            </ul>
+
+            <div class="key-message">
+                <p><strong>رؤية أساسية:</strong> الأمان لا يتعلق فقط بالتكنولوجيا - يتطلب مزيجاً من <em>التكنولوجيا</em> و<em>السياسات</em> و<em>الأشخاص</em> يعملون معاً. أقوى تشفير يصبح عديم الفائدة إذا شارك الناس كلمات مرورهم.</p>
+            </div>
+
+            <h3>عقلية الأمان</h3>
+            <p>للتفكير في الأمان بفعالية، تحتاج إلى:</p>
+            <ol>
+                <li><strong>فكر كمهاجم</strong> - فكر في كيفية استغلال الأنظمة</li>
+                <li><strong>افترض الاختراق</strong> - خطط لوقت (وليس إذا) فشل الدفاعات</li>
+                <li><strong>الدفاع المتعدد الطبقات</strong> - استخدم طبقات متعددة من الحماية</li>
+                <li><strong>أقل امتياز</strong> - امنح فقط الحد الأدنى من الوصول المطلوب</li>
+            </ol>
+        </section>
+
+        <!-- Section 2: The Cast of Characters -->
+        <section id="characters" class="content-section">
+            <h2>2. شخصيات القصة</h2>
+
+            <p>في نقاشات الأمان، نستخدم شخصيات خيالية لتمثيل أدوار مختلفة. هذا التقليد يسهل مناقشة السيناريوهات المعقدة.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">تعرف على اللاعبين</h3>
+                </div>
+                <div class="character-grid">
+                    <div class="character-card character-alice">
+                        <div class="character-icon">👩</div>
+                        <h4>أليس (Alice)</h4>
+                        <p><strong>المرسل</strong></p>
+                        <p>مستخدم شرعي يريد إرسال رسائل آمنة</p>
+                    </div>
+                    <div class="character-card character-bob">
+                        <div class="character-icon">👨</div>
+                        <h4>بوب (Bob)</h4>
+                        <p><strong>المستقبل</strong></p>
+                        <p>مستخدم شرعي يريد استقبال رسائل أليس</p>
+                    </div>
+                    <div class="character-card character-trudy">
+                        <div class="character-icon">🦹</div>
+                        <h4>ترودي (Trudy)</h4>
+                        <p><strong>المهاجم</strong></p>
+                        <p>خصم يريد اعتراض أو التلاعب بالاتصالات</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>لماذا هذه الأسماء؟</h3>
+            <ul>
+                <li><strong>Alice (أليس)</strong> - تبدأ بـ 'A'، الشخص الأول في الاتصال</li>
+                <li><strong>Bob (بوب)</strong> - يبدأ بـ 'B'، الشخص الثاني (المستلم)</li>
+                <li><strong>Trudy (ترودي)</strong> - من "intruder" أي الدخيل - يمثل المهاجم</li>
+            </ul>
+
+            <p>شخصيات أخرى قد تصادفها:</p>
+            <ul>
+                <li><strong>Eve (إيف)</strong> - متنصت (مهاجم سلبي)</li>
+                <li><strong>Mallory (مالوري)</strong> - مهاجم خبيث (نشط)</li>
+                <li><strong>Trent (ترينت)</strong> - طرف ثالث موثوق</li>
+            </ul>
+
+            <div class="warning-box">
+                <h4>افترض دائماً وجود مهاجم نشط!</h4>
+                <p>عند تصميم أنظمة الأمان، افترض دائماً أن ترودي:</p>
+                <ul>
+                    <li>تستمع إلى كل حركة مرور الشبكة</li>
+                    <li>قادرة على تعديل الرسائل أثناء النقل</li>
+                    <li>قادرة على انتحال شخصية المستخدمين الشرعيين</li>
+                    <li>صبورة ومثابرة</li>
+                </ul>
+            </div>
+
+            <a href="../demos/alice_bob_trudy_demo.html" class="demo-link">تشغيل العرض التفاعلي لأليس-بوب-ترودي</a>
+        </section>
+
+        <!-- Section 3: The CIA Triad -->
+        <section id="cia-triad" class="content-section">
+            <h2>3. ثالوث CIA</h2>
+
+            <p>يمثل <strong>ثالوث CIA</strong> الأهداف الثلاثة الأساسية لأمن المعلومات. كل إجراء أمني يهدف إلى حماية واحدة أو أكثر من هذه الخصائص.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">الركائز الثلاث للأمان</h3>
+                </div>
+                <div class="cia-triad-container">
+                    <div class="cia-triangle">
+                        <div class="cia-pillar pillar-confidentiality">
+                            السرية
+                        </div>
+                        <div class="cia-pillar pillar-integrity">
+                            السلامة
+                        </div>
+                        <div class="cia-pillar pillar-availability">
+                            التوفر
+                        </div>
+                        <div class="cia-center">
+                            <strong>CIA</strong><br>
+                            <small>الثالوث</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>السرية (Confidentiality)</h4>
+                <p><strong>التعريف:</strong> حماية المعلومات من الوصول أو الكشف غير المصرح به.</p>
+                <p><strong>الهدف:</strong> فقط الأطراف المصرح لها يمكنها قراءة المعلومات.</p>
+                <p><strong>أمثلة:</strong></p>
+                <ul>
+                    <li>تشفير رسائل البريد الإلكتروني الحساسة</li>
+                    <li>حماية المستندات بكلمة مرور</li>
+                    <li>استخدام HTTPS لتصفح الويب</li>
+                </ul>
+                <p><strong>الهجمات على السرية:</strong></p>
+                <ul>
+                    <li>التنصت على حركة مرور الشبكة</li>
+                    <li>سرقة كلمات المرور</li>
+                    <li>الهندسة الاجتماعية لاستخراج المعلومات</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>السلامة (Integrity)</h4>
+                <p><strong>التعريف:</strong> ضمان دقة المعلومات وعدم تعديلها من قبل أطراف غير مصرح لها.</p>
+                <p><strong>الهدف:</strong> اكتشاف أي تغييرات غير مصرح بها على البيانات.</p>
+                <p><strong>أمثلة:</strong></p>
+                <ul>
+                    <li>التوقيعات الرقمية على المستندات</li>
+                    <li>المجاميع الاختبارية لتحميل الملفات</li>
+                    <li>أنظمة التحكم في الإصدارات</li>
+                </ul>
+                <p><strong>الهجمات على السلامة:</strong></p>
+                <ul>
+                    <li>هجمات الرجل في المنتصف (تعديل البيانات أثناء النقل)</li>
+                    <li>حقن SQL لتغيير سجلات قاعدة البيانات</li>
+                    <li>التلاعب بتحديثات البرمجيات</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>التوفر (Availability)</h4>
+                <p><strong>التعريف:</strong> ضمان قدرة المستخدمين المصرح لهم على الوصول إلى المعلومات والأنظمة عند الحاجة.</p>
+                <p><strong>الهدف:</strong> بقاء الأنظمة عاملة ويمكن الوصول إليها.</p>
+                <p><strong>أمثلة:</strong></p>
+                <ul>
+                    <li>الخوادم الاحتياطية والنسخ الاحتياطية</li>
+                    <li>خدمات الحماية من هجمات DDoS</li>
+                    <li>خطط التعافي من الكوارث</li>
+                </ul>
+                <p><strong>الهجمات على التوفر:</strong></p>
+                <ul>
+                    <li>هجمات حجب الخدمة (DoS)</li>
+                    <li>برامج الفدية التي تقفل الملفات</li>
+                    <li>التدمير المادي للأجهزة</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>عملية موازنة:</strong> هذه الأهداف الثلاثة قد تتعارض أحياناً. على سبيل المثال، إضافة المزيد من ضوابط الأمان (السرية) قد تبطئ أداء النظام (التوفر). يجب على متخصصي الأمان إيجاد التوازن الصحيح.</p>
+            </div>
+
+            <a href="../demos/cia_triad_demo.html" class="demo-link">تشغيل العرض التفاعلي لثالوث CIA</a>
+        </section>
+
+        <!-- Section 4: Alice's Online Bank Example -->
+        <section id="bank-example" class="content-section">
+            <h2>4. مثال البنك الإلكتروني لأليس</h2>
+
+            <p>لنطبق مفاهيم الأمان على سيناريو حقيقي: أليس تريد استخدام حسابها البنكي عبر الإنترنت. لدى الأطراف المختلفة مخاوف أمنية مختلفة.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">ثلاث وجهات نظر لأمان البنك</h3>
+                </div>
+                <div class="three-perspectives-grid">
+                    <div class="perspective-card perspective-bank">
+                        <h4>وجهة نظر البنك</h4>
+                        <p><strong>الاهتمامات الرئيسية:</strong></p>
+                        <p>حماية بيانات العملاء، منع الاحتيال، الحفاظ على الثقة، الامتثال للوائح، ضمان تشغيل النظام</p>
+                    </div>
+                    <div class="perspective-card perspective-customer">
+                        <h4>وجهة نظر العميل</h4>
+                        <p><strong>الاهتمامات الرئيسية:</strong></p>
+                        <p>الحفاظ على أمان المال، حماية المعلومات الشخصية، سهولة الوصول إلى الحسابات، كشف الاحتيال السريع</p>
+                    </div>
+                    <div class="perspective-card perspective-attacker">
+                        <h4>وجهة نظر المهاجم</h4>
+                        <p><strong>الأهداف الرئيسية:</strong></p>
+                        <p>سرقة الأموال، جمع بيانات الاعتماد، ارتكاب سرقة الهوية، تعطيل الخدمات</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>إجراءات الأمان في الخدمات المصرفية عبر الإنترنت</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>خاصية CIA</th>
+                        <th>التهديد</th>
+                        <th>الحماية</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>السرية</strong></td>
+                        <td>شخص يقرأ رصيد حساب أليس</td>
+                        <td>تشفير HTTPS، تسجيل دخول آمن</td>
+                    </tr>
+                    <tr>
+                        <td><strong>السلامة</strong></td>
+                        <td>ترودي تغير مبلغ التحويل من 100$ إلى 10,000$</td>
+                        <td>التوقيعات الرقمية، التحقق من المعاملات</td>
+                    </tr>
+                    <tr>
+                        <td><strong>التوفر</strong></td>
+                        <td>هجوم DDoS يوقف موقع البنك</td>
+                        <td>خوادم احتياطية، تخفيف DDoS</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="example">
+                <h4>سيناريو: أليس تحول أموالاً إلى بوب</h4>
+                <ol>
+                    <li><strong>المصادقة:</strong> أليس تسجل الدخول باسم المستخدم وكلمة المرور ورمز المصادقة الثنائية</li>
+                    <li><strong>السرية:</strong> كل الاتصالات مشفرة عبر TLS</li>
+                    <li><strong>السلامة:</strong> تفاصيل التحويل موقعة رقمياً</li>
+                    <li><strong>التفويض:</strong> البنك يتحقق من أن أليس يمكنها الوصول إلى هذا الحساب</li>
+                    <li><strong>المحاسبة:</strong> المعاملة مسجلة مع الطابع الزمني</li>
+                </ol>
+            </div>
+
+            <a href="../demos/bank_security_demo.html" class="demo-link">تشغيل العرض التفاعلي لأمان البنك</a>
+        </section>
+
+        <!-- Section 5: Beyond the CIA Triad -->
+        <section id="beyond-cia" class="content-section">
+            <h2>5. ما وراء ثالوث CIA</h2>
+
+            <p>بينما يغطي CIA الأهداف الأمنية الأساسية، تتطلب الأنظمة الحديثة مفاهيم إضافية، غالباً ما تسمى "AAA" للأمان.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">إطار AAA</h3>
+                </div>
+                <div class="aaa-grid">
+                    <div class="aaa-card">
+                        <div class="aaa-icon">🔐</div>
+                        <h4>المصادقة (Authentication)</h4>
+                        <p><strong>من أنت؟</strong></p>
+                        <p>التحقق من هوية مستخدم أو جهاز أو نظام</p>
+                    </div>
+                    <div class="aaa-card">
+                        <div class="aaa-icon">🚪</div>
+                        <h4>التفويض (Authorization)</h4>
+                        <p><strong>ماذا يمكنك أن تفعل؟</strong></p>
+                        <p>تحديد الإجراءات المسموح لكيان مصادق عليه بتنفيذها</p>
+                    </div>
+                    <div class="aaa-card">
+                        <div class="aaa-icon">📋</div>
+                        <h4>المحاسبة (Accountability)</h4>
+                        <p><strong>ماذا فعلت؟</strong></p>
+                        <p>تتبع وتسجيل الإجراءات لمحاسبة المستخدمين</p>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>المصادقة مقابل التفويض</h4>
+                <p>هذان المفهومان يُخلط بينهما كثيراً لكنهما مختلفان تماماً:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المصادقة</th>
+                            <th>التفويض</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>يتحقق من الهوية</td>
+                            <td>يمنح الصلاحيات</td>
+                        </tr>
+                        <tr>
+                            <td>يحدث أولاً</td>
+                            <td>يحدث بعد المصادقة</td>
+                        </tr>
+                        <tr>
+                            <td>"هل أنت من تدعي أنك هو؟"</td>
+                            <td>"هل مسموح لك بفعل هذا؟"</td>
+                        </tr>
+                        <tr>
+                            <td>مثال: تسجيل الدخول بكلمة مرور</td>
+                            <td>مثال: صلاحيات المسؤول مقابل المستخدم العادي</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <div class="example">
+                <h4>مثال من الواقع: أمن المطار</h4>
+                <ul>
+                    <li><strong>المصادقة:</strong> إظهار هويتك وبطاقة الصعود (إثبات من أنت)</li>
+                    <li><strong>التفويض:</strong> تذكرتك تحدد أي رحلة يمكنك ركوبها</li>
+                    <li><strong>المحاسبة:</strong> كاميرات المراقبة وقوائم الركاب تتتبع الحركات</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 6: Core Areas of Information Security -->
+        <section id="core-areas" class="content-section">
+            <h2>6. المجالات الأساسية لأمن المعلومات</h2>
+
+            <p>أمن المعلومات مجال واسع يشمل عدة مجالات متخصصة:</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">المجالات الأربعة الأساسية</h3>
+                </div>
+                <div class="four-areas-grid">
+                    <div class="area-card">
+                        <div class="area-icon">🔒</div>
+                        <h4>التشفير (Cryptography)</h4>
+                        <p>علم الاتصال الآمن في وجود خصوم.</p>
+                        <ul>
+                            <li>خوارزميات التشفير</li>
+                            <li>دوال التجزئة</li>
+                            <li>التوقيعات الرقمية</li>
+                            <li>إدارة المفاتيح</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">🚧</div>
+                        <h4>التحكم في الوصول (Access Control)</h4>
+                        <p>آليات تقيد الوصول إلى الموارد بناءً على الهوية والصلاحيات.</p>
+                        <ul>
+                            <li>أنظمة المصادقة</li>
+                            <li>نماذج التفويض</li>
+                            <li>التحكم في الوصول المستند إلى الأدوار</li>
+                            <li>المصادقة متعددة العوامل</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">🔗</div>
+                        <h4>بروتوكولات الأمان (Security Protocols)</h4>
+                        <p>قواعد وإجراءات للاتصال الآمن بين الأنظمة.</p>
+                        <ul>
+                            <li>SSL/TLS</li>
+                            <li>SSH</li>
+                            <li>IPSec</li>
+                            <li>Kerberos</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">💻</div>
+                        <h4>أمن البرمجيات (Software Security)</h4>
+                        <p>بناء وصيانة برمجيات تقاوم الهجمات.</p>
+                        <ul>
+                            <li>ممارسات البرمجة الآمنة</li>
+                            <li>تقييم الثغرات</li>
+                            <li>تحليل البرمجيات الخبيثة</li>
+                            <li>اختبار الأمان</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>معاينة المقرر:</strong> سيستكشف هذا المقرر كل من هذه المجالات بعمق. سنبدأ بأساسيات التشفير، ثم ننتقل إلى التحكم في الوصول والمصادقة، وندرس البروتوكولات الحقيقية، وننتهي بأمن البرمجيات.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: The People Problem -->
+        <section id="people-problem" class="content-section">
+            <h2>7. مشكلة العامل البشري</h2>
+
+            <div class="warning-box">
+                <h4>الحلقة الأضعف</h4>
+                <p>يمكن هزيمة أكثر أنظمة الأمان تطوراً بالخطأ البشري. غالباً ما يكون الناس الحلقة الأضعف في الأمان.</p>
+            </div>
+
+            <h3>إخفاقات الأمان البشرية الشائعة</h3>
+
+            <article class="security-concept">
+                <h4>كلمات المرور الضعيفة</h4>
+                <ul>
+                    <li>استخدام "password123" أو "qwerty"</li>
+                    <li>إعادة استخدام نفس كلمة المرور في كل مكان</li>
+                    <li>كتابة كلمات المرور على ملاحظات لاصقة</li>
+                    <li>مشاركة كلمات المرور مع الزملاء</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>الهندسة الاجتماعية</h4>
+                <p>يتلاعب المهاجمون بالناس للكشف عن معلومات سرية:</p>
+                <ul>
+                    <li><strong>التصيد الاحتيالي:</strong> رسائل بريد إلكتروني مزيفة تبدو شرعية</li>
+                    <li><strong>التظاهر:</strong> إنشاء سيناريوهات خاطئة لكسب الثقة</li>
+                    <li><strong>الإغراء:</strong> ترك أقراص USB مصابة في أماكن عامة</li>
+                    <li><strong>التتبع:</strong> متابعة المستخدمين المصرح لهم إلى المناطق الآمنة</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>سوء النظافة الأمنية</h4>
+                <ul>
+                    <li>عدم تثبيت التحديثات الأمنية</li>
+                    <li>النقر على روابط مشبوهة</li>
+                    <li>تنزيل برامج من مصادر غير موثوقة</li>
+                    <li>ترك الأجهزة مفتوحة وغير مراقبة</li>
+                </ul>
+            </article>
+
+            <div class="example">
+                <h4>هجوم هندسة اجتماعية شهير</h4>
+                <p>في عام 2020، تمكن مراهق من الوصول إلى حسابات تويتر بارزة (بما في ذلك إيلون ماسك وباراك أوباما وأبل) عن طريق الاتصال بموظفي تويتر والتظاهر بأنه من قسم تكنولوجيا المعلومات. المهاجمون لم يخترقوا النظام - اخترقوا الناس.</p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>الوعي الأمني:</strong> الضوابط التقنية ضرورية لكنها غير كافية. يجب على المنظمات أيضاً الاستثمار في التدريب على الوعي الأمني لمساعدة الموظفين على التعرف على هجمات الهندسة الاجتماعية ومقاومتها.</p>
+            </div>
+        </section>
+
+        <!-- Section 8: Principles and Practice -->
+        <section id="principles" class="content-section">
+            <h2>8. مبادئ وممارسات الأمان</h2>
+
+            <p>يتطلب الأمان الفعال الاهتمام بأربعة عناصر رئيسية:</p>
+
+            <article class="security-concept">
+                <h4>1. السياسة (Policy)</h4>
+                <p><strong>ماذا نريد أن نحقق؟</strong></p>
+                <p>تحدد السياسات الأمنية القواعد والأهداف. تجيب على أسئلة مثل:</p>
+                <ul>
+                    <li>من المسموح له بالوصول إلى ماذا؟</li>
+                    <li>ما الذي يشكل الاستخدام المقبول؟</li>
+                    <li>كيف يجب التعامل مع الحوادث؟</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>2. الآليات (Mechanisms)</h4>
+                <p><strong>كيف نحقق ذلك؟</strong></p>
+                <p>الضوابط التقنية والإجرائية التي تنفذ السياسة:</p>
+                <ul>
+                    <li>أنظمة التشفير</li>
+                    <li>جدران الحماية وكشف التسلل</li>
+                    <li>أنظمة التحكم في الوصول</li>
+                    <li>تسجيل التدقيق</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>3. التأكيد (Assurance)</h4>
+                <p><strong>هل يعمل فعلاً؟</strong></p>
+                <p>الاختبار والتحقق من فعالية إجراءات الأمان:</p>
+                <ul>
+                    <li>عمليات التدقيق والتقييمات الأمنية</li>
+                    <li>اختبار الاختراق</li>
+                    <li>مراجعات الكود</li>
+                    <li>التحقق من الامتثال</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>4. العوامل البشرية (Human Factors)</h4>
+                <p><strong>هل سيتبع الناس القواعد؟</strong></p>
+                <p>جعل الأمان قابلاً للاستخدام وضمان الامتثال:</p>
+                <ul>
+                    <li>التدريب على الوعي الأمني</li>
+                    <li>ضوابط أمان سهلة الاستخدام</li>
+                    <li>التواصل الواضح للسياسات</li>
+                    <li>حوافز للسلوك الآمن</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>تذكر:</strong> الأمان عملية وليس منتجاً. يتطلب اهتماماً مستمراً وتحديثات وتحسينات مع تطور التهديدات.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>أمن المعلومات</strong> يحمي البيانات من الوصول والتعديل والتدمير غير المصرح به من خلال التكنولوجيا والسياسات والناس.</li>
+
+                <li><strong>شخصيات القصة</strong> - أليس (المرسل)، بوب (المستقبل)، وترودي (المهاجم) تساعدنا في مناقشة سيناريوهات الأمان بوضوح.</li>
+
+                <li><strong>ثالوث CIA</strong> يحدد الأهداف الأمنية الثلاثة الأساسية: السرية (سري)، السلامة (غير متغير)، التوفر (يمكن الوصول إليه).</li>
+
+                <li><strong>وجهات نظر الأمان تختلف</strong> - البنوك والعملاء والمهاجمون لديهم أهداف ومخاوف مختلفة.</li>
+
+                <li><strong>ما وراء CIA</strong> - المصادقة (من أنت؟)، التفويض (ماذا يمكنك أن تفعل؟)، والمحاسبة (ماذا فعلت؟) تكمل صورة الأمان.</li>
+
+                <li><strong>المجالات الأربعة الأساسية</strong> - التشفير، التحكم في الوصول، بروتوكولات الأمان، وأمن البرمجيات تشكل أساس المجال.</li>
+
+                <li><strong>الناس هم الحلقة الأضعف</strong> - الهندسة الاجتماعية والخطأ البشري يتجاوزان حتى أقوى الضوابط التقنية.</li>
+
+                <li><strong>الأمان يتطلب توازناً</strong> - السياسة والآليات والتأكيد والعوامل البشرية يجب أن تعمل معاً.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>التطلع إلى الأمام:</strong> في الفصل الثاني، سنغوص في أساسيات التشفير - الأساس الرياضي الذي يمكّن الاتصال الآمن.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>الاعتمادات والإسناد</h2>
+            <p class="credits-intro">جميع الرسوم البيانية في هذه الوثيقة هي أعمال تعليمية أصلية تم إنشاؤها خصيصاً لهذا المقرر.</p>
+            <ul class="credits-list">
+                <li><strong>رسم ثالوث CIA:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>بطاقات الشخصيات:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>شبكة وجهات النظر:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>إطار AAA:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>شبكة المجالات الأساسية:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">&rarr; العودة إلى الصفحة الرئيسية</a>
+        </p>
+    </footer>
+</body>
+</html>

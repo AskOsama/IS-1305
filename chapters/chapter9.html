@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 9: Simple Authentication Protocols</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter9_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>Simple Authentication Protocols</h1>
+        <p class="subtitle">Chapter 9: Protocol Design, Authentication Methods, and Session Keys</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#intro">1. Introduction to Protocols</a></li>
+            <li><a href="#simple">2. Simple Security Protocols</a></li>
+            <li><a href="#hash-auth">3. Authentication with Hash</a></li>
+            <li><a href="#symmetric-auth">4. Authentication Using Symmetric Keys</a></li>
+            <li><a href="#mutual-auth">5. Mutual Authentication</a></li>
+            <li><a href="#pubkey-auth">6. Authentication Using Public Keys</a></li>
+            <li><a href="#session-keys">7. Session Keys and Perfect Forward Secrecy</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this chapter, you will be able to:</p>
+            <ul>
+                <li>Distinguish between formal protocols and security protocols</li>
+                <li>Explain basic authentication mechanisms (PIN, badge, ATM)</li>
+                <li>Describe how hash functions and nonces prevent replay attacks</li>
+                <li>Compare authentication using symmetric keys vs public keys</li>
+                <li>Understand session keys and Perfect Forward Secrecy (PFS)</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction to Protocols -->
+        <section id="intro" class="content-section">
+            <h2>1. Introduction to Protocols</h2>
+
+            <div class="definition">
+                <h3>What is a Protocol?</h3>
+                <p>A <strong>protocol</strong> is a set of rules that govern how two or more parties communicate. In security, protocols define the exact sequence of messages exchanged to achieve a security goal like authentication or key exchange.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>Types of Protocols</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Purpose</th>
+                            <th>Examples</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Communication Protocols</strong></td>
+                            <td>Define how data is transmitted</td>
+                            <td>HTTP, FTP, SMTP, TCP/IP</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Security Protocols</strong></td>
+                            <td>Provide security services</td>
+                            <td>SSH, SSL/TLS, Kerberos, IPSec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Key Insight:</strong> Security protocols must be carefully designed. Even small flaws in protocol design can be exploited by attackers. Unlike bugs in code, protocol flaws are fundamental design errors that are much harder to fix.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Simple Security Protocols -->
+        <section id="simple" class="content-section">
+            <h2>2. Simple Security Protocols</h2>
+
+            <p>Before diving into cryptographic protocols, let's look at everyday authentication examples.</p>
+
+            <article class="security-concept">
+                <h4>Badge/PIN Authentication</h4>
+                <p>The simplest form of authentication uses something you <strong>have</strong> (badge) or something you <strong>know</strong> (PIN).</p>
+                <ul>
+                    <li><strong>Badge only:</strong> Physical access cards &mdash; weak if stolen</li>
+                    <li><strong>PIN only:</strong> Numeric code &mdash; weak if observed or guessed</li>
+                    <li><strong>Badge + PIN:</strong> Two-factor &mdash; much stronger (requires both)</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>ATM Authentication Example</h4>
+                <p>An ATM uses two-factor authentication:</p>
+                <ol>
+                    <li><strong>Something you have:</strong> The bank card (contains account data on magnetic strip or chip)</li>
+                    <li><strong>Something you know:</strong> The PIN (4-6 digit code)</li>
+                    <li>The ATM sends both factors to the bank for verification</li>
+                    <li>If both match, the user is authenticated and can access their account</li>
+                </ol>
+            </article>
+
+            <div class="warning-box">
+                <h4>Vulnerabilities of Simple Protocols</h4>
+                <p>Simple authentication is vulnerable to: shoulder surfing (observing PIN entry), skimming (copying card data), replay attacks (reusing captured authentication data), and social engineering.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Authentication with Hash -->
+        <section id="hash-auth" class="content-section">
+            <h2>3. Authentication with Hash</h2>
+
+            <div class="definition">
+                <h3>Hash-Based Authentication</h3>
+                <p>Instead of sending passwords in plaintext, the system stores and verifies a <strong>hash</strong> of the password. This way, even if the stored data is compromised, the actual passwords are not revealed.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Hash-Based Authentication Flow</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">1. "I'm Alice", h(password)</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">Server</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">2. "Welcome" or "Denied"</span>
+                        </div>
+                        <div class="protocol-actor">Server</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>The Replay Attack Problem</h3>
+            <p>An attacker who captures the hash can simply resend it to authenticate as Alice. The hash never changes!</p>
+
+            <h3>Solution: Nonces</h3>
+            <div class="definition">
+                <p>A <strong>nonce</strong> (Number used ONCE) is a random value that ensures each authentication attempt is unique and prevents replay attacks.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Hash + Nonce Authentication (Challenge-Response)</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">1. "I'm Alice"</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">Server</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">2. Nonce R (random challenge)</span>
+                        </div>
+                        <div class="protocol-actor">Server</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">3. h(password || R)</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">Server</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Why This Works:</strong> Because the nonce R is different every time, the hash h(password || R) is different for each session. An attacker who captures one response cannot reuse it.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Symmetric Key Authentication -->
+        <section id="symmetric-auth" class="content-section">
+            <h2>4. Authentication Using Symmetric Keys</h2>
+
+            <div class="definition">
+                <h3>Symmetric Key Authentication</h3>
+                <p>Both parties share a secret key. Authentication is achieved by proving knowledge of the key without revealing it, typically through <strong>challenge-response</strong> protocols.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Symmetric Key Challenge-Response</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">1. "I'm Alice"</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">Bob</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">2. Nonce R</span>
+                        </div>
+                        <div class="protocol-actor">Bob</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">3. E(R, K<sub>AB</sub>)</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">Bob</div>
+                    </div>
+                </div>
+                <p class="diagram-note">Bob sends a random nonce R. Alice encrypts R with the shared key K<sub>AB</sub>. Bob decrypts and verifies it matches R.</p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Why This Works:</strong> Only someone who knows the shared key K<sub>AB</sub> can correctly encrypt the nonce. The nonce prevents replay attacks since it's different each time.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Mutual Authentication -->
+        <section id="mutual-auth" class="content-section">
+            <h2>5. Mutual Authentication</h2>
+
+            <div class="definition">
+                <h3>What is Mutual Authentication?</h3>
+                <p><strong>Mutual authentication</strong> means both parties verify each other's identity. This prevents one side from being fooled by an impersonator.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Mutual Authentication Protocol</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">1. "I'm Alice", R<sub>A</sub></span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">Bob</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">2. R<sub>B</sub>, E(R<sub>A</sub>, K<sub>AB</sub>)</span>
+                        </div>
+                        <div class="protocol-actor">Bob</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">3. E(R<sub>B</sub>, K<sub>AB</sub>)</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">Bob</div>
+                    </div>
+                </div>
+                <p class="diagram-note">Alice verifies Bob by decrypting E(R<sub>A</sub>, K<sub>AB</sub>) and checking it matches R<sub>A</sub>. Bob verifies Alice by decrypting E(R<sub>B</sub>, K<sub>AB</sub>) and checking it matches R<sub>B</sub>.</p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Both Sides Verified:</strong> Each party sends a challenge (nonce) and expects the other to encrypt it with the shared key. If both responses are correct, both identities are confirmed.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: Public Key Authentication -->
+        <section id="pubkey-auth" class="content-section">
+            <h2>6. Authentication Using Public Keys</h2>
+
+            <div class="definition">
+                <h3>Public Key Authentication</h3>
+                <p>Instead of a shared secret, each party has a <strong>public/private key pair</strong>. Authentication works by proving possession of the private key (through signing or decryption) without revealing it.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Public Key Authentication Protocol</h3>
+                </div>
+                <div class="protocol-flow">
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">1. "I'm Alice"</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">Bob</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-arrow">←</span>
+                            <span class="msg-label">2. R (nonce)</span>
+                        </div>
+                        <div class="protocol-actor">Bob</div>
+                    </div>
+                    <div class="protocol-step">
+                        <div class="protocol-actor">Alice</div>
+                        <div class="protocol-message">
+                            <span class="msg-label">3. Sign(R, Alice's Private Key)</span>
+                            <span class="msg-arrow">→</span>
+                        </div>
+                        <div class="protocol-actor">Bob</div>
+                    </div>
+                </div>
+                <p class="diagram-note">Bob verifies the signature using Alice's public key. Only Alice's private key could have produced a valid signature on R.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>Advantages of Public Key Authentication</h4>
+                <ul>
+                    <li><strong>No shared secret needed:</strong> No key distribution problem</li>
+                    <li><strong>Digital signatures:</strong> Provide non-repudiation (Alice cannot deny signing)</li>
+                    <li><strong>Scalable:</strong> Each user needs only one key pair</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>Requires Trusted Public Keys</h4>
+                <p>Public key authentication only works if Bob trusts that Alice's public key truly belongs to Alice. This is solved by <strong>certificates</strong> issued by a trusted Certificate Authority (CA).</p>
+            </div>
+        </section>
+
+        <!-- Section 7: Session Keys and PFS -->
+        <section id="session-keys" class="content-section">
+            <h2>7. Session Keys and Perfect Forward Secrecy</h2>
+
+            <div class="definition">
+                <h3>What is a Session Key?</h3>
+                <p>A <strong>session key</strong> is a temporary symmetric key generated for a single communication session. When the session ends, the key is discarded.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>Why Use Session Keys?</h4>
+                <ul>
+                    <li><strong>Limit exposure:</strong> If a session key is compromised, only that session is affected</li>
+                    <li><strong>Performance:</strong> Symmetric keys are fast; use public key only for initial key exchange</li>
+                    <li><strong>Fresh keys:</strong> Each session gets a unique key, making attacks harder</li>
+                </ul>
+            </article>
+
+            <div class="definition">
+                <h3>Perfect Forward Secrecy (PFS)</h3>
+                <p><strong>PFS</strong> guarantees that even if a long-term private key is compromised in the future, past session keys cannot be recovered. Each session uses an independent key exchange (e.g., ephemeral Diffie-Hellman).</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>PFS Example</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Without PFS</th>
+                            <th>With PFS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Session key derived from server's long-term private key</td>
+                            <td>Session key from ephemeral (temporary) key exchange</td>
+                        </tr>
+                        <tr>
+                            <td>If private key is leaked later, all past sessions can be decrypted</td>
+                            <td>Past sessions remain secure even if private key leaks</td>
+                        </tr>
+                        <tr>
+                            <td>RSA key exchange (no PFS)</td>
+                            <td>Ephemeral Diffie-Hellman (DHE, ECDHE)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Modern Standard:</strong> PFS is now required in TLS 1.3. All key exchanges use ephemeral Diffie-Hellman (ECDHE), ensuring that compromising the server's long-term key does not expose past communications.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>Protocols</strong> define the rules of communication. Security protocols must be carefully designed to prevent exploitation.</li>
+
+                <li><strong>Simple authentication</strong> uses factors like PINs and badges. Combining factors (two-factor authentication) is much stronger.</li>
+
+                <li><strong>Hash-based authentication</strong> avoids sending passwords in plaintext. Adding a <strong>nonce</strong> prevents replay attacks.</li>
+
+                <li><strong>Symmetric key authentication</strong> uses challenge-response: prove you know the shared key by encrypting a random nonce.</li>
+
+                <li><strong>Mutual authentication</strong> ensures both parties verify each other using nonces and shared keys.</li>
+
+                <li><strong>Public key authentication</strong> uses digital signatures to prove identity without a shared secret, but requires trusted public key distribution.</li>
+
+                <li><strong>Session keys</strong> are temporary keys for one session, limiting damage if compromised.</li>
+
+                <li><strong>Perfect Forward Secrecy</strong> ensures past sessions remain secure even if long-term keys are later compromised.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In Chapter 10, we'll see how these authentication concepts are implemented in real-world protocols like SSL/TLS, SSH, IPSec, and Kerberos.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>Credits and Attributions</h2>
+            <p class="credits-intro">All diagrams in this document are original educational works created specifically for this course.</p>
+            <ul class="credits-list">
+                <li><strong>Authentication Protocol Flows:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Challenge-Response Diagrams:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Session Key Exchange Flow:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 9 specific styles */
+        .protocol-flow {
+            padding: 1.5rem;
+        }
+
+        .protocol-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .protocol-actor {
+            font-weight: 700;
+            color: var(--primary-color);
+            min-width: 60px;
+            text-align: center;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 8px;
+            border: 2px solid var(--secondary-color);
+        }
+
+        .protocol-message {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .msg-label {
+            background: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.9em;
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        .msg-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .diagram-note {
+            font-size: 0.9em;
+            color: #555;
+            font-style: italic;
+            text-align: center;
+            padding: 0 1.5rem 1rem;
+        }
+
+        @media screen and (max-width: 768px) {
+            .protocol-step {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .msg-arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</body>
+</html>

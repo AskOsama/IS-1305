@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transposition Cipher Interactive Demo | Network Security</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --accent-color: #c53030;
+            --success-color: #276749;
+            --warning-color: #c05621;
+            --light-gray: #f8f9fa;
+            --border-color: #e1e4e8;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #276749 0%, #2f855a 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        h1 {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--success-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Input Section */
+        .input-section {
+            background: var(--light-gray);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 1.1em;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-family: "Courier New", monospace;
+            text-transform: uppercase;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--success-color);
+            box-shadow: 0 0 0 3px rgba(39, 103, 73, 0.1);
+        }
+
+        .columns-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: var(--border-color);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--success-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        .columns-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--success-color);
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--success-color);
+            background: white;
+            color: var(--success-color);
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .mode-btn:hover:not(.active) {
+            background: #e8f5e9;
+        }
+
+        /* Grid Visualization */
+        .grid-section {
+            margin-bottom: 2rem;
+        }
+
+        .grid-section h3 {
+            text-align: center;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .grid-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.5rem;
+            background: var(--light-gray);
+            border-radius: 12px;
+        }
+
+        .grid-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .grid-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .grid-cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: "Courier New", monospace;
+            font-weight: 600;
+            font-size: 1.1em;
+            border-radius: 6px;
+            background: white;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        .grid-cell.filled {
+            background: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .grid-cell.reading {
+            animation: pulse-read 0.5s ease-in-out;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(39, 103, 73, 0.4);
+        }
+
+        .grid-cell.empty {
+            background: #f0f0f0;
+            color: #999;
+        }
+
+        @keyframes pulse-read {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .column-headers {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .column-header {
+            width: 40px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: var(--success-color);
+            background: #e8f5e9;
+            border-radius: 4px;
+        }
+
+        .read-order {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .read-order-label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .read-order-sequence {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .order-item {
+            padding: 0.5rem 1rem;
+            background: var(--success-color);
+            color: white;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Result Section */
+        .result-section {
+            background: #e8f5e9;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            border: 2px solid var(--success-color);
+        }
+
+        .result-section h3 {
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .result-text {
+            font-family: "Courier New", monospace;
+            font-size: 1.5em;
+            letter-spacing: 2px;
+            word-break: break-all;
+            color: var(--primary-color);
+        }
+
+        /* Animation Control */
+        .animation-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .anim-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: var(--success-color);
+            color: white;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .anim-btn:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .anim-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Explanation */
+        .explanation {
+            background: #fff3e0;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .explanation h3 {
+            color: var(--warning-color);
+            margin-bottom: 1rem;
+        }
+
+        .explanation p {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .explanation ol {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .explanation li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .grid-cell {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9em;
+            }
+
+            .column-header {
+                width: 32px;
+            }
+
+            .columns-control {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../chapters/chapter2.html#classic-crypto" class="back-link">&larr; Back to Chapter 2</a>
+
+        <header>
+            <h1>Transposition Cipher Interactive Demo</h1>
+            <p class="subtitle">See how letters are rearranged without being changed</p>
+        </header>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="mode-toggle">
+                <button class="mode-btn active" onclick="setMode('encrypt')" id="encryptBtn">Encrypt</button>
+                <button class="mode-btn" onclick="setMode('decrypt')" id="decryptBtn">Decrypt</button>
+            </div>
+
+            <div class="input-group">
+                <label for="plaintext">Enter your message:</label>
+                <input type="text" id="plaintext" placeholder="Type your message here..." value="ATTACK AT DAWN" oninput="processText()">
+            </div>
+
+            <div class="input-group">
+                <label>Number of Columns (2-8):</label>
+                <div class="columns-control">
+                    <input type="range" id="columnsSlider" min="2" max="8" value="4" oninput="updateColumns()">
+                    <span class="columns-value" id="columnsValue">4</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grid Visualization -->
+        <div class="grid-section">
+            <h3>Step 1: Write Message in Rows</h3>
+            <div class="grid-container">
+                <div class="column-headers" id="columnHeaders"></div>
+                <div class="grid-wrapper" id="gridWrapper"></div>
+
+                <div class="read-order">
+                    <div class="read-order-label">Step 2: Read Columns (Left to Right)</div>
+                    <div class="read-order-sequence" id="readOrderSequence"></div>
+                </div>
+
+                <div class="animation-controls">
+                    <button class="anim-btn" onclick="animateReading()" id="animateBtn">Animate Reading</button>
+                    <button class="anim-btn" onclick="resetAnimation()">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result -->
+        <div class="result-section">
+            <h3 id="resultLabel">Ciphertext:</h3>
+            <div class="result-text" id="resultText">-</div>
+        </div>
+
+        <!-- Explanation -->
+        <div class="explanation">
+            <h3>How Columnar Transposition Works</h3>
+            <p>Unlike substitution ciphers, transposition ciphers <strong>don't change the letters</strong> - they only <strong>rearrange their positions</strong>.</p>
+
+            <p style="margin-top: 1rem;"><strong>Encryption Process:</strong></p>
+            <ol>
+                <li>Write the plaintext in rows of a fixed width (number of columns = key)</li>
+                <li>Pad the last row with 'X' if needed to fill the grid</li>
+                <li>Read the columns from left to right (or in a specified order) to get the ciphertext</li>
+            </ol>
+
+            <p style="margin-top: 1rem;"><strong>Decryption Process:</strong></p>
+            <ol>
+                <li>Calculate how many rows the grid will have</li>
+                <li>Write the ciphertext down the columns</li>
+                <li>Read across the rows to recover the plaintext</li>
+            </ol>
+
+            <p style="margin-top: 1rem;"><strong>Security Note:</strong> Simple columnar transposition is weak because:</p>
+            <ul style="margin-left: 1.5rem;">
+                <li>Letter frequencies are preserved (same as plaintext)</li>
+                <li>Limited number of possible column arrangements</li>
+                <li>Can be broken by trying different column widths and analyzing patterns</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let mode = 'encrypt';
+        let columns = 4;
+        let animationInProgress = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateColumns();
+        });
+
+        function setMode(newMode) {
+            mode = newMode;
+            document.getElementById('encryptBtn').classList.toggle('active', mode === 'encrypt');
+            document.getElementById('decryptBtn').classList.toggle('active', mode === 'decrypt');
+            document.getElementById('resultLabel').textContent = mode === 'encrypt' ? 'Ciphertext:' : 'Plaintext:';
+            processText();
+        }
+
+        function updateColumns() {
+            columns = parseInt(document.getElementById('columnsSlider').value);
+            document.getElementById('columnsValue').textContent = columns;
+            processText();
+        }
+
+        function processText() {
+            const input = document.getElementById('plaintext').value.toUpperCase().replace(/[^A-Z]/g, '');
+
+            if (mode === 'encrypt') {
+                encrypt(input);
+            } else {
+                decrypt(input);
+            }
+        }
+
+        function encrypt(plaintext) {
+            if (!plaintext) {
+                document.getElementById('resultText').textContent = '-';
+                document.getElementById('gridWrapper').innerHTML = '';
+                document.getElementById('columnHeaders').innerHTML = '';
+                document.getElementById('readOrderSequence').innerHTML = '';
+                return;
+            }
+
+            // Pad with X if needed
+            let padded = plaintext;
+            while (padded.length % columns !== 0) {
+                padded += 'X';
+            }
+
+            const rows = Math.ceil(padded.length / columns);
+
+            // Build grid
+            const grid = [];
+            for (let r = 0; r < rows; r++) {
+                const row = [];
+                for (let c = 0; c < columns; c++) {
+                    const idx = r * columns + c;
+                    row.push(padded[idx] || '');
+                }
+                grid.push(row);
+            }
+
+            // Display grid
+            displayGrid(grid);
+
+            // Read columns to get ciphertext
+            let ciphertext = '';
+            const columnContents = [];
+            for (let c = 0; c < columns; c++) {
+                let colText = '';
+                for (let r = 0; r < rows; r++) {
+                    colText += grid[r][c];
+                }
+                columnContents.push(colText);
+                ciphertext += colText;
+            }
+
+            document.getElementById('resultText').textContent = ciphertext;
+
+            // Display read order
+            displayReadOrder(columnContents);
+        }
+
+        function decrypt(ciphertext) {
+            if (!ciphertext) {
+                document.getElementById('resultText').textContent = '-';
+                document.getElementById('gridWrapper').innerHTML = '';
+                document.getElementById('columnHeaders').innerHTML = '';
+                document.getElementById('readOrderSequence').innerHTML = '';
+                return;
+            }
+
+            const rows = Math.ceil(ciphertext.length / columns);
+            const fullCols = ciphertext.length % columns || columns;
+
+            // Build grid by reading down columns
+            const grid = [];
+            for (let r = 0; r < rows; r++) {
+                grid.push(new Array(columns).fill(''));
+            }
+
+            let idx = 0;
+            for (let c = 0; c < columns; c++) {
+                const colRows = (c < fullCols || ciphertext.length % columns === 0) ? rows : rows - 1;
+                for (let r = 0; r < colRows && idx < ciphertext.length; r++) {
+                    grid[r][c] = ciphertext[idx++];
+                }
+            }
+
+            // Display grid
+            displayGrid(grid);
+
+            // Read rows to get plaintext
+            let plaintext = '';
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < columns; c++) {
+                    if (grid[r][c]) plaintext += grid[r][c];
+                }
+            }
+
+            document.getElementById('resultText').textContent = plaintext;
+
+            // Display column contents
+            const columnContents = [];
+            for (let c = 0; c < columns; c++) {
+                let colText = '';
+                for (let r = 0; r < rows; r++) {
+                    if (grid[r][c]) colText += grid[r][c];
+                }
+                columnContents.push(colText);
+            }
+            displayReadOrder(columnContents);
+        }
+
+        function displayGrid(grid) {
+            // Column headers
+            const headersDiv = document.getElementById('columnHeaders');
+            headersDiv.innerHTML = '';
+            for (let c = 0; c < columns; c++) {
+                const header = document.createElement('div');
+                header.className = 'column-header';
+                header.textContent = 'C' + (c + 1);
+                headersDiv.appendChild(header);
+            }
+
+            // Grid cells
+            const wrapper = document.getElementById('gridWrapper');
+            wrapper.innerHTML = '';
+
+            for (let r = 0; r < grid.length; r++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'grid-row';
+
+                for (let c = 0; c < columns; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.id = `cell-${r}-${c}`;
+
+                    if (grid[r][c]) {
+                        cell.classList.add('filled');
+                        cell.textContent = grid[r][c];
+                    } else {
+                        cell.classList.add('empty');
+                        cell.textContent = '';
+                    }
+
+                    rowDiv.appendChild(cell);
+                }
+
+                wrapper.appendChild(rowDiv);
+            }
+        }
+
+        function displayReadOrder(columnContents) {
+            const sequenceDiv = document.getElementById('readOrderSequence');
+            sequenceDiv.innerHTML = '';
+
+            columnContents.forEach((content, idx) => {
+                if (content) {
+                    const item = document.createElement('div');
+                    item.className = 'order-item';
+                    item.textContent = `C${idx + 1}: ${content}`;
+                    item.id = `order-${idx}`;
+                    sequenceDiv.appendChild(item);
+                }
+            });
+        }
+
+        async function animateReading() {
+            if (animationInProgress) return;
+            animationInProgress = true;
+
+            const animBtn = document.getElementById('animateBtn');
+            animBtn.disabled = true;
+
+            const wrapper = document.getElementById('gridWrapper');
+            const rows = wrapper.querySelectorAll('.grid-row');
+            const numRows = rows.length;
+
+            // Reset all cells
+            document.querySelectorAll('.grid-cell').forEach(cell => cell.classList.remove('reading'));
+
+            // Animate column by column
+            for (let c = 0; c < columns; c++) {
+                // Highlight order item
+                const orderItems = document.querySelectorAll('.order-item');
+                orderItems.forEach((item, idx) => {
+                    item.style.opacity = idx === c ? '1' : '0.3';
+                    item.style.transform = idx === c ? 'scale(1.1)' : 'scale(1)';
+                });
+
+                for (let r = 0; r < numRows; r++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    if (cell && cell.classList.contains('filled')) {
+                        cell.classList.add('reading');
+                        await sleep(200);
+                        cell.classList.remove('reading');
+                    }
+                }
+
+                await sleep(300);
+            }
+
+            // Reset order items
+            document.querySelectorAll('.order-item').forEach(item => {
+                item.style.opacity = '1';
+                item.style.transform = 'scale(1)';
+            });
+
+            animBtn.disabled = false;
+            animationInProgress = false;
+        }
+
+        function resetAnimation() {
+            document.querySelectorAll('.grid-cell').forEach(cell => cell.classList.remove('reading'));
+            document.querySelectorAll('.order-item').forEach(item => {
+                item.style.opacity = '1';
+                item.style.transform = 'scale(1)';
+            });
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>

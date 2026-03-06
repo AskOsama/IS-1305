@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل الثاني: أساسيات التشفير</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter2.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>أساسيات التشفير</h1>
+        <p class="subtitle">الفصل الثاني: مبادئ علم التشفير</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#intro">1. مقدمة في أساسيات التشفير</a></li>
+            <li><a href="#terminology">2. مصطلحات التشفير</a></li>
+            <li><a href="#classic-crypto">3. التشفير الكلاسيكي</a></li>
+            <li><a href="#modern-history">4. تاريخ التشفير الحديث</a></li>
+            <li><a href="#taxonomy-crypto">5. تصنيف علم التشفير</a></li>
+            <li><a href="#taxonomy-analysis">6. تصنيف تحليل الشفرات</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذا الفصل، ستكون قادراً على:</p>
+            <ul>
+                <li>فهم واستخدام المصطلحات الأساسية للتشفير</li>
+                <li>شرح كيفية عمل الشفرات الكلاسيكية (الاستبدال والتبديل)</li>
+                <li>وصف تقنيات تحليل الشفرات الأساسية</li>
+                <li>تعريف ما يعنيه أن تكون الشفرة "آمنة"</li>
+                <li>تلخيص الدروس التاريخية المهمة من علم التشفير</li>
+                <li>التعرف على الفئات الرئيسية للتشفير وتحليل الشفرات</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction to Crypto Basics -->
+        <section id="intro" class="content-section">
+            <h2>1. مقدمة في أساسيات التشفير</h2>
+
+            <div class="definition">
+                <h3>ما هو التشفير؟</h3>
+                <p><strong>التشفير (Cryptography)</strong> هو علم الكتابة السرية. يأتي المصطلح من اليونانية: "kryptos" (مخفي) + "graphein" (يكتب). هو ممارسة ودراسة تقنيات الاتصال الآمن في وجود خصوم.</p>
+            </div>
+
+            <h3>لماذا ندرس التشفير؟</h3>
+            <p>التشفير أساسي للأمان الحديث. يوفر:</p>
+            <ul>
+                <li><strong>السرية:</strong> إبقاء المعلومات سرية عن الأطراف غير المصرح لها</li>
+                <li><strong>السلامة:</strong> اكتشاف التعديل غير المصرح به على البيانات</li>
+                <li><strong>المصادقة:</strong> التحقق من هوية الأطراف المتواصلة</li>
+                <li><strong>عدم الإنكار:</strong> منع إنكار الإجراءات السابقة</li>
+            </ul>
+
+            <div class="key-message">
+                <p><strong>رؤية أساسية:</strong> التشفير أداة وليس حلاً كاملاً. حتى أفضل خوارزميات التشفير يمكن أن تصبح عديمة الفائدة بسبب التنفيذ السيئ، أو إدارة المفاتيح الضعيفة، أو الخطأ البشري.</p>
+            </div>
+
+            <h3>مبدأ كيرخوفس</h3>
+            <p>مبدأ أساسي في التشفير ينص على:</p>
+            <div class="definition">
+                <p><strong>مبدأ كيرخوفس:</strong> يجب أن يكون نظام التشفير آمناً حتى لو كان كل شيء عن النظام، باستثناء المفتاح، معروفاً للعامة.</p>
+            </div>
+            <p>هذا يعني:</p>
+            <ul>
+                <li>يجب أن يعتمد الأمان فقط على سرية المفتاح</li>
+                <li>الخوارزمية نفسها يمكن أن تكون معروفة للعامة</li>
+                <li>"الأمان من خلال الغموض" غير موثوق</li>
+            </ul>
+        </section>
+
+        <!-- Section 2: How to Speak Crypto -->
+        <section id="terminology" class="content-section">
+            <h2>2. مصطلحات التشفير</h2>
+
+            <p>قبل التعمق أكثر، دعنا نؤسس المفردات الأساسية للتشفير.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">عملية التشفير الأساسية</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">النص الأصلي</div>
+                        <div class="step-desc">الرسالة الأصلية</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔐</div>
+                        <div class="step-label">التشفير</div>
+                        <div class="step-desc">+ المفتاح</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔒</div>
+                        <div class="step-label">النص المشفر</div>
+                        <div class="step-desc">الرسالة المشفرة</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔓</div>
+                        <div class="step-label">فك التشفير</div>
+                        <div class="step-desc">+ المفتاح</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">النص الأصلي</div>
+                        <div class="step-desc">الرسالة الأصلية</div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>المصطلحات الأساسية</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المصطلح</th>
+                            <th>التعريف</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>النص الأصلي (Plaintext)</strong></td>
+                            <td>الرسالة الأصلية القابلة للقراءة قبل التشفير</td>
+                        </tr>
+                        <tr>
+                            <td><strong>النص المشفر (Ciphertext)</strong></td>
+                            <td>الناتج المشفر غير القابل للقراءة بعد التشفير</td>
+                        </tr>
+                        <tr>
+                            <td><strong>الشفرة (Cipher)</strong></td>
+                            <td>خوارزمية للتشفير وفك التشفير</td>
+                        </tr>
+                        <tr>
+                            <td><strong>المفتاح (Key)</strong></td>
+                            <td>قيمة سرية تتحكم في عمل الشفرة</td>
+                        </tr>
+                        <tr>
+                            <td><strong>التشفير (Encryption)</strong></td>
+                            <td>عملية تحويل النص الأصلي إلى نص مشفر</td>
+                        </tr>
+                        <tr>
+                            <td><strong>فك التشفير (Decryption)</strong></td>
+                            <td>عملية تحويل النص المشفر إلى النص الأصلي</td>
+                        </tr>
+                        <tr>
+                            <td><strong>تحليل الشفرات (Cryptanalysis)</strong></td>
+                            <td>علم كسر الشفرات</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <div class="example">
+                <h4>مثال على الترميز</h4>
+                <p>في الترميز التشفيري:</p>
+                <ul>
+                    <li><strong>P</strong> = النص الأصلي (الرسالة الأصلية)</li>
+                    <li><strong>C</strong> = النص المشفر (الرسالة المشفرة)</li>
+                    <li><strong>K</strong> = المفتاح (القيمة السرية)</li>
+                    <li><strong>E(P, K)</strong> = تشفير P باستخدام المفتاح K، ينتج C</li>
+                    <li><strong>D(C, K)</strong> = فك تشفير C باستخدام المفتاح K، يستعيد P</li>
+                </ul>
+                <p>العلاقة الأساسية: <strong>D(E(P, K), K) = P</strong></p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>تذكر:</strong> بدون المفتاح الصحيح، يجب أن يكون فك التشفير مستحيلاً حسابياً. يعتمد أمان النظام على الحفاظ على سرية المفتاح، وليس الخوارزمية.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Classic Crypto -->
+        <section id="classic-crypto" class="content-section">
+            <h2>3. التشفير الكلاسيكي</h2>
+
+            <p>يوفر التشفير الكلاسيكي، المستخدم قبل عصر الحاسوب، أساساً ممتازاً لفهم مبادئ التشفير. هناك نوعان رئيسيان من الشفرات الكلاسيكية:</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">أنواع الشفرات الكلاسيكية</h3>
+                </div>
+                <div class="three-perspectives-grid">
+                    <div class="perspective-card perspective-bank">
+                        <h4>شفرات الاستبدال</h4>
+                        <p><strong>المبدأ:</strong></p>
+                        <p>استبدال كل حرف بحرف أو رمز مختلف. مواقع الحروف تبقى كما هي.</p>
+                    </div>
+                    <div class="perspective-card perspective-customer">
+                        <h4>شفرات التبديل</h4>
+                        <p><strong>المبدأ:</strong></p>
+                        <p>إعادة ترتيب مواقع الحروف. الحروف نفسها تبقى دون تغيير.</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3>شفرات الاستبدال</h3>
+
+            <article class="security-concept">
+                <h4>شفرة قيصر</h4>
+                <p>شفرة قيصر هي واحدة من أقدم وأبسط تقنيات التشفير. سميت على اسم يوليوس قيصر الذي استخدمها للاتصالات العسكرية.</p>
+
+                <p><strong>كيف تعمل:</strong></p>
+                <ul>
+                    <li>كل حرف يُزاح بعدد ثابت من المواقع في الأبجدية</li>
+                    <li>قيمة الإزاحة هي المفتاح</li>
+                    <li>يلتف حول نهاية الأبجدية</li>
+                </ul>
+
+                <div class="example">
+                    <h4>مثال على شفرة قيصر (إزاحة = 3)</h4>
+                    <p><strong>الأبجدية الأصلية:</strong> A B C D E F G H I J K L M N O P Q R S T U V W X Y Z</p>
+                    <p><strong>الأبجدية المشفرة:</strong> D E F G H I J K L M N O P Q R S T U V W X Y Z A B C</p>
+                    <p><strong>مثال:</strong></p>
+                    <ul>
+                        <li>النص الأصلي: <code>HELLO</code></li>
+                        <li>النص المشفر: <code>KHOOR</code></li>
+                    </ul>
+                    <p>H → K, E → H, L → O, L → O, O → R</p>
+                </div>
+            </article>
+
+            <a href="../demos/caesar_cipher_demo.html" class="demo-link">تشغيل العرض التفاعلي لشفرة قيصر</a>
+
+            <div class="warning-box">
+                <h4>ضعف شفرة قيصر</h4>
+                <p>شفرة قيصر ضعيفة للغاية لأن:</p>
+                <ul>
+                    <li>هناك فقط 25 مفتاحاً ممكناً (إزاحات 1-25)</li>
+                    <li>يمكن كسرها بتجربة كل الاحتمالات (القوة الغاشمة)</li>
+                    <li>تحليل التردد يجعل كسرها أسهل</li>
+                </ul>
+            </div>
+
+            <h3>شفرات التبديل</h3>
+
+            <article class="security-concept">
+                <h4>التبديل العمودي</h4>
+                <p>في شفرات التبديل، لا يتم استبدال الحروف بل إعادة ترتيبها وفقاً لنمط معين.</p>
+
+                <p><strong>كيف يعمل التبديل العمودي:</strong></p>
+                <ol>
+                    <li>اكتب النص الأصلي في صفوف بعرض ثابت (يحدده المفتاح)</li>
+                    <li>اقرأ الأعمدة بترتيب معين لإنشاء النص المشفر</li>
+                </ol>
+
+                <div class="example">
+                    <h4>مثال على التبديل العمودي</h4>
+                    <p><strong>النص الأصلي:</strong> ATTACK AT DAWN</p>
+                    <p><strong>المفتاح:</strong> 4 أعمدة، تُقرأ بترتيب 3-1-4-2</p>
+                    <p><strong>الخطوة 1:</strong> اكتب في صفوف من 4:</p>
+                    <pre>
+A T T A
+C K A T
+D A W N
+                    </pre>
+                    <p><strong>الخطوة 2:</strong> اقرأ الأعمدة بترتيب المفتاح (3-1-4-2):</p>
+                    <p>العمود 3: TAW | العمود 1: ACD | العمود 4: ATN | العمود 2: TKA</p>
+                    <p><strong>النص المشفر:</strong> TAWACDATNTKA</p>
+                </div>
+            </article>
+
+            <a href="../demos/transposition_cipher_demo.html" class="demo-link">تشغيل العرض التفاعلي لشفرة التبديل</a>
+
+            <h3>مشاكل التشفير الكلاسيكي</h3>
+
+            <div class="warning-box">
+                <h4>لماذا الشفرات الكلاسيكية غير آمنة</h4>
+                <ul>
+                    <li><strong>مساحة مفاتيح صغيرة:</strong> العدد المحدود من المفاتيح الممكنة يجعل القوة الغاشمة ممكنة</li>
+                    <li><strong>تحليل التردد:</strong> ترددات الحروف في النص المشفر تكشف الأنماط</li>
+                    <li><strong>الحفاظ على الأنماط:</strong> الأنماط المتكررة في النص الأصلي تظهر في النص المشفر</li>
+                    <li><strong>لا تشويش/انتشار:</strong> التغييرات الصغيرة لا تنتشر في جميع أنحاء النص المشفر</li>
+                </ul>
+            </div>
+
+            <article class="security-concept">
+                <h4>تحليل التردد</h4>
+                <p>في النص الإنجليزي، تظهر الحروف بترددات يمكن التنبؤ بها:</p>
+                <ul>
+                    <li>الأكثر شيوعاً: E, T, A, O, I, N, S, H, R</li>
+                    <li>الأقل شيوعاً: Z, Q, X, J, K</li>
+                </ul>
+                <p>من خلال تحليل تردد الحروف في النص المشفر، يمكن لمحللي الشفرات غالباً استنتاج نمط الاستبدال.</p>
+            </article>
+        </section>
+
+        <!-- Section 4: Modern Crypto History -->
+        <section id="modern-history" class="content-section">
+            <h2>4. تاريخ التشفير الحديث</h2>
+
+            <p>يوفر تاريخ التشفير دروساً قيمة لا تزال تنطبق اليوم.</p>
+
+            <article class="security-concept">
+                <h4>الحرب العالمية الثانية: آلة إنجما</h4>
+                <p>اعتُبرت آلة إنجما الألمانية غير قابلة للكسر، باستخدام عجلات شفرة دوارة لإنشاء أنماط استبدال معقدة.</p>
+                <p><strong>الدروس الرئيسية من إنجما:</strong></p>
+                <ul>
+                    <li>لم يكن بإمكان الحرف أن يُشفر إلى نفسه - هذا ساعد محللي شفرات الحلفاء</li>
+                    <li>أخطاء المشغلين (بدايات الرسائل المتكررة) كشفت الأنماط</li>
+                    <li>حتى الأنظمة المعقدة يمكن كسرها بمعلومات كافية</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>ولادة التشفير الحديث</h4>
+                <p>المعالم الرئيسية في التشفير الحديث:</p>
+                <ul>
+                    <li><strong>1949:</strong> "نظرية الاتصال لأنظمة السرية" لكلود شانون - الأساس الرياضي للتشفير</li>
+                    <li><strong>1976:</strong> تبادل مفاتيح ديفي-هيلمان - ثورة في توزيع المفاتيح</li>
+                    <li><strong>1977:</strong> DES (معيار تشفير البيانات) - أول شفرة معيارية</li>
+                    <li><strong>1978:</strong> خوارزمية RSA - التشفير بالمفتاح العام يصبح عملياً</li>
+                    <li><strong>2001:</strong> AES (معيار التشفير المتقدم) - الشفرة المتماثلة المعيارية الحالية</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>الدرس التاريخي:</strong> "من لا يتذكر الماضي محكوم عليه بتكراره." العديد من إخفاقات الأمان الحديثة تردد أخطاء من تاريخ التشفير. فهم التاريخ يساعد على تجنب تكرار الأخطاء.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: A Taxonomy of Cryptography -->
+        <section id="taxonomy-crypto" class="content-section">
+            <h2>5. تصنيف علم التشفير</h2>
+
+            <p>يمكن تنظيم التشفير الحديث في ثلاث فئات رئيسية:</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">الركائز الثلاث للتشفير الحديث</h3>
+                </div>
+                <div class="four-areas-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="area-card">
+                        <div class="area-icon">🔑</div>
+                        <h4>تشفير المفتاح المتماثل</h4>
+                        <p>نفس المفتاح للتشفير وفك التشفير</p>
+                        <ul>
+                            <li>سريع وفعال</li>
+                            <li>أمثلة: AES, DES, 3DES</li>
+                            <li>التحدي: توزيع المفاتيح</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">🔐</div>
+                        <h4>تشفير المفتاح العام</h4>
+                        <p>مفاتيح مختلفة للتشفير وفك التشفير</p>
+                        <ul>
+                            <li>يحل مشكلة توزيع المفاتيح</li>
+                            <li>أمثلة: RSA, ECC</li>
+                            <li>أبطأ من المتماثل</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">#️⃣</div>
+                        <h4>دوال التجزئة</h4>
+                        <p>دوال أحادية الاتجاه تنتج مخرجات بحجم ثابت</p>
+                        <ul>
+                            <li>لا تحتاج مفتاحاً</li>
+                            <li>أمثلة: SHA-256, SHA-3</li>
+                            <li>تُستخدم للسلامة</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>تشفير المفتاح المتماثل</h4>
+                <p>يُسمى أيضاً تشفير "المفتاح السري" أو "المفتاح الخاص".</p>
+                <p><strong>الخصائص:</strong></p>
+                <ul>
+                    <li>المرسل والمستقبل يتشاركان نفس المفتاح السري</li>
+                    <li>يجب تبادل المفتاح بأمان قبل الاتصال</li>
+                    <li>سريع جداً - مناسب لتشفير كميات كبيرة من البيانات</li>
+                    <li>n مستخدمين يحتاجون n(n-1)/2 مفتاحاً للاتصال الزوجي</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>تشفير المفتاح العام (غير المتماثل)</h4>
+                <p>يستخدم زوجاً من المفاتيح المرتبطة رياضياً.</p>
+                <p><strong>الخصائص:</strong></p>
+                <ul>
+                    <li><strong>المفتاح العام:</strong> يمكن مشاركته بحرية، يُستخدم للتشفير</li>
+                    <li><strong>المفتاح الخاص:</strong> يجب الحفاظ على سريته، يُستخدم لفك التشفير</li>
+                    <li>يحل مشكلة توزيع المفاتيح</li>
+                    <li>كل مستخدم يحتاج زوج مفاتيح واحد فقط</li>
+                    <li>أكثر تكلفة حسابياً من التشفير المتماثل</li>
+                </ul>
+            </article>
+
+            <article class="security-concept">
+                <h4>دوال التجزئة التشفيرية</h4>
+                <p>تحول أي مدخل إلى "بصمة" بحجم ثابت.</p>
+                <p><strong>الخصائص:</strong></p>
+                <ul>
+                    <li><strong>أحادية الاتجاه:</strong> لا يمكن استعادة المدخل من المخرج</li>
+                    <li><strong>حتمية:</strong> نفس المدخل دائماً ينتج نفس المخرج</li>
+                    <li><strong>مقاومة التصادم:</strong> صعوبة إيجاد مدخلين بنفس المخرج</li>
+                    <li><strong>تأثير الانهيار:</strong> تغيير صغير في المدخل يسبب تغييراً كبيراً في المخرج</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>في الممارسة:</strong> غالباً ما تجمع الأنظمة الحديثة بين الأنواع الثلاثة. على سبيل المثال، يستخدم TLS تشفير المفتاح العام لتبادل المفاتيح المتماثلة، والتشفير المتماثل للبيانات، ودوال التجزئة للسلامة.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: A Taxonomy of Cryptanalysis -->
+        <section id="taxonomy-analysis" class="content-section">
+            <h2>6. تصنيف تحليل الشفرات</h2>
+
+            <p>تحليل الشفرات هو دراسة كسر أنظمة التشفير. فهم أنواع الهجمات يساعد على تصميم أمان أفضل.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">أنواع هجمات تحليل الشفرات</h3>
+                </div>
+                <div class="four-areas-grid">
+                    <div class="area-card">
+                        <div class="area-icon">👁️</div>
+                        <h4>هجوم النص المشفر فقط (COA)</h4>
+                        <p>المهاجم لديه وصول فقط إلى النص المشفر.</p>
+                        <ul>
+                            <li>أصعب سيناريو هجوم</li>
+                            <li>يعتمد على الأنماط وتحليل التردد</li>
+                            <li>الشفرة الآمنة يجب أن تقاوم هذا</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">📋</div>
+                        <h4>هجوم النص الأصلي المعروف (KPA)</h4>
+                        <p>المهاجم لديه أزواج من النص الأصلي والنص المشفر المقابل.</p>
+                        <ul>
+                            <li>معلومات أكثر متاحة</li>
+                            <li>يمكن استنتاج أنماط المفتاح</li>
+                            <li>شائع في السيناريوهات الواقعية</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">🎯</div>
+                        <h4>هجوم النص الأصلي المختار (CPA)</h4>
+                        <p>المهاجم يمكنه اختيار نصوص أصلية والحصول على نصوصها المشفرة.</p>
+                        <ul>
+                            <li>نموذج هجوم أقوى</li>
+                            <li>يمكن فحص سلوك النظام</li>
+                            <li>أنظمة المفتاح العام يجب أن تقاوم هذا</li>
+                        </ul>
+                    </div>
+                    <div class="area-card">
+                        <div class="area-icon">💥</div>
+                        <h4>هجوم القوة الغاشمة</h4>
+                        <p>تجربة كل المفاتيح الممكنة حتى إيجاد الصحيح.</p>
+                        <ul>
+                            <li>ممكن دائماً نظرياً</li>
+                            <li>يُهزم بمساحة مفاتيح كبيرة</li>
+                            <li>طول المفتاح حرج</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>هجمات القنوات الجانبية</h4>
+                <p>هذه الهجمات تستغل المعلومات المسربة من التنفيذ المادي لنظام التشفير، وليس نقاط الضعف في الخوارزمية نفسها.</p>
+                <ul>
+                    <li><strong>هجمات التوقيت:</strong> قياس المدة التي تستغرقها العمليات</li>
+                    <li><strong>تحليل الطاقة:</strong> مراقبة استهلاك الطاقة أثناء التشفير</li>
+                    <li><strong>الهجمات الكهرومغناطيسية:</strong> التقاط الانبعاثات الكهرومغناطيسية من الأجهزة</li>
+                    <li><strong>الهجمات الصوتية:</strong> الاستماع إلى الأصوات الصادرة من الأجهزة</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>ما الذي يجعل الشفرة "آمنة"؟</h4>
+                <p>تُعتبر الشفرة آمنة حسابياً إذا:</p>
+                <ul>
+                    <li>أفضل هجوم معروف يتطلب موارد أكثر مما يملكه المهاجم</li>
+                    <li>كسرها غير ممكن حسابياً (سيستغرق ملايين السنين)</li>
+                    <li>تكلفة الكسر تتجاوز قيمة البيانات المشفرة</li>
+                </ul>
+                <p><strong>ملاحظة:</strong> "آمن" لا يعني "غير قابل للكسر" - يعني أن كسرها غير عملي.</p>
+            </div>
+
+            <div class="key-message">
+                <p><strong>الدفاع المتعدد الطبقات:</strong> لا تعتمد فقط على التشفير. ادمجه مع إدارة المفاتيح السليمة، والبروتوكولات الآمنة، وضوابط الوصول، ومراقبة الأمان للحماية القوية.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>التشفير</strong> هو علم الكتابة السرية، يوفر السرية والسلامة والمصادقة وعدم الإنكار.</li>
+
+                <li><strong>المصطلحات الأساسية</strong> تشمل النص الأصلي، النص المشفر، الشفرة، المفتاح، التشفير، فك التشفير، وتحليل الشفرات.</li>
+
+                <li><strong>الشفرات الكلاسيكية</strong> تنقسم إلى فئتين: الاستبدال (استبدال الحروف) والتبديل (إعادة ترتيب الحروف).</li>
+
+                <li><strong>شفرة قيصر</strong> تزيح الحروف بمقدار ثابت، لكنها تُكسر بسهولة بسبب مساحة مفاتيحها الصغيرة.</li>
+
+                <li><strong>شفرات التبديل</strong> تعيد ترتيب مواقع الحروف لكنها تحافظ على الحروف الأصلية.</li>
+
+                <li><strong>التشفير الحديث</strong> يشمل تشفير المفتاح المتماثل، وتشفير المفتاح العام، ودوال التجزئة.</li>
+
+                <li><strong>هجمات تحليل الشفرات</strong> تتراوح من هجمات النص المشفر فقط إلى هجمات النص الأصلي المختار، بالإضافة إلى هجمات القنوات الجانبية.</li>
+
+                <li><strong>مبدأ كيرخوفس</strong> ينص على أن الأمان يجب أن يعتمد فقط على المفتاح، وليس على سرية الخوارزمية.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>التطلع إلى الأمام:</strong> في الفصل الثالث، سنغوص بعمق في تشفير المفتاح المتماثل، ونستكشف الخوارزميات الحديثة مثل AES ونفهم كيف تعمل شفرات الكتل.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>الاعتمادات والإسناد</h2>
+            <p class="credits-intro">جميع الرسوم البيانية في هذه الوثيقة هي أعمال تعليمية أصلية تم إنشاؤها خصيصاً لهذا المقرر.</p>
+            <ul class="credits-list">
+                <li><strong>تدفق عملية التشفير:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>رسم أنواع الشفرات:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>تصنيف التشفير:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>تصنيف تحليل الشفرات:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">&rarr; العودة إلى الصفحة الرئيسية</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Additional styles for Chapter 2 diagrams */
+        .crypto-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .crypto-step {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            min-width: 100px;
+        }
+
+        .crypto-step.highlight-step {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: var(--secondary-color);
+        }
+
+        .step-icon {
+            font-size: 2em;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .step-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .crypto-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        @media screen and (max-width: 768px) {
+            .crypto-flow {
+                flex-direction: column;
+            }
+
+            .crypto-arrow {
+                transform: rotate(90deg);
+            }
+
+            .four-areas-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+            direction: ltr;
+            text-align: left;
+        }
+
+        code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+            direction: ltr;
+        }
+    </style>
+</body>
+</html>

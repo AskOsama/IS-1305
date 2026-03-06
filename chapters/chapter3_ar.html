@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل الثالث: تشفير المفتاح المتماثل</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter3.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>تشفير المفتاح المتماثل</h1>
+        <p class="subtitle">الفصل الثالث: شفرات التدفق، شفرات الكتل، ورموز المصادقة</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#intro">1. مقدمة في تشفير المفتاح المتماثل</a></li>
+            <li><a href="#stream-ciphers">2. شفرات التدفق</a></li>
+            <li><a href="#block-ciphers">3. شفرات الكتل</a></li>
+            <li><a href="#integrity-macs">4. السلامة ورموز المصادقة</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذا الفصل، ستكون قادراً على:</p>
+            <ul>
+                <li>شرح كيفية عمل تشفير المفتاح المتماثل ولماذا المفتاح السري المشترك ضروري</li>
+                <li>التمييز بين شفرات التدفق وشفرات الكتل</li>
+                <li>وصف الخوارزميات الرئيسية: RC4، A5/1، DES، 3DES، وAES</li>
+                <li>فهم كيف توفر رموز مصادقة الرسائل (MAC) سلامة البيانات</li>
+                <li>مقارنة نقاط القوة والضعف في خوارزميات التشفير المتماثل المختلفة</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="content-section">
+            <h2>1. مقدمة في تشفير المفتاح المتماثل</h2>
+
+            <div class="definition">
+                <h3>ما هو تشفير المفتاح المتماثل؟</h3>
+                <p><strong>تشفير المفتاح المتماثل</strong> هو أقدم وأكثر أشكال التشفير استخداماً. يتشارك كل من المرسل والمستقبل <strong>نفس المفتاح السري</strong> لكل من التشفير وفك التشفير.</p>
+            </div>
+
+            <p>تشفير المفتاح المتماثل هو العمود الفقري لأنظمة الأمان الحديثة. فهو سريع وفعال ويُستخدم لتشفير الغالبية العظمى من البيانات أثناء النقل والتخزين.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">عملية التشفير بالمفتاح المتماثل</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">النص الأصلي</div>
+                        <div class="step-desc">الرسالة الأصلية</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔐</div>
+                        <div class="step-label">التشفير</div>
+                        <div class="step-desc">+ المفتاح K المشترك</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔒</div>
+                        <div class="step-label">النص المشفر</div>
+                        <div class="step-desc">يُرسل</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔓</div>
+                        <div class="step-label">فك التشفير</div>
+                        <div class="step-desc">+ نفس المفتاح K</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">النص الأصلي</div>
+                        <div class="step-desc">مُسترجع</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>التحدي الأساسي:</strong> المشكلة الجوهرية في تشفير المفتاح المتماثل هي <strong>توزيع المفاتيح</strong> &mdash; كيف تشارك المفتاح السري بأمان مع الطرف الآخر؟ إذا اعترض المهاجم المفتاح، تُكشف جميع الاتصالات.</p>
+            </div>
+
+            <h3>عائلتان من الشفرات المتماثلة</h3>
+            <p>تنقسم خوارزميات المفتاح المتماثل إلى فئتين رئيسيتين:</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">شفرات التدفق مقابل شفرات الكتل</h3>
+                </div>
+                <div class="cipher-comparison-grid">
+                    <div class="cipher-card cipher-stream">
+                        <h4>شفرات التدفق</h4>
+                        <p><strong>تشفير بت واحد (أو بايت) في كل مرة</strong></p>
+                        <ul>
+                            <li>تولد تدفق مفاتيح من المفتاح</li>
+                            <li>XOR تدفق المفاتيح مع النص الأصلي</li>
+                            <li>سريعة، زمن استجابة منخفض</li>
+                            <li>أمثلة: RC4، A5/1</li>
+                        </ul>
+                    </div>
+                    <div class="cipher-card cipher-block">
+                        <h4>شفرات الكتل</h4>
+                        <p><strong>تشفير كتلة بحجم ثابت في كل مرة</strong></p>
+                        <ul>
+                            <li>معالجة البيانات في كتل ثابتة (64 أو 128 بت)</li>
+                            <li>جولات متعددة من الاستبدال والتبديل</li>
+                            <li>أكثر تنوعاً، معيارية واسعة</li>
+                            <li>أمثلة: DES، 3DES، AES</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Stream Ciphers -->
+        <section id="stream-ciphers" class="content-section">
+            <h2>2. شفرات التدفق</h2>
+
+            <div class="definition">
+                <h3>كيف تعمل شفرات التدفق</h3>
+                <p>تولد <strong>شفرة التدفق</strong> <strong>تدفق مفاتيح</strong> شبه عشوائي من المفتاح السري، ثم تدمجه مع النص الأصلي بت واحد أو بايت واحد في كل مرة باستخدام عملية XOR. يُستخدم نفس تدفق المفاتيح لفك التشفير.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">عمل شفرة التدفق</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">🔑</div>
+                        <div class="step-label">المفتاح</div>
+                        <div class="step-desc">السر المشترك</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">⚙️</div>
+                        <div class="step-label">مولد تدفق المفاتيح</div>
+                        <div class="step-desc">بتات شبه عشوائية</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">⊕</div>
+                        <div class="step-label">XOR</div>
+                        <div class="step-desc">بت بعد بت</div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>RC4 (شفرة ريفست 4)</h4>
+                <p>RC4 هي شفرة تدفق واسعة الانتشار، استُخدمت في:</p>
+                <ul>
+                    <li><strong>SSL/TLS:</strong> تأمين حركة مرور الويب (تم إيقافها الآن)</li>
+                    <li><strong>WEP:</strong> تشفير الواي فاي (مكسورة تماماً)</li>
+                    <li><strong>WPA-TKIP:</strong> إصلاح مؤقت للواي فاي (تم إيقافه أيضاً)</li>
+                </ul>
+                <p>تستخدم RC4 مفتاحاً متغير الطول (40&ndash;2048 بت) وتولد بايت واحد من تدفق المفاتيح لكل عملية. وهي سريعة وبسيطة التنفيذ.</p>
+            </article>
+
+            <div class="warning-box">
+                <h4>RC4 مكسورة</h4>
+                <p>لدى RC4 انحيازات معروفة في مخرجات تدفق المفاتيح ولا يجب استخدامها بعد الآن. تم حظرها رسمياً في TLS بموجب RFC 7465 (2015). انتقلت جميع الأنظمة الحديثة إلى شفرات مبنية على AES.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>A5/1 (تشفير GSM)</h4>
+                <p>A5/1 هي شفرة تدفق تُستخدم لتشفير المكالمات الصوتية في معيار الهاتف المحمول <strong>GSM</strong> (الجيل الثاني).</p>
+                <ul>
+                    <li>تستخدم ثلاثة سجلات إزاحة بتغذية راجعة خطية (LFSRs)</li>
+                    <li>مفتاح 64 بت، تولد بت واحد من تدفق المفاتيح لكل دورة ساعة</li>
+                    <li>صُممت لكفاءة الأجهزة في الهواتف المحمولة</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>ثغرات A5/1</h4>
+                <p>تم كسر A5/1 بالكامل. تشمل الهجمات المعروفة هجمات المقايضة بين الوقت والذاكرة التي يمكنها فك تشفير مكالمات GSM في الوقت الفعلي تقريباً. تستخدم شبكات الهاتف المحمول الحديثة (4G/5G) تشفيراً أقوى بكثير.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>لوحة المرة الواحدة (OTP)</h4>
+                <p><strong>لوحة المرة الواحدة</strong> هي الشفرة الوحيدة غير القابلة للكسر نظرياً. تستخدم مفتاحاً عشوائياً:</p>
+                <ul>
+                    <li>بطول مساوٍ على الأقل لطول رسالة النص الأصلي</li>
+                    <li>عشوائي حقيقياً (وليس شبه عشوائي)</li>
+                    <li>يُستخدم مرة واحدة فقط ثم يُتلف</li>
+                    <li>معروف فقط للمرسل والمستقبل</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>لماذا OTP غير عملية:</strong> رغم كمالها النظري، تتطلب لوحة المرة الواحدة مفتاحاً بطول الرسالة نفسها، مما يجعل توزيع المفاتيح صعباً للغاية. إذا استطعت تسليم مفتاح بهذا الطول بأمان، يمكنك ببساطة تسليم الرسالة نفسها!</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Block Ciphers -->
+        <section id="block-ciphers" class="content-section">
+            <h2>3. شفرات الكتل</h2>
+
+            <div class="definition">
+                <h3>كيف تعمل شفرات الكتل</h3>
+                <p>تشفر <strong>شفرة الكتل</strong> البيانات في كتل بحجم ثابت. تمر كل كتلة بجولات متعددة من عمليات <strong>الاستبدال</strong> (التشويش) و<strong>التبديل</strong> (الانتشار) التي يتحكم فيها المفتاح.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>DES (معيار تشفير البيانات)</h4>
+                <p>كان DES أول معيار تشفير تجاري معتمد، نشره NIST في عام 1977.</p>
+                <ul>
+                    <li><strong>حجم الكتلة:</strong> 64 بت</li>
+                    <li><strong>حجم المفتاح:</strong> 56 بت (مفتاح 64 بت مع 8 بتات تماثل)</li>
+                    <li><strong>الجولات:</strong> 16 جولة من عمليات شبكة فايستل</li>
+                    <li><strong>البنية:</strong> كل جولة تستخدم الاستبدال (صناديق S) والتبديل (صناديق P)</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>DES غير آمن</h4>
+                <p>بمفتاح 56 بت فقط، يمكن كسر DES بالقوة الغاشمة. في عام 1999، تم كسر مفتاح DES في 22 ساعة فقط باستخدام أجهزة متخصصة. لا يجب استخدام DES أبداً في الأنظمة الجديدة.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>3DES (DES الثلاثي)</h4>
+                <p>يطبق 3DES خوارزمية DES ثلاث مرات بمفتاحين أو ثلاثة مفاتيح مختلفة لزيادة الأمان.</p>
+                <ul>
+                    <li><strong>العملية:</strong> تشفير ← فك تشفير ← تشفير (وضع EDE)</li>
+                    <li><strong>حجم المفتاح:</strong> 112 بت (مفتاحان) أو 168 بت (3 مفاتيح)</li>
+                    <li><strong>حجم الكتلة:</strong> 64 بت (لم يتغير عن DES)</li>
+                    <li><strong>السرعة:</strong> أبطأ ثلاث مرات من DES</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>لماذا EDE؟</strong> تم اختيار نمط تشفير-فك تشفير-تشفير بحيث يكون 3DES متوافقاً مع DES الأحادي عندما تكون المفاتيح الثلاثة متطابقة (فك التشفير الأوسط يلغي التشفير الأول).</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>AES (معيار التشفير المتقدم)</h4>
+                <p>حل AES محل DES كمعيار للتشفير المتماثل. اختاره NIST في عام 2001 من خوارزمية Rijndael، وهو الشفرة الأكثر استخداماً اليوم.</p>
+                <ul>
+                    <li><strong>حجم الكتلة:</strong> 128 بت</li>
+                    <li><strong>أحجام المفاتيح:</strong> 128 أو 192 أو 256 بت</li>
+                    <li><strong>الجولات:</strong> 10 (مفتاح 128 بت)، 12 (192 بت)، أو 14 (256 بت)</li>
+                    <li><strong>البنية:</strong> شبكة استبدال-تبديل (وليست فايستل)</li>
+                </ul>
+            </article>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">مقارنة شفرات الكتل المتماثلة</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الميزة</th>
+                            <th>DES</th>
+                            <th>3DES</th>
+                            <th>AES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>السنة</strong></td>
+                            <td>1977</td>
+                            <td>1998</td>
+                            <td>2001</td>
+                        </tr>
+                        <tr>
+                            <td><strong>حجم الكتلة</strong></td>
+                            <td>64 بت</td>
+                            <td>64 بت</td>
+                            <td>128 بت</td>
+                        </tr>
+                        <tr>
+                            <td><strong>حجم المفتاح</strong></td>
+                            <td>56 بت</td>
+                            <td>112 / 168 بت</td>
+                            <td>128 / 192 / 256 بت</td>
+                        </tr>
+                        <tr>
+                            <td><strong>الجولات</strong></td>
+                            <td>16</td>
+                            <td>48 (16 &times; 3)</td>
+                            <td>10 / 12 / 14</td>
+                        </tr>
+                        <tr>
+                            <td><strong>الأمان</strong></td>
+                            <td>مكسور</td>
+                            <td>مقبول (تم إيقافه)</td>
+                            <td>قوي</td>
+                        </tr>
+                        <tr>
+                            <td><strong>السرعة</strong></td>
+                            <td>سريع</td>
+                            <td>بطيء</td>
+                            <td>سريع جداً</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <p><strong>AES هو المعيار:</strong> يُستخدم AES في كل مكان &mdash; TLS/HTTPS، الواي فاي (WPA2/WPA3)، تشفير الأقراص (BitLocker, FileVault)، الشبكات الافتراضية الخاصة (IPSec)، وأكثر. AES-256 معتمد للبيانات السرية للغاية من قبل الحكومة الأمريكية.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Integrity and MACs -->
+        <section id="integrity-macs" class="content-section">
+            <h2>4. السلامة ورموز المصادقة (MACs)</h2>
+
+            <div class="definition">
+                <h3>ما هو MAC؟</h3>
+                <p><strong>رمز مصادقة الرسالة (MAC)</strong> هو جزء قصير من المعلومات يُستخدم للتحقق من <strong>سلامة</strong> و<strong>مصداقية</strong> الرسالة. يُحسب باستخدام مفتاح سري مشترك بين المرسل والمستقبل.</p>
+            </div>
+
+            <p>بينما يوفر التشفير <strong>السرية</strong>، فإنه لا يضمن عدم التلاعب بالبيانات. تعالج رموز MAC هذه الفجوة.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">عملية التحقق من MAC</h3>
+                </div>
+                <div class="mac-flow">
+                    <div class="mac-sender">
+                        <h4>المرسل</h4>
+                        <div class="crypto-flow">
+                            <div class="crypto-step">
+                                <div class="step-icon">📝</div>
+                                <div class="step-label">الرسالة</div>
+                            </div>
+                            <div class="crypto-arrow">←</div>
+                            <div class="crypto-step highlight-step">
+                                <div class="step-icon">🔑</div>
+                                <div class="step-label">MAC(رسالة, مفتاح)</div>
+                            </div>
+                            <div class="crypto-arrow">←</div>
+                            <div class="crypto-step">
+                                <div class="step-icon">📨</div>
+                                <div class="step-label">رسالة + وسم MAC</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mac-receiver">
+                        <h4>المستقبل</h4>
+                        <div class="crypto-flow">
+                            <div class="crypto-step">
+                                <div class="step-icon">📨</div>
+                                <div class="step-label">رسالة + وسم MAC</div>
+                            </div>
+                            <div class="crypto-arrow">←</div>
+                            <div class="crypto-step highlight-step">
+                                <div class="step-icon">🔑</div>
+                                <div class="step-label">إعادة حساب MAC</div>
+                            </div>
+                            <div class="crypto-arrow">←</div>
+                            <div class="crypto-step">
+                                <div class="step-icon">✅</div>
+                                <div class="step-label">المقارنة</div>
+                                <div class="step-desc">تطابق = صحيح</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>السرية مقابل السلامة</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الخاصية</th>
+                            <th>التشفير</th>
+                            <th>MAC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>يوفر</strong></td>
+                            <td>السرية</td>
+                            <td>السلامة + المصداقية</td>
+                        </tr>
+                        <tr>
+                            <td><strong>يمنع</strong></td>
+                            <td>التنصت</td>
+                            <td>التلاعب</td>
+                        </tr>
+                        <tr>
+                            <td><strong>المخرج</strong></td>
+                            <td>نص مشفر (بنفس حجم المدخل)</td>
+                            <td>وسم بحجم ثابت (مثلاً 256 بت)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>قابل للعكس؟</strong></td>
+                            <td>نعم (بالمفتاح)</td>
+                            <td>لا (أحادي الاتجاه)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <article class="security-concept">
+                <h4>خوارزميات MAC الشائعة</h4>
+                <ul>
+                    <li><strong>HMAC:</strong> رمز مصادقة مبني على التجزئة باستخدام خوارزميات مثل SHA-256. أكثر بنية MAC استخداماً.</li>
+                    <li><strong>CMAC:</strong> رمز مصادقة مبني على الشفرات باستخدام شفرات كتل مثل AES.</li>
+                    <li><strong>GMAC:</strong> رمز مصادقة غالوا، يُستخدم في التشفير المصادق AES-GCM.</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>أفضل الممارسات:</strong> تستخدم الأنظمة الحديثة <strong>التشفير المصادق</strong> (مثل AES-GCM) الذي يجمع بين التشفير وMAC في عملية واحدة، مما يوفر السرية والسلامة بكفاءة.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>تشفير المفتاح المتماثل</strong> يستخدم نفس المفتاح السري المشترك للتشفير وفك التشفير. وهو أسرع أشكال التشفير.</li>
+
+                <li><strong>شفرات التدفق</strong> (RC4، A5/1) تشفر البيانات بت/بايت واحد في كل مرة باستخدام تدفق مفاتيح يُدمج مع النص الأصلي بعملية XOR.</li>
+
+                <li><strong>لوحة المرة الواحدة</strong> غير قابلة للكسر نظرياً لكنها غير عملية لأن المفتاح يجب أن يكون بطول الرسالة.</li>
+
+                <li><strong>شفرات الكتل</strong> (DES، 3DES، AES) تشفر كتلاً بحجم ثابت عبر جولات متعددة من الاستبدال والتبديل.</li>
+
+                <li><strong>DES</strong> (مفتاح 56 بت) مكسور؛ <strong>3DES</strong> (مفتاح 112/168 بت) تم إيقافه؛ <strong>AES</strong> (مفتاح 128/192/256 بت) هو المعيار الحالي.</li>
+
+                <li><strong>رموز MAC</strong> توفر سلامة البيانات والمصادقة. HMAC (باستخدام دوال التجزئة) وCMAC (باستخدام شفرات الكتل) هما بنيتان شائعتان.</li>
+
+                <li><strong>التشفير المصادق</strong> (AES-GCM) يجمع بين السرية والسلامة في عملية واحدة فعالة.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>التطلع إلى الأمام:</strong> في الفصل الثامن، سنستكشف التفويض &mdash; كيف تحدد الأنظمة ما يُسمح للمستخدمين المصادق عليهم بفعله، بما في ذلك نماذج التحكم في الوصول والجدران النارية.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>الاعتمادات والإسناد</h2>
+            <p class="credits-intro">جميع الرسوم البيانية في هذه الوثيقة هي أعمال تعليمية أصلية تم إنشاؤها خصيصاً لهذا المقرر.</p>
+            <ul class="credits-list">
+                <li><strong>تدفق التشفير بالمفتاح المتماثل:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>مقارنة شفرات التدفق والكتل:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>جدول مقارنة شفرات الكتل:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>تدفق التحقق من MAC:</strong> رسم بياني تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">&rarr; العودة إلى الصفحة الرئيسية</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 3 specific styles */
+        .crypto-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .crypto-step {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            min-width: 100px;
+        }
+
+        .crypto-step.highlight-step {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: var(--secondary-color);
+        }
+
+        .step-icon {
+            font-size: 2em;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .step-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .crypto-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .cipher-comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .cipher-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .cipher-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2em;
+        }
+
+        .cipher-stream {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-color: #4caf50;
+        }
+
+        .cipher-block {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2196f3;
+        }
+
+        .mac-flow {
+            padding: 1.5rem;
+        }
+
+        .mac-sender, .mac-receiver {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .mac-sender {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        }
+
+        .mac-receiver {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        }
+
+        .mac-sender h4, .mac-receiver h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        @media screen and (max-width: 768px) {
+            .crypto-flow {
+                flex-direction: column;
+            }
+
+            .crypto-arrow {
+                transform: rotate(90deg);
+            }
+
+            .cipher-comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        pre {
+            background-color: #f6f8fa;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+            direction: ltr;
+            text-align: left;
+        }
+
+        code {
+            background-color: #f0f0f0;
+            padding: 0.2em 0.4em;
+            border-radius: 3px;
+            font-family: "Courier New", Courier, monospace;
+            direction: ltr;
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 3: Symmetric Key Cryptography</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter3_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>Symmetric Key Cryptography</h1>
+        <p class="subtitle">Chapter 3: Stream Ciphers, Block Ciphers, and MACs</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#intro">1. Introduction to Symmetric Key Cryptography</a></li>
+            <li><a href="#stream-ciphers">2. Stream Ciphers</a></li>
+            <li><a href="#block-ciphers">3. Block Ciphers</a></li>
+            <li><a href="#integrity-macs">4. Integrity and MACs</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this chapter, you will be able to:</p>
+            <ul>
+                <li>Explain how symmetric key cryptography works and why a shared secret key is essential</li>
+                <li>Distinguish between stream ciphers and block ciphers</li>
+                <li>Describe major algorithms: RC4, A5/1, DES, 3DES, and AES</li>
+                <li>Understand how Message Authentication Codes (MACs) provide data integrity</li>
+                <li>Compare the strengths and weaknesses of different symmetric algorithms</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="content-section">
+            <h2>1. Introduction to Symmetric Key Cryptography</h2>
+
+            <div class="definition">
+                <h3>What is Symmetric Key Cryptography?</h3>
+                <p><strong>Symmetric key cryptography</strong> is the oldest and most widely used form of encryption. Both the sender and the receiver share the <strong>same secret key</strong> for both encryption and decryption.</p>
+            </div>
+
+            <p>Symmetric key cryptography is the workhorse of modern security systems. It is fast, efficient, and used to encrypt the vast majority of data in transit and at rest.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Symmetric Key Encryption Process</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">Plaintext</div>
+                        <div class="step-desc">Original message</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔐</div>
+                        <div class="step-label">Encrypt</div>
+                        <div class="step-desc">+ Shared Key K</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔒</div>
+                        <div class="step-label">Ciphertext</div>
+                        <div class="step-desc">Transmitted</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔓</div>
+                        <div class="step-label">Decrypt</div>
+                        <div class="step-desc">+ Same Key K</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">Plaintext</div>
+                        <div class="step-desc">Recovered</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Key Challenge:</strong> The fundamental problem with symmetric key cryptography is <strong>key distribution</strong> &mdash; how do you securely share the secret key with the other party? If an attacker intercepts the key, all communications are compromised.</p>
+            </div>
+
+            <h3>Two Families of Symmetric Ciphers</h3>
+            <p>Symmetric key algorithms are divided into two main categories:</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Stream Ciphers vs Block Ciphers</h3>
+                </div>
+                <div class="cipher-comparison-grid">
+                    <div class="cipher-card cipher-stream">
+                        <h4>Stream Ciphers</h4>
+                        <p><strong>Encrypt one bit (or byte) at a time</strong></p>
+                        <ul>
+                            <li>Generate a keystream from the key</li>
+                            <li>XOR keystream with plaintext</li>
+                            <li>Fast, low latency</li>
+                            <li>Examples: RC4, A5/1</li>
+                        </ul>
+                    </div>
+                    <div class="cipher-card cipher-block">
+                        <h4>Block Ciphers</h4>
+                        <p><strong>Encrypt a fixed-size block at a time</strong></p>
+                        <ul>
+                            <li>Process data in fixed blocks (64 or 128 bits)</li>
+                            <li>Multiple rounds of substitution and permutation</li>
+                            <li>More versatile, widely standardized</li>
+                            <li>Examples: DES, 3DES, AES</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Stream Ciphers -->
+        <section id="stream-ciphers" class="content-section">
+            <h2>2. Stream Ciphers</h2>
+
+            <div class="definition">
+                <h3>How Stream Ciphers Work</h3>
+                <p>A <strong>stream cipher</strong> generates a pseudo-random <strong>keystream</strong> from the secret key, then combines it with the plaintext one bit or byte at a time using XOR. The same keystream is used to decrypt.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Stream Cipher Operation</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">🔑</div>
+                        <div class="step-label">Key</div>
+                        <div class="step-desc">Shared secret</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">⚙️</div>
+                        <div class="step-label">Keystream Generator</div>
+                        <div class="step-desc">Pseudo-random bits</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">⊕</div>
+                        <div class="step-label">XOR</div>
+                        <div class="step-desc">Bit-by-bit</div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>RC4 (Rivest Cipher 4)</h4>
+                <p>RC4 is a widely deployed stream cipher, once used in:</p>
+                <ul>
+                    <li><strong>SSL/TLS:</strong> Securing web traffic (now deprecated)</li>
+                    <li><strong>WEP:</strong> Wi-Fi encryption (completely broken)</li>
+                    <li><strong>WPA-TKIP:</strong> Temporary Wi-Fi fix (also deprecated)</li>
+                </ul>
+                <p>RC4 uses a variable-length key (40&ndash;2048 bits) and generates one byte of keystream per operation. It is fast and simple to implement.</p>
+            </article>
+
+            <div class="warning-box">
+                <h4>RC4 is Broken</h4>
+                <p>RC4 has known biases in its keystream output and should no longer be used. It was officially prohibited in TLS by RFC 7465 (2015). All modern systems have moved to AES-based ciphers.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>A5/1 (GSM Encryption)</h4>
+                <p>A5/1 is a stream cipher used to encrypt voice communications in the <strong>GSM</strong> (2G) mobile phone standard.</p>
+                <ul>
+                    <li>Uses three Linear Feedback Shift Registers (LFSRs)</li>
+                    <li>64-bit key, generates 1 bit of keystream per clock cycle</li>
+                    <li>Designed for hardware efficiency in mobile phones</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>A5/1 Vulnerabilities</h4>
+                <p>A5/1 has been completely broken. Known attacks include time-memory trade-off attacks that can crack GSM calls in near real-time. Modern mobile networks (4G/5G) use much stronger encryption.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>One-Time Pad (OTP)</h4>
+                <p>The <strong>One-Time Pad</strong> is the only theoretically unbreakable cipher. It uses a random key that is:</p>
+                <ul>
+                    <li>At least as long as the plaintext message</li>
+                    <li>Truly random (not pseudo-random)</li>
+                    <li>Used only once and then destroyed</li>
+                    <li>Known only to sender and receiver</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Why OTP Is Impractical:</strong> While theoretically perfect, the One-Time Pad requires a key as long as the message itself, making key distribution extremely difficult. If you could securely deliver a key that long, you could just deliver the message itself!</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Block Ciphers -->
+        <section id="block-ciphers" class="content-section">
+            <h2>3. Block Ciphers</h2>
+
+            <div class="definition">
+                <h3>How Block Ciphers Work</h3>
+                <p>A <strong>block cipher</strong> encrypts data in fixed-size blocks. Each block goes through multiple rounds of <strong>substitution</strong> (confusion) and <strong>permutation</strong> (diffusion) operations controlled by the key.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>DES (Data Encryption Standard)</h4>
+                <p>DES was the first commercially adopted encryption standard, published by NIST in 1977.</p>
+                <ul>
+                    <li><strong>Block size:</strong> 64 bits</li>
+                    <li><strong>Key size:</strong> 56 bits (64-bit key with 8 parity bits)</li>
+                    <li><strong>Rounds:</strong> 16 rounds of Feistel network operations</li>
+                    <li><strong>Structure:</strong> Each round uses substitution (S-boxes) and permutation (P-boxes)</li>
+                </ul>
+            </article>
+
+            <div class="warning-box">
+                <h4>DES is Insecure</h4>
+                <p>With only a 56-bit key, DES can be brute-forced. In 1999, a DES key was cracked in just 22 hours using specialized hardware. DES should never be used for new systems.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>3DES (Triple DES)</h4>
+                <p>3DES applies DES three times with two or three different keys to increase security.</p>
+                <ul>
+                    <li><strong>Process:</strong> Encrypt &rarr; Decrypt &rarr; Encrypt (EDE mode)</li>
+                    <li><strong>Key size:</strong> 112 bits (2-key) or 168 bits (3-key)</li>
+                    <li><strong>Block size:</strong> 64 bits (unchanged from DES)</li>
+                    <li><strong>Speed:</strong> Three times slower than DES</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Why EDE?</strong> The Encrypt-Decrypt-Encrypt pattern was chosen so that 3DES is backward compatible with single DES when all three keys are the same (the middle decrypt undoes the first encrypt).</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>AES (Advanced Encryption Standard)</h4>
+                <p>AES replaced DES as the standard symmetric cipher. Selected by NIST in 2001 from the Rijndael algorithm, it is the most widely used cipher today.</p>
+                <ul>
+                    <li><strong>Block size:</strong> 128 bits</li>
+                    <li><strong>Key sizes:</strong> 128, 192, or 256 bits</li>
+                    <li><strong>Rounds:</strong> 10 (128-bit key), 12 (192-bit), or 14 (256-bit)</li>
+                    <li><strong>Structure:</strong> Substitution-permutation network (not Feistel)</li>
+                </ul>
+            </article>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Comparison of Symmetric Block Ciphers</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>DES</th>
+                            <th>3DES</th>
+                            <th>AES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Year</strong></td>
+                            <td>1977</td>
+                            <td>1998</td>
+                            <td>2001</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Block Size</strong></td>
+                            <td>64 bits</td>
+                            <td>64 bits</td>
+                            <td>128 bits</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Key Size</strong></td>
+                            <td>56 bits</td>
+                            <td>112 / 168 bits</td>
+                            <td>128 / 192 / 256 bits</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Rounds</strong></td>
+                            <td>16</td>
+                            <td>48 (16 &times; 3)</td>
+                            <td>10 / 12 / 14</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Security</strong></td>
+                            <td>Broken</td>
+                            <td>Adequate (deprecated)</td>
+                            <td>Strong</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Speed</strong></td>
+                            <td>Fast</td>
+                            <td>Slow</td>
+                            <td>Very Fast</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <p><strong>AES is the Standard:</strong> AES is used everywhere &mdash; TLS/HTTPS, Wi-Fi (WPA2/WPA3), disk encryption (BitLocker, FileVault), VPNs (IPSec), and more. AES-256 is approved for Top Secret classified data by the U.S. government.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Integrity and MACs -->
+        <section id="integrity-macs" class="content-section">
+            <h2>4. Integrity and MACs</h2>
+
+            <div class="definition">
+                <h3>What is a MAC?</h3>
+                <p>A <strong>Message Authentication Code (MAC)</strong> is a short piece of information used to verify both the <strong>integrity</strong> and the <strong>authenticity</strong> of a message. It is computed using a secret key shared between sender and receiver.</p>
+            </div>
+
+            <p>While encryption provides <strong>confidentiality</strong>, it does not guarantee that data has not been tampered with. MACs address this gap.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">MAC Verification Process</h3>
+                </div>
+                <div class="mac-flow">
+                    <div class="mac-sender">
+                        <h4>Sender</h4>
+                        <div class="crypto-flow">
+                            <div class="crypto-step">
+                                <div class="step-icon">📝</div>
+                                <div class="step-label">Message</div>
+                            </div>
+                            <div class="crypto-arrow">→</div>
+                            <div class="crypto-step highlight-step">
+                                <div class="step-icon">🔑</div>
+                                <div class="step-label">MAC(msg, key)</div>
+                            </div>
+                            <div class="crypto-arrow">→</div>
+                            <div class="crypto-step">
+                                <div class="step-icon">📨</div>
+                                <div class="step-label">msg + MAC tag</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mac-receiver">
+                        <h4>Receiver</h4>
+                        <div class="crypto-flow">
+                            <div class="crypto-step">
+                                <div class="step-icon">📨</div>
+                                <div class="step-label">msg + MAC tag</div>
+                            </div>
+                            <div class="crypto-arrow">→</div>
+                            <div class="crypto-step highlight-step">
+                                <div class="step-icon">🔑</div>
+                                <div class="step-label">Recompute MAC</div>
+                            </div>
+                            <div class="crypto-arrow">→</div>
+                            <div class="crypto-step">
+                                <div class="step-icon">✅</div>
+                                <div class="step-label">Compare</div>
+                                <div class="step-desc">Match = Valid</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Confidentiality vs Integrity</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Encryption</th>
+                            <th>MAC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Provides</strong></td>
+                            <td>Confidentiality (secrecy)</td>
+                            <td>Integrity + Authenticity</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Prevents</strong></td>
+                            <td>Eavesdropping</td>
+                            <td>Tampering</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Output</strong></td>
+                            <td>Ciphertext (same size as input)</td>
+                            <td>Fixed-size tag (e.g. 256 bits)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reversible?</strong></td>
+                            <td>Yes (with key)</td>
+                            <td>No (one-way)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </article>
+
+            <article class="security-concept">
+                <h4>Common MAC Algorithms</h4>
+                <ul>
+                    <li><strong>HMAC:</strong> Hash-based MAC using algorithms like SHA-256. The most widely used MAC construction.</li>
+                    <li><strong>CMAC:</strong> Cipher-based MAC built on block ciphers like AES.</li>
+                    <li><strong>GMAC:</strong> Galois MAC, used in AES-GCM authenticated encryption.</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Best Practice:</strong> Modern systems use <strong>authenticated encryption</strong> (e.g. AES-GCM) which combines encryption and MAC in a single operation, providing both confidentiality and integrity efficiently.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>Symmetric key cryptography</strong> uses the same shared secret key for encryption and decryption. It is the fastest form of encryption.</li>
+
+                <li><strong>Stream ciphers</strong> (RC4, A5/1) encrypt data one bit/byte at a time using a keystream XORed with plaintext.</li>
+
+                <li><strong>The One-Time Pad</strong> is theoretically unbreakable but impractical because the key must be as long as the message.</li>
+
+                <li><strong>Block ciphers</strong> (DES, 3DES, AES) encrypt fixed-size blocks through multiple rounds of substitution and permutation.</li>
+
+                <li><strong>DES</strong> (56-bit key) is broken; <strong>3DES</strong> (112/168-bit key) is deprecated; <strong>AES</strong> (128/192/256-bit key) is the current standard.</li>
+
+                <li><strong>MACs</strong> provide data integrity and authentication. HMAC (using hash functions) and CMAC (using block ciphers) are common constructions.</li>
+
+                <li><strong>Authenticated encryption</strong> (AES-GCM) combines confidentiality and integrity in one efficient operation.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In Chapter 8, we'll explore authorization &mdash; how systems determine what authenticated users are allowed to do, including access control models and firewalls.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>Credits and Attributions</h2>
+            <p class="credits-intro">All diagrams in this document are original educational works created specifically for this course.</p>
+            <ul class="credits-list">
+                <li><strong>Symmetric Key Encryption Flow:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Stream vs Block Cipher Comparison:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Block Cipher Comparison Table:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>MAC Verification Flow:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 3 specific styles */
+        .crypto-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .crypto-step {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            min-width: 100px;
+        }
+
+        .crypto-step.highlight-step {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: var(--secondary-color);
+        }
+
+        .step-icon {
+            font-size: 2em;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .step-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .crypto-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .cipher-comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .cipher-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .cipher-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2em;
+        }
+
+        .cipher-stream {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-color: #4caf50;
+        }
+
+        .cipher-block {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2196f3;
+        }
+
+        .mac-flow {
+            padding: 1.5rem;
+        }
+
+        .mac-sender, .mac-receiver {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .mac-sender {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        }
+
+        .mac-receiver {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        }
+
+        .mac-sender h4, .mac-receiver h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        @media screen and (max-width: 768px) {
+            .crypto-flow {
+                flex-direction: column;
+            }
+
+            .crypto-arrow {
+                transform: rotate(90deg);
+            }
+
+            .cipher-comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

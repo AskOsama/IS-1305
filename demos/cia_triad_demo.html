@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CIA Triad Interactive Demo | Network Security</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --accent-color: #c53030;
+            --success-color: #276749;
+            --warning-color: #c05621;
+            --light-gray: #f8f9fa;
+            --confidentiality-color: #2b6cb0;
+            --integrity-color: #276749;
+            --availability-color: #c05621;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        h1 {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Main Layout */
+        .demo-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* CIA Triangle */
+        .triangle-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--light-gray);
+            border-radius: 12px;
+            padding: 2rem;
+            min-height: 400px;
+        }
+
+        .cia-triangle {
+            position: relative;
+            width: 320px;
+            height: 280px;
+        }
+
+        .pillar {
+            position: absolute;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 4px solid white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .pillar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .pillar.active {
+            transform: scale(1.15);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .pillar-icon {
+            font-size: 1.8em;
+            margin-bottom: 0.3rem;
+        }
+
+        .pillar-c {
+            background: linear-gradient(135deg, #2b6cb0, #1a365d);
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .pillar-c.active { transform: translateX(-50%) scale(1.15); }
+
+        .pillar-i {
+            background: linear-gradient(135deg, #276749, #1a4731);
+            bottom: 0;
+            left: 15px;
+        }
+
+        .pillar-a {
+            background: linear-gradient(135deg, #c05621, #9c4221);
+            bottom: 0;
+            right: 15px;
+        }
+
+        /* Triangle connecting lines */
+        .triangle-lines {
+            position: absolute;
+            top: 55px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 130px solid transparent;
+            border-right: 130px solid transparent;
+            border-bottom: 195px solid rgba(43, 108, 176, 0.1);
+            z-index: 0;
+        }
+
+        .triangle-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -20%);
+            text-align: center;
+            font-weight: 600;
+            color: var(--primary-color);
+            z-index: 1;
+        }
+
+        .triangle-center strong {
+            font-size: 1.5em;
+            display: block;
+        }
+
+        /* Info Panel */
+        .info-section {
+            background: white;
+            border: 2px solid var(--secondary-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-height: 400px;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .info-icon {
+            font-size: 2.5em;
+        }
+
+        .info-title {
+            font-size: 1.5em;
+            color: var(--primary-color);
+        }
+
+        .info-content h4 {
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .info-content ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-content li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .info-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            color: #666;
+            text-align: center;
+        }
+
+        .info-placeholder .icon {
+            font-size: 4em;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Attack Scenarios */
+        .scenarios-section {
+            margin-top: 2rem;
+        }
+
+        .scenarios-section h3 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .scenario-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .scenario-card {
+            background: var(--light-gray);
+            border-radius: 10px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .scenario-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .scenario-card.active {
+            border-color: var(--accent-color);
+            background: #fff5f5;
+        }
+
+        .scenario-card h4 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .scenario-card p {
+            font-size: 0.9em;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .attack-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .badge-c { background: #e3f2fd; color: var(--confidentiality-color); }
+        .badge-i { background: #e8f5e9; color: var(--integrity-color); }
+        .badge-a { background: #fff3e0; color: var(--availability-color); }
+
+        /* Animation for attack visualization */
+        @keyframes pulse-attack {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(197, 48, 48, 0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(197, 48, 48, 0); }
+        }
+
+        .pillar.under-attack {
+            animation: pulse-attack 1s ease-in-out infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .demo-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .scenario-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .cia-triangle {
+                transform: scale(0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../chapters/chapter1.html#cia-triad" class="back-link">&larr; Back to Chapter 1</a>
+
+        <header>
+            <h1>CIA Triad Interactive Visualization</h1>
+            <p class="subtitle">Click on each pillar to learn more about Confidentiality, Integrity, and Availability</p>
+        </header>
+
+        <div class="demo-layout">
+            <!-- Triangle Visualization -->
+            <div class="triangle-section">
+                <div class="cia-triangle">
+                    <div class="triangle-lines"></div>
+
+                    <div class="pillar pillar-c" id="pillar-c" onclick="showInfo('confidentiality')">
+                        <span class="pillar-icon">🔒</span>
+                        Confidentiality
+                    </div>
+
+                    <div class="pillar pillar-i" id="pillar-i" onclick="showInfo('integrity')">
+                        <span class="pillar-icon">✓</span>
+                        Integrity
+                    </div>
+
+                    <div class="pillar pillar-a" id="pillar-a" onclick="showInfo('availability')">
+                        <span class="pillar-icon">⚡</span>
+                        Availability
+                    </div>
+
+                    <div class="triangle-center">
+                        <strong>CIA</strong>
+                        <small>Triad</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Panel -->
+            <div class="info-section" id="info-panel">
+                <div class="info-placeholder">
+                    <span class="icon">👆</span>
+                    <p><strong>Click on a pillar</strong> to learn about each security goal</p>
+                    <p style="margin-top: 1rem; font-size: 0.9em;">Or click on an attack scenario below to see which pillar it targets</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attack Scenarios -->
+        <div class="scenarios-section">
+            <h3>Common Attack Scenarios</h3>
+            <p style="text-align: center; margin-bottom: 1.5rem; color: #666;">Click on a scenario to see which CIA pillar it attacks</p>
+
+            <div class="scenario-cards">
+                <div class="scenario-card" onclick="showScenario('eavesdropping')">
+                    <h4>🎧 Eavesdropping</h4>
+                    <p>An attacker intercepts and reads sensitive data being transmitted over a network without authorization.</p>
+                    <span class="attack-badge badge-c">Attacks Confidentiality</span>
+                </div>
+
+                <div class="scenario-card" onclick="showScenario('mitm')">
+                    <h4>🔄 Man-in-the-Middle</h4>
+                    <p>An attacker secretly alters communication between two parties who believe they are directly communicating.</p>
+                    <span class="attack-badge badge-i">Attacks Integrity</span>
+                </div>
+
+                <div class="scenario-card" onclick="showScenario('ddos')">
+                    <h4>💥 DDoS Attack</h4>
+                    <p>Multiple systems flood a target with traffic, overwhelming it and making it unavailable to legitimate users.</p>
+                    <span class="attack-badge badge-a">Attacks Availability</span>
+                </div>
+
+                <div class="scenario-card" onclick="showScenario('phishing')">
+                    <h4>🎣 Phishing</h4>
+                    <p>Fraudulent emails trick users into revealing passwords, credit card numbers, or other sensitive information.</p>
+                    <span class="attack-badge badge-c">Attacks Confidentiality</span>
+                </div>
+
+                <div class="scenario-card" onclick="showScenario('ransomware')">
+                    <h4>🔐 Ransomware</h4>
+                    <p>Malware encrypts files and demands payment for the decryption key, making data inaccessible.</p>
+                    <span class="attack-badge badge-a">Attacks Availability</span>
+                </div>
+
+                <div class="scenario-card" onclick="showScenario('sqli')">
+                    <h4>💉 SQL Injection</h4>
+                    <p>Malicious SQL code is inserted into queries to manipulate or destroy database data.</p>
+                    <span class="attack-badge badge-i">Attacks Integrity</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const infoData = {
+            confidentiality: {
+                icon: '🔒',
+                title: 'Confidentiality',
+                color: '#2b6cb0',
+                content: `
+                    <h4>Definition</h4>
+                    <p>Protecting information from unauthorized access or disclosure. Only authorized parties should be able to read the data.</p>
+
+                    <h4>Real-World Examples</h4>
+                    <ul>
+                        <li>Encrypting emails and messages</li>
+                        <li>Password-protecting sensitive documents</li>
+                        <li>Using HTTPS for secure web browsing</li>
+                        <li>Access controls on confidential files</li>
+                    </ul>
+
+                    <h4>Protection Methods</h4>
+                    <ul>
+                        <li>Encryption (AES, RSA, TLS)</li>
+                        <li>Access control lists (ACLs)</li>
+                        <li>Authentication mechanisms</li>
+                        <li>Data classification and handling procedures</li>
+                    </ul>
+
+                    <h4>Common Attacks</h4>
+                    <ul>
+                        <li>Eavesdropping / Network sniffing</li>
+                        <li>Phishing attacks</li>
+                        <li>Social engineering</li>
+                        <li>Unauthorized data access</li>
+                    </ul>
+                `
+            },
+            integrity: {
+                icon: '✓',
+                title: 'Integrity',
+                color: '#276749',
+                content: `
+                    <h4>Definition</h4>
+                    <p>Ensuring information is accurate, complete, and has not been modified by unauthorized parties. Data should remain trustworthy.</p>
+
+                    <h4>Real-World Examples</h4>
+                    <ul>
+                        <li>Digital signatures on documents</li>
+                        <li>Checksums for file downloads</li>
+                        <li>Version control systems (Git)</li>
+                        <li>Database transaction logs</li>
+                    </ul>
+
+                    <h4>Protection Methods</h4>
+                    <ul>
+                        <li>Hash functions (SHA-256, MD5)</li>
+                        <li>Digital signatures</li>
+                        <li>Message authentication codes (MACs)</li>
+                        <li>Audit trails and logging</li>
+                    </ul>
+
+                    <h4>Common Attacks</h4>
+                    <ul>
+                        <li>Man-in-the-middle attacks</li>
+                        <li>SQL injection</li>
+                        <li>Data tampering</li>
+                        <li>Malware that modifies files</li>
+                    </ul>
+                `
+            },
+            availability: {
+                icon: '⚡',
+                title: 'Availability',
+                color: '#c05621',
+                content: `
+                    <h4>Definition</h4>
+                    <p>Ensuring authorized users can access information and systems when needed. Systems must remain operational and accessible.</p>
+
+                    <h4>Real-World Examples</h4>
+                    <ul>
+                        <li>Redundant servers and backups</li>
+                        <li>Cloud-based disaster recovery</li>
+                        <li>Load balancers distributing traffic</li>
+                        <li>Uninterruptible power supplies (UPS)</li>
+                    </ul>
+
+                    <h4>Protection Methods</h4>
+                    <ul>
+                        <li>Redundancy and failover systems</li>
+                        <li>Regular backups (3-2-1 rule)</li>
+                        <li>DDoS mitigation services</li>
+                        <li>Disaster recovery planning</li>
+                    </ul>
+
+                    <h4>Common Attacks</h4>
+                    <ul>
+                        <li>Denial of Service (DoS/DDoS)</li>
+                        <li>Ransomware</li>
+                        <li>Hardware destruction</li>
+                        <li>Resource exhaustion attacks</li>
+                    </ul>
+                `
+            }
+        };
+
+        const scenarioData = {
+            eavesdropping: { pillar: 'confidentiality', name: 'Eavesdropping' },
+            mitm: { pillar: 'integrity', name: 'Man-in-the-Middle' },
+            ddos: { pillar: 'availability', name: 'DDoS Attack' },
+            phishing: { pillar: 'confidentiality', name: 'Phishing' },
+            ransomware: { pillar: 'availability', name: 'Ransomware' },
+            sqli: { pillar: 'integrity', name: 'SQL Injection' }
+        };
+
+        function showInfo(pillar) {
+            const data = infoData[pillar];
+            const panel = document.getElementById('info-panel');
+
+            // Update info panel
+            panel.innerHTML = `
+                <div class="info-header">
+                    <span class="info-icon">${data.icon}</span>
+                    <span class="info-title" style="color: ${data.color}">${data.title}</span>
+                </div>
+                <div class="info-content">
+                    ${data.content}
+                </div>
+            `;
+
+            // Update pillar styles
+            document.querySelectorAll('.pillar').forEach(p => {
+                p.classList.remove('active', 'under-attack');
+            });
+
+            const pillarMap = {
+                confidentiality: 'pillar-c',
+                integrity: 'pillar-i',
+                availability: 'pillar-a'
+            };
+
+            document.getElementById(pillarMap[pillar]).classList.add('active');
+
+            // Clear scenario selection
+            document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+        }
+
+        function showScenario(scenario) {
+            const data = scenarioData[scenario];
+
+            // Show the pillar info
+            showInfo(data.pillar);
+
+            // Mark pillar as under attack
+            const pillarMap = {
+                confidentiality: 'pillar-c',
+                integrity: 'pillar-i',
+                availability: 'pillar-a'
+            };
+
+            document.getElementById(pillarMap[data.pillar]).classList.add('under-attack');
+
+            // Highlight the scenario card
+            document.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>
