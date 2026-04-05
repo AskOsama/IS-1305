@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل الرابع: تشفير المفتاح العام</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter4.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>تشفير المفتاح العام</h1>
+        <p class="subtitle">الفصل الرابع: التشفير غير المتماثل، RSA، ديفي-هيلمان، ECC، والبنية التحتية للمفاتيح العامة</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#intro">1. مقدمة في تشفير المفتاح العام</a></li>
+            <li><a href="#rsa">2. نظام تشفير RSA</a></li>
+            <li><a href="#diffie-hellman">3. تبادل مفاتيح ديفي-هيلمان</a></li>
+            <li><a href="#ecc">4. تشفير المنحنيات الإهليلجية (ECC)</a></li>
+            <li><a href="#notation">5. ترميز المفتاح العام</a></li>
+            <li><a href="#pki">6. البنية التحتية للمفاتيح العامة (PKI)</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذا الفصل، ستكون قادراً على:</p>
+            <ul>
+                <li>شرح كيف يحل التشفير غير المتماثل (المفتاح العام) مشكلة توزيع المفاتيح</li>
+                <li>وصف الأسس الرياضية وآلية عمل نظام تشفير RSA</li>
+                <li>فهم كيفية عمل بروتوكول تبادل مفاتيح ديفي-هيلمان</li>
+                <li>شرح مزايا تشفير المنحنيات الإهليلجية (ECC) مقارنة بـ RSA</li>
+                <li>تحديد الترميز القياسي لعمليات المفتاح العام والخاص</li>
+                <li>وصف كيف توفر البنية التحتية للمفاتيح العامة (PKI) وسلطات التصديق الثقة</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="content-section">
+            <h2>1. مقدمة في تشفير المفتاح العام</h2>
+
+            <div class="definition">
+                <h3>ما هو تشفير المفتاح العام؟</h3>
+                <p><strong>تشفير المفتاح العام (PKC)</strong>، المعروف أيضاً بـ<strong>التشفير غير المتماثل</strong>، هو نظام تشفير يستخدم مفتاحين مرتبطين رياضياً: <strong>مفتاح عام</strong> (يُشارك علناً) و<strong>مفتاح خاص</strong> (يُحفظ سراً). البيانات المشفرة بأحد المفتاحين لا يمكن فك تشفيرها إلا بالمفتاح الآخر.</p>
+            </div>
+
+            <p>يحل تشفير المفتاح العام المشكلة الجوهرية في التشفير المتماثل &mdash; <strong>توزيع المفاتيح</strong>. في التشفير المتماثل، يجب على الطرفين مشاركة مفتاح سري بطريقة آمنة. يلغي تشفير المفتاح العام هذا المتطلب: يمكن لأي شخص تشفير رسالة باستخدام المفتاح العام للمستقبل، ولكن فقط المستقبل يمكنه فك تشفيرها بمفتاحه الخاص.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">عملية التشفير غير المتماثل</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">النص الأصلي</div>
+                        <div class="step-desc">الرسالة الأصلية</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔐</div>
+                        <div class="step-label">التشفير</div>
+                        <div class="step-desc">+ مفتاح بوب العام</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔒</div>
+                        <div class="step-label">النص المشفر</div>
+                        <div class="step-desc">يُرسل</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔓</div>
+                        <div class="step-label">فك التشفير</div>
+                        <div class="step-desc">+ مفتاح بوب الخاص</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">النص الأصلي</div>
+                        <div class="step-desc">مُسترجع</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>الفكرة الأساسية:</strong> يمكن لأي شخص تشفير رسالة باستخدام المفتاح العام، ولكن <strong>فقط صاحب المفتاح الخاص يمكنه فك التشفير</strong>. هذا هو أساس الاتصال الآمن بدون تبادل مسبق للمفاتيح.</p>
+            </div>
+
+            <h3>التشفير المتماثل مقابل غير المتماثل</h3>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">مقارنة: المتماثل مقابل غير المتماثل</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الميزة</th>
+                            <th>المتماثل</th>
+                            <th>غير المتماثل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>المفاتيح</strong></td>
+                            <td>مفتاح سري واحد مشترك</td>
+                            <td>زوج مفتاح عام + خاص</td>
+                        </tr>
+                        <tr>
+                            <td><strong>توزيع المفاتيح</strong></td>
+                            <td>يتطلب قناة آمنة</td>
+                            <td>المفتاح العام يُشارك علناً</td>
+                        </tr>
+                        <tr>
+                            <td><strong>السرعة</strong></td>
+                            <td>سريع جداً</td>
+                            <td>أبطأ بكثير</td>
+                        </tr>
+                        <tr>
+                            <td><strong>الاستخدام</strong></td>
+                            <td>تشفير البيانات الكبيرة</td>
+                            <td>تبادل المفاتيح، التوقيعات</td>
+                        </tr>
+                        <tr>
+                            <td><strong>أمثلة</strong></td>
+                            <td>AES، 3DES</td>
+                            <td>RSA، ECC، DH</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <p><strong>أفضل الممارسات:</strong> يمكّن تشفير المفتاح العام من تبادل المفاتيح والمصادقة بشكل آمن، بينما يوفر التشفير المتماثل تشفيراً فعالاً للبيانات. تستخدم الأنظمة الحديثة <strong>كليهما معاً</strong> &mdash; التشفير غير المتماثل لتبادل مفتاح الجلسة، ثم التشفير المتماثل لتشفير البيانات بسرعة.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: RSA -->
+        <section id="rsa" class="content-section">
+            <h2>2. نظام تشفير RSA</h2>
+
+            <div class="definition">
+                <h3>ما هو RSA؟</h3>
+                <p>نظام تشفير <strong>RSA</strong> (سُمي على اسم Rivest وShamir وAdleman) هو نظام تشفير بالمفتاح العام يعتمد أمنه على الصعوبة الحسابية لـ<strong>تحليل الأعداد الصحيحة المركبة الكبيرة إلى عواملها</strong>. يستخدم زوج مفتاح عام/خاص للتشفير وفك التشفير والتوقيعات الرقمية.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>توليد مفاتيح RSA</h4>
+                <ol>
+                    <li><strong>اختر عددين أوليين كبيرين</strong> p وq</li>
+                    <li><strong>احسب</strong> n = p &times; q (المعامل)</li>
+                    <li><strong>احسب</strong> &phi;(n) = (p-1)(q-1)</li>
+                    <li><strong>اختر</strong> الأس العام e بحيث gcd(e, &phi;(n)) = 1</li>
+                    <li><strong>احسب</strong> الأس الخاص d بحيث e &times; d &equiv; 1 (mod &phi;(n))</li>
+                </ol>
+                <p><strong>المفتاح العام:</strong> (e, n) &mdash; يُشارك مع الجميع</p>
+                <p><strong>المفتاح الخاص:</strong> (d, n) &mdash; يُحفظ سراً</p>
+            </article>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">تشفير وفك تشفير RSA</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">النص الأصلي M</div>
+                        <div class="step-desc">الرسالة الأصلية</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔐</div>
+                        <div class="step-label">C = M<sup>e</sup> mod n</div>
+                        <div class="step-desc">التشفير بالمفتاح العام</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔒</div>
+                        <div class="step-label">النص المشفر C</div>
+                        <div class="step-desc">يُرسل</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔓</div>
+                        <div class="step-label">M = C<sup>d</sup> mod n</div>
+                        <div class="step-desc">فك التشفير بالمفتاح الخاص</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">النص الأصلي M</div>
+                        <div class="step-desc">مُسترجع</div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>تطبيقات RSA</h4>
+                <ul>
+                    <li><strong>تبادل المفاتيح:</strong> نقل مفاتيح الجلسة المتماثلة بشكل آمن</li>
+                    <li><strong>التوقيعات الرقمية:</strong> توقيع الرسائل لإثبات المصداقية وعدم الإنكار</li>
+                    <li><strong>المصادقة:</strong> التحقق من هوية الأطراف المتصلة</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>حجم المفتاح مهم:</strong> يعتمد أمن RSA على حجم المفتاح. يُوصى بحد أدنى <strong>2048 بت</strong> اليوم. RSA-1024 يُعتبر غير آمن، بينما RSA-4096 يوفر هامش أمان أعلى.</p>
+            </div>
+
+            <div class="warning-box">
+                <h4>RSA بطيء</h4>
+                <p>تشفير RSA أبطأ بكثير من الخوارزميات المتماثلة مثل AES. لذلك، لا يُستخدم RSA عادةً <strong>لتشفير البيانات الكبيرة</strong>. بدلاً من ذلك، يُستخدم لتبادل مفتاح متماثل بشكل آمن، ثم يُستخدم المفتاح المتماثل لتشفير البيانات بسرعة.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Diffie-Hellman -->
+        <section id="diffie-hellman" class="content-section">
+            <h2>3. تبادل مفاتيح ديفي-هيلمان</h2>
+
+            <div class="definition">
+                <h3>ما هو ديفي-هيلمان؟</h3>
+                <p><strong>تبادل مفاتيح ديفي-هيلمان (DH)</strong> هو تقنية مفتاح عام تسمح لطرفين بالاتفاق على <strong>مفتاح سري مشترك</strong> عبر شبكة غير آمنة، دون مشاركة مسبقة لأي مفتاح. لا يقوم بتشفير البيانات مباشرة &mdash; إنما يُنشئ سراً مشتركاً فقط.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">عملية تبادل مفاتيح ديفي-هيلمان</h3>
+                </div>
+                <div class="dh-exchange">
+                    <div class="dh-setup">
+                        <h4>المعاملات العامة</h4>
+                        <p>يتفق الطرفان على: عدد أولي <strong>p</strong> ومولد <strong>g</strong></p>
+                    </div>
+                    <div class="dh-parties">
+                        <div class="dh-party dh-alice">
+                            <h4>أليس</h4>
+                            <p>تختار السر <strong>a</strong></p>
+                            <p>تحسب g<sup>a</sup> mod p</p>
+                            <p>← ترسل g<sup>a</sup> mod p</p>
+                            <p>تستقبل g<sup>b</sup> mod p</p>
+                            <p>تحسب (g<sup>b</sup>)<sup>a</sup> mod p</p>
+                        </div>
+                        <div class="dh-party dh-bob">
+                            <h4>بوب</h4>
+                            <p>يختار السر <strong>b</strong></p>
+                            <p>يحسب g<sup>b</sup> mod p</p>
+                            <p>يرسل g<sup>b</sup> mod p →</p>
+                            <p>يستقبل g<sup>a</sup> mod p</p>
+                            <p>يحسب (g<sup>a</sup>)<sup>b</sup> mod p</p>
+                        </div>
+                    </div>
+                    <div class="dh-result">
+                        <h4>السر المشترك</h4>
+                        <p>كلاهما يصل إلى نفس القيمة: g<sup>ab</sup> mod p</p>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>ما يوفره DH (وما لا يوفره)</h4>
+                <div class="cipher-comparison-grid">
+                    <div class="cipher-card cipher-stream">
+                        <h4>يوفر</h4>
+                        <ul>
+                            <li>اتفاق آمن على المفتاح</li>
+                            <li>أساس لمفاتيح الجلسة</li>
+                            <li>أساس لـ TLS، SSH، IPSec</li>
+                        </ul>
+                    </div>
+                    <div class="cipher-card cipher-block">
+                        <h4>لا يوفر</h4>
+                        <ul>
+                            <li>تشفير البيانات</li>
+                            <li>مصادقة الأطراف (بمفرده)</li>
+                            <li>حماية من هجوم الوسيط (وحده)</li>
+                        </ul>
+                    </div>
+                </div>
+            </article>
+
+            <div class="warning-box">
+                <h4>عرضة لهجوم الرجل في المنتصف</h4>
+                <p>بمفرده، لا يقوم ديفي-هيلمان <strong>بمصادقة</strong> الأطراف المتصلة. يمكن للمهاجم (ترودي) اعتراض التبادل وإنشاء أسرار مشتركة منفصلة مع كل طرف. يجب دمج DH مع المصادقة (مثل الشهادات الرقمية) ليكون آمناً.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: ECC -->
+        <section id="ecc" class="content-section">
+            <h2>4. تشفير المنحنيات الإهليلجية (ECC)</h2>
+
+            <div class="definition">
+                <h3>ما هو ECC؟</h3>
+                <p><strong>تشفير المنحنيات الإهليلجية (ECC)</strong> هو شكل من أشكال تشفير المفتاح العام يعتمد على رياضيات المنحنيات الإهليلجية فوق الحقول المنتهية. يوفر ECC <strong>نفس مستوى الأمان مثل RSA</strong> ولكن بـ<strong>أحجام مفاتيح أصغر بكثير</strong>، مما يجعله أسرع وأكثر كفاءة.</p>
+            </div>
+
+            <p>تتطلب أنظمة المفتاح العام التقليدية مثل RSA أحجام مفاتيح كبيرة بشكل متزايد. طُور ECC لتحسين الكفاءة وتقليل حجم المفتاح مع الحفاظ على أمان قوي &mdash; وهو مهم بشكل خاص للأجهزة المحمولة والمدمجة.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">RSA مقابل ECC: مقارنة أحجام المفاتيح لأمان مكافئ</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>مستوى الأمان (بت)</th>
+                            <th>حجم مفتاح RSA</th>
+                            <th>حجم مفتاح ECC</th>
+                            <th>نسبة RSA / ECC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>80</strong></td>
+                            <td>1024 بت</td>
+                            <td>160 بت</td>
+                            <td>6:1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>112</strong></td>
+                            <td>2048 بت</td>
+                            <td>224 بت</td>
+                            <td>9:1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>128</strong></td>
+                            <td>3072 بت</td>
+                            <td>256 بت</td>
+                            <td>12:1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>256</strong></td>
+                            <td>15360 بت</td>
+                            <td>512 بت</td>
+                            <td>30:1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <article class="security-concept">
+                <h4>أين يُستخدم ECC</h4>
+                <ul>
+                    <li><strong>TLS/SSL:</strong> تستخدم اتصالات HTTPS الحديثة ECDHE (ديفي-هيلمان عبر المنحنيات الإهليلجية)</li>
+                    <li><strong>الأجهزة المحمولة والمدمجة:</strong> مفاتيح أصغر تعني طاقة معالجة وذاكرة أقل</li>
+                    <li><strong>العملات الرقمية:</strong> يستخدم البيتكوين منحنى secp256k1 لمفاتيح المحافظ</li>
+                    <li><strong>المراسلة الآمنة:</strong> يستخدم بروتوكول Signal منحنى Curve25519 لتبادل المفاتيح</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>لماذا ECC مهم:</strong> مفتاح ECC بحجم 256 بت يوفر أماناً مكافئاً لمفتاح RSA بحجم 3072 بت. هذا يجعل ECC الخيار المفضل للبيئات محدودة الموارد والبروتوكولات الحديثة حيث الكفاءة أساسية.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Notation -->
+        <section id="notation" class="content-section">
+            <h2>5. ترميز المفتاح العام</h2>
+
+            <div class="definition">
+                <h3>الترميز القياسي لعمليات المفتاح العام</h3>
+                <p>يستخدم تشفير المفتاح العام ترميزاً قياسياً للتمييز بين عمليات التشفير وفك التشفير والتوقيع. يحدد الترميز أي مفتاح يُستخدم ومن يملكه.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">دليل ترميز المفتاح العام</h3>
+                </div>
+                <div class="notation-grid">
+                    <div class="notation-card notation-public">
+                        <h4>{ } الأقواس المعقوفة &mdash; المفتاح العام</h4>
+                        <p class="notation-example">{M}<sub>أليس</sub></p>
+                        <p>تشفير الرسالة M بـ<strong>المفتاح العام لأليس</strong></p>
+                        <p class="notation-use">يمكن لأي شخص القيام بذلك</p>
+                    </div>
+                    <div class="notation-card notation-private">
+                        <h4>[ ] الأقواس المربعة &mdash; المفتاح الخاص</h4>
+                        <p class="notation-example">[M]<sub>أليس</sub></p>
+                        <p>تشفير/توقيع الرسالة M بـ<strong>المفتاح الخاص لأليس</strong></p>
+                        <p class="notation-use">فقط أليس يمكنها القيام بذلك</p>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>أمثلة على الترميز</h4>
+                <ul>
+                    <li><strong>التشفير:</strong> C = {M}<sub>أليس</sub> &mdash; تشفير الرسالة M بالمفتاح العام لأليس. فقط أليس يمكنها فك التشفير.</li>
+                    <li><strong>فك التشفير:</strong> M = [C]<sub>أليس</sub> &mdash; فك تشفير النص المشفر C بالمفتاح الخاص لأليس.</li>
+                    <li><strong>التوقيع الرقمي:</strong> S = [M]<sub>أليس</sub> &mdash; أليس توقع الرسالة M باستخدام مفتاحها الخاص. يمكن لأي شخص التحقق باستخدام مفتاحها العام.</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>التوقيعات الرقمية وعدم الإنكار:</strong> عندما توقع أليس رسالة بمفتاحها الخاص [M]<sub>أليس</sub>، يمكن لأي شخص التحقق من التوقيع باستخدام مفتاحها العام. بما أن أليس وحدها تملك مفتاحها الخاص، لا يمكنها إنكار توقيعها على الرسالة &mdash; وهذا ما يُسمى <strong>عدم الإنكار</strong>.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: PKI -->
+        <section id="pki" class="content-section">
+            <h2>6. البنية التحتية للمفاتيح العامة (PKI)</h2>
+
+            <div class="definition">
+                <h3>ما هي PKI؟</h3>
+                <p><strong>البنية التحتية للمفاتيح العامة (PKI)</strong> هي الإطار الذي يدير المفاتيح العامة والشهادات الرقمية لتمكين الاتصال الآمن باستخدام تشفير المفتاح العام. توفر PKI طريقة موثوقة للتحقق من أن المفتاح العام ينتمي حقاً لمالكه المُدعى.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>لماذا نحتاج PKI</h4>
+                <p>بدون PKI، تكون المفاتيح العامة عرضة لـ<strong>هجمات الرجل في المنتصف (MITM)</strong>:</p>
+                <ol>
+                    <li>يشارك فهد مفتاحه العام مع فاطمة</li>
+                    <li>المهاجمة سارة تعترض وتستبدله بمفتاحها العام</li>
+                    <li>فاطمة تشفر الرسائل ظناً أنها تستخدم مفتاح فهد &mdash; لكن سارة يمكنها قراءتها</li>
+                    <li>سارة تعيد التشفير بمفتاح فهد الحقيقي وتعيد التوجيه دون اكتشاف</li>
+                </ol>
+                <p>تمنع PKI ذلك بوجود <strong>طرف ثالث موثوق</strong> يتحقق من ملكية المفتاح العام ويصادق عليها.</p>
+            </article>
+
+            <article class="security-concept">
+                <h4>المكونات الرئيسية لـ PKI</h4>
+                <ul>
+                    <li><strong>سلطة التصديق (CA):</strong> جهة موثوقة تصدر الشهادات الرقمية. تتحقق من الهوية قبل ربط المفتاح العام بالمستخدم.</li>
+                    <li><strong>سلطة التسجيل (RA):</strong> تساعد CA بالتحقق من هوية المستخدم قبل إصدار الشهادة.</li>
+                    <li><strong>الشهادات الرقمية:</strong> وثائق إلكترونية تربط المفتاح العام بهوية (مثل شهادات SSL/TLS لمواقع الويب، بصيغة X.509).</li>
+                    <li><strong>مستودع الشهادات:</strong> قاعدة بيانات تُخزن فيها الشهادات ويصل إليها الأطراف المعتمدة.</li>
+                </ul>
+            </article>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">كيف تعمل PKI: نموذج الثقة بالطرف الثالث</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">👤</div>
+                        <div class="step-label">المستخدم</div>
+                        <div class="step-desc">يطلب شهادة</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔍</div>
+                        <div class="step-label">RA</div>
+                        <div class="step-desc">يتحقق من الهوية</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🏛️</div>
+                        <div class="step-label">CA</div>
+                        <div class="step-desc">يصدر الشهادة</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📜</div>
+                        <div class="step-label">الشهادة</div>
+                        <div class="step-desc">مفتاح عام + هوية</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">✅</div>
+                        <div class="step-label">موثوق</div>
+                        <div class="step-desc">اتصال آمن</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>نموذج الثقة:</strong> تماماً كما تتحقق جهة حكومية (مثل إدارة المرور) من الهوية وتصدر بطاقة تعريف، يقوم RA بتأكيد الهوية ويصدر CA شهادة موقعة رقمياً. حتى لو لم يعرف الأطراف بعضهم البعض، يمكنهم الوثوق بالـ CA التي صادقت عليهم.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>تشفير المفتاح العام</strong> يستخدم مفتاحين مرتبطين رياضياً (عام وخاص) ويحل مشكلة توزيع المفاتيح في التشفير المتماثل.</li>
+
+                <li><strong>RSA</strong> هو أشهر خوارزمية مفتاح عام، يعتمد على صعوبة تحليل الأعداد الأولية الكبيرة. يُستخدم لتبادل المفاتيح والتوقيعات الرقمية والمصادقة.</li>
+
+                <li><strong>ديفي-هيلمان</strong> يسمح لطرفين بإنشاء سر مشترك عبر قناة غير آمنة، لكنه لا يوفر المصادقة بمفرده.</li>
+
+                <li><strong>تشفير المنحنيات الإهليلجية (ECC)</strong> يوفر نفس أمان RSA بمفاتيح أصغر بكثير، مما يجعله مثالياً للأنظمة الحديثة ومحدودة الموارد.</li>
+
+                <li><strong>ترميز المفتاح العام</strong> يستخدم الأقواس المعقوفة {M} لعمليات المفتاح العام والأقواس المربعة [M] لعمليات المفتاح الخاص.</li>
+
+                <li><strong>التوقيعات الرقمية</strong> توفر عدم الإنكار &mdash; لا يمكن للموقع إنكار توقيعه على الرسالة.</li>
+
+                <li><strong>PKI</strong> (سلطات التصديق وسلطات التسجيل والشهادات الرقمية) توفر إطار الثقة للتحقق من ملكية المفاتيح العامة ومنع هجمات الرجل في المنتصف.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>نظرة مستقبلية:</strong> في الفصل الخامس، سنستكشف دوال التجزئة &mdash; الدوال أحادية الاتجاه التي توفر سلامة البيانات والمصادقة وتُعد لبنات أساسية للتوقيعات الرقمية ورموز المصادقة.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>الاعتمادات والإسناد</h2>
+            <p class="credits-intro">جميع الرسوم البيانية في هذا المستند هي أعمال تعليمية أصلية أُنشئت خصيصاً لهذا المقرر.</p>
+            <ul class="credits-list">
+                <li><strong>مخطط التشفير غير المتماثل:</strong> رسم تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>مخطط تشفير وفك تشفير RSA:</strong> رسم تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>مخطط تبادل ديفي-هيلمان:</strong> رسم تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>جدول مقارنة RSA مقابل ECC:</strong> رسم تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>مخطط نموذج ثقة PKI:</strong> رسم تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">العودة إلى الصفحة الرئيسية →</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 4 specific styles */
+        .crypto-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .crypto-step {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            min-width: 100px;
+        }
+
+        .crypto-step.highlight-step {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: var(--secondary-color);
+        }
+
+        .step-icon {
+            font-size: 2em;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .step-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .crypto-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .cipher-comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .cipher-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .cipher-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2em;
+        }
+
+        .cipher-stream {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-color: #4caf50;
+        }
+
+        .cipher-block {
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+            border-color: #e91e63;
+        }
+
+        /* DH Exchange styles */
+        .dh-exchange {
+            padding: 1.5rem;
+        }
+
+        .dh-setup, .dh-result {
+            text-align: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-radius: 8px;
+            border: 2px solid #ff9800;
+        }
+
+        .dh-setup h4, .dh-result h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .dh-parties {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .dh-party {
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .dh-party h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .dh-alice {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        }
+
+        .dh-bob {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        }
+
+        /* Notation styles */
+        .notation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .notation-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            text-align: center;
+        }
+
+        .notation-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .notation-example {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .notation-use {
+            font-style: italic;
+            color: #666;
+        }
+
+        .notation-public {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2196f3;
+        }
+
+        .notation-private {
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+            border-color: #e91e63;
+        }
+
+        @media screen and (max-width: 768px) {
+            .crypto-flow {
+                flex-direction: column;
+            }
+
+            .crypto-arrow {
+                transform: rotate(90deg);
+            }
+
+            .cipher-comparison-grid,
+            .dh-parties,
+            .notation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

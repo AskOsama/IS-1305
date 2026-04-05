@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5: Hash Functions++</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter5_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>Hash Functions++</h1>
+        <p class="subtitle">Chapter 5: Cryptographic Hashing, HMAC, and Digital Integrity</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#intro">1. Introduction to Hash Functions</a></li>
+            <li><a href="#how-it-works">2. How Hash Functions Work</a></li>
+            <li><a href="#properties">3. Properties of Cryptographic Hash Functions</a></li>
+            <li><a href="#non-crypto">4. Non-Cryptographic Hash Functions</a></li>
+            <li><a href="#tiger">5. Tiger Hash</a></li>
+            <li><a href="#hmac">6. HMAC</a></li>
+            <li><a href="#uses">7. Uses of Hash Functions</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this chapter, you will be able to:</p>
+            <ul>
+                <li>Define what a cryptographic hash function is and explain the concept of one-way functions</li>
+                <li>Describe how hash functions process input data to produce a fixed-length output</li>
+                <li>List and explain the essential properties of cryptographic hash functions</li>
+                <li>Distinguish between cryptographic and non-cryptographic hash functions</li>
+                <li>Explain how HMAC combines a secret key with a hash function for message authentication</li>
+                <li>Identify common real-world applications of hash functions in security</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="content-section">
+            <h2>1. Introduction to Hash Functions</h2>
+
+            <div class="definition">
+                <h3>What is a Hash Function?</h3>
+                <p>A <strong>hash function</strong> is a mathematical algorithm that converts data of <strong>any size</strong> into a <strong>fixed-length</strong> string called a <strong>hash value</strong> (or digest). It creates a unique digital fingerprint for the input, ensuring consistency in output length regardless of input size. Hashing is a <strong>one-way function</strong> &mdash; once data is hashed, it is computationally infeasible to retrieve the original data from the hash value.</p>
+            </div>
+
+            <p>Hash functions are fundamental building blocks of modern security systems. They are used everywhere &mdash; from password storage and data integrity verification to digital signatures and blockchain technology.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Hash Function: Any Input &rarr; Fixed Output</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📄</div>
+                        <div class="step-label">Input</div>
+                        <div class="step-desc">Any size data</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">⚙️</div>
+                        <div class="step-label">Hash Function H()</div>
+                        <div class="step-desc">One-way transform</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔢</div>
+                        <div class="step-label">Hash Value</div>
+                        <div class="step-desc">Fixed length (e.g. 256 bits)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Key Property:</strong> A hash function is a <strong>one-way function</strong>. It is easy to compute the hash from the input, but computationally infeasible to find the input from the hash. This is what makes hashing useful for security.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: How Hash Functions Work -->
+        <section id="how-it-works" class="content-section">
+            <h2>2. How Hash Functions Work</h2>
+
+            <div class="definition">
+                <h3>Internal Process</h3>
+                <p>When data is hashed, a complex process occurs behind the scenes. The input is divided into fixed-size blocks, processed through multiple rounds of mathematical transformations, and produces a unique fixed-size output.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Hash Function Processing Steps</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">Input Message</div>
+                        <div class="step-desc">Any length</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📐</div>
+                        <div class="step-label">Padding</div>
+                        <div class="step-desc">Fill to block size</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔄</div>
+                        <div class="step-label">Process Blocks</div>
+                        <div class="step-desc">Compression function</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔢</div>
+                        <div class="step-label">Digest</div>
+                        <div class="step-desc">Fixed-size output</div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Step-by-Step Process</h4>
+                <ol>
+                    <li><strong>Input Processing:</strong> The input data (message) is divided into fixed-size blocks (e.g., SHA-256 uses 512-bit blocks).</li>
+                    <li><strong>Padding:</strong> If the final block isn't large enough, the algorithm adds extra bits (padding) to ensure consistent processing.</li>
+                    <li><strong>Compression:</strong> Each block passes through a compression function that applies a series of mathematical transformations.</li>
+                    <li><strong>Output:</strong> The final result is a unique, fixed-size hash value (message digest). The length depends on the algorithm used.</li>
+                </ol>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Avalanche Effect Example:</strong> Even changing a single character (e.g., "Hello" vs "hello") produces a completely different hash output. This is called the <strong>avalanche effect</strong> and is critical for security.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Properties -->
+        <section id="properties" class="content-section">
+            <h2>3. Properties of Cryptographic Hash Functions</h2>
+
+            <div class="definition">
+                <h3>Essential Properties</h3>
+                <p>A cryptographic hash function must satisfy four key properties to be considered secure. These properties distinguish cryptographic hashes from simple checksums.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Four Key Properties</h3>
+                </div>
+                <div class="hash-properties-grid">
+                    <div class="hash-property-card property-fixed">
+                        <h4>Fixed Length Output</h4>
+                        <p>The hash always produces the same size output regardless of input size.</p>
+                        <p class="property-example">Example: SHA-256 always produces 256 bits whether input is 1 byte or 1 GB</p>
+                    </div>
+                    <div class="hash-property-card property-oneway">
+                        <h4>One-Way Function</h4>
+                        <p>Given a hash value h, it is computationally infeasible to find any input m such that H(m) = h.</p>
+                        <p class="property-example">Also called: Pre-image Resistance</p>
+                    </div>
+                    <div class="hash-property-card property-avalanche">
+                        <h4>Avalanche Effect</h4>
+                        <p>A small change in input produces a drastically different output.</p>
+                        <p class="property-example">Flipping one bit in input changes ~50% of output bits</p>
+                    </div>
+                    <div class="hash-property-card property-collision">
+                        <h4>Collision Resistance</h4>
+                        <p>It is computationally infeasible to find two different inputs that produce the same hash.</p>
+                        <p class="property-example">Finding m1 &ne; m2 where H(m1) = H(m2) should be impractical</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Common Hash Algorithms Comparison</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Algorithm</th>
+                            <th>Output Size</th>
+                            <th>Block Size</th>
+                            <th>Security Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>MD5</strong></td>
+                            <td>128 bits</td>
+                            <td>512 bits</td>
+                            <td>Broken (collisions found)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SHA-1</strong></td>
+                            <td>160 bits</td>
+                            <td>512 bits</td>
+                            <td>Broken (deprecated)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SHA-256</strong></td>
+                            <td>256 bits</td>
+                            <td>512 bits</td>
+                            <td>Secure (widely used)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SHA-3</strong></td>
+                            <td>Variable</td>
+                            <td>Variable</td>
+                            <td>Secure (newest standard)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning-box">
+                <h4>MD5 and SHA-1 are Broken</h4>
+                <p>MD5 and SHA-1 have known collision vulnerabilities and should <strong>never be used</strong> for security purposes. Always use SHA-256 or SHA-3 for cryptographic applications.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Non-Cryptographic -->
+        <section id="non-crypto" class="content-section">
+            <h2>4. Non-Cryptographic Hash Functions</h2>
+
+            <div class="definition">
+                <h3>What are Non-Cryptographic Hash Functions?</h3>
+                <p>A <strong>non-cryptographic hash function</strong> is a hash algorithm designed for <strong>speed and efficiency</strong>, not for security. It converts input data into a fixed-length value mainly for data processing tasks, not for protecting information.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Cryptographic vs Non-Cryptographic Hash Functions</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Cryptographic</th>
+                            <th>Non-Cryptographic</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Purpose</strong></td>
+                            <td>Security (integrity, auth)</td>
+                            <td>Performance (hash tables, checksums)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Speed</strong></td>
+                            <td>Slower (by design)</td>
+                            <td>Very fast</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Collision Resistance</strong></td>
+                            <td>Strong requirement</td>
+                            <td>Not required</td>
+                        </tr>
+                        <tr>
+                            <td><strong>One-Way</strong></td>
+                            <td>Yes (pre-image resistant)</td>
+                            <td>No</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Examples</strong></td>
+                            <td>SHA-256, SHA-3</td>
+                            <td>CRC32, MurmurHash, FNV</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Important:</strong> Non-cryptographic hash functions should <strong>never</strong> be used for security purposes. They are designed for speed in data structures (hash tables, bloom filters) and error detection, not for protecting against malicious attacks.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Tiger Hash -->
+        <section id="tiger" class="content-section">
+            <h2>5. Tiger Hash</h2>
+
+            <article class="security-concept">
+                <h4>What is Tiger Hash?</h4>
+                <p><strong>Tiger</strong> is a cryptographic hash function designed to be fast in software, particularly on <strong>64-bit processors</strong>. It processes input data of any size and produces a fixed-length <strong>192-bit</strong> hash value (message digest).</p>
+                <ul>
+                    <li><strong>Output:</strong> 192 bits (24 bytes)</li>
+                    <li><strong>Optimized for:</strong> 64-bit platforms with high speed</li>
+                    <li><strong>Design goals:</strong> High speed on 64-bit platforms with strong cryptographic security</li>
+                    <li><strong>Use cases:</strong> File verification, P2P networks, efficient hashing of large data</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Tiger vs SHA-256:</strong> Tiger is presented as an example of a modern cryptographic hash function that emphasizes both performance and security. While SHA-256 is the most widely used standard, Tiger shows that hash functions can be designed with specific hardware optimization in mind.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: HMAC -->
+        <section id="hmac" class="content-section">
+            <h2>6. HMAC (Hash-Based Message Authentication Code)</h2>
+
+            <div class="definition">
+                <h3>What is HMAC?</h3>
+                <p><strong>HMAC</strong> is a mechanism that uses a cryptographic hash function together with a <strong>secret key</strong> to provide <strong>message authentication</strong> and <strong>integrity</strong>. Instead of hashing the message alone, HMAC incorporates a secret key, making the hash secure against attackers.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">HMAC Process</h3>
+                </div>
+                <div class="hmac-flow">
+                    <div class="hmac-sender">
+                        <h4>Sender</h4>
+                        <div class="crypto-flow">
+                            <div class="crypto-step">
+                                <div class="step-icon">📝</div>
+                                <div class="step-label">Message</div>
+                            </div>
+                            <div class="crypto-step">
+                                <div class="step-icon">🔑</div>
+                                <div class="step-label">+ Secret Key</div>
+                            </div>
+                            <div class="crypto-arrow">→</div>
+                            <div class="crypto-step highlight-step">
+                                <div class="step-icon">⚙️</div>
+                                <div class="step-label">HMAC(key, msg)</div>
+                            </div>
+                            <div class="crypto-arrow">→</div>
+                            <div class="crypto-step">
+                                <div class="step-icon">📨</div>
+                                <div class="step-label">msg + HMAC tag</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hmac-receiver">
+                        <h4>Receiver</h4>
+                        <div class="crypto-flow">
+                            <div class="crypto-step">
+                                <div class="step-icon">📨</div>
+                                <div class="step-label">msg + HMAC tag</div>
+                            </div>
+                            <div class="crypto-arrow">→</div>
+                            <div class="crypto-step highlight-step">
+                                <div class="step-icon">🔑</div>
+                                <div class="step-label">Recompute HMAC</div>
+                            </div>
+                            <div class="crypto-arrow">→</div>
+                            <div class="crypto-step">
+                                <div class="step-icon">✅</div>
+                                <div class="step-label">Compare</div>
+                                <div class="step-desc">Match = Valid</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>What HMAC Provides</h4>
+                <ul>
+                    <li><strong>Message Integrity:</strong> Ensures the message was not altered in transit</li>
+                    <li><strong>Sender Authentication:</strong> Only someone with the secret key could have generated the correct HMAC</li>
+                    <li><strong>Protection Against Tampering:</strong> Any modification to the message invalidates the HMAC</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>HMAC in Practice:</strong> HMAC is widely used in security protocols including <strong>TLS/SSL</strong>, <strong>IPSec</strong>, <strong>API authentication</strong> (e.g., AWS request signing), and <strong>JWT tokens</strong>.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: Uses -->
+        <section id="uses" class="content-section">
+            <h2>7. Uses of Hash Functions</h2>
+
+            <article class="security-concept">
+                <h4>Real-World Applications</h4>
+                <ul>
+                    <li><strong>Password Storage:</strong> Systems store hash values of passwords, not the passwords themselves. When a user logs in, the system hashes the entered password and compares it to the stored hash.</li>
+                    <li><strong>Message Integrity (HMAC):</strong> Hash functions ensure that a message has not been altered during transmission using HMAC.</li>
+                    <li><strong>Digital Signatures:</strong> Instead of signing an entire large document, the sender signs the <strong>hash of the document</strong>. This is much faster and equally secure.</li>
+                    <li><strong>Message Fingerprinting:</strong> A hash produces a fixed-length "fingerprint" of data. Even a tiny change in the message changes the hash drastically, making tampering detectable.</li>
+                    <li><strong>Error Detection:</strong> Hash values can reveal accidental changes in data, similar to checksums but cryptographically stronger.</li>
+                    <li><strong>Blockchain:</strong> Cryptocurrencies like Bitcoin use hash functions (SHA-256) extensively for mining, transaction verification, and linking blocks together.</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Hash Functions Are Everywhere:</strong> From the HTTPS padlock in your browser to the blockchain behind cryptocurrencies, hash functions are one of the most ubiquitous tools in information security.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>Hash functions</strong> convert data of any size into a fixed-length digest. They are one-way functions &mdash; you cannot recover the original data from the hash.</li>
+
+                <li><strong>Hash functions work</strong> by dividing input into blocks, applying padding, processing through a compression function, and producing a fixed-size output.</li>
+
+                <li><strong>Cryptographic hash properties</strong> include fixed output length, pre-image resistance (one-way), avalanche effect, and collision resistance.</li>
+
+                <li><strong>MD5 and SHA-1</strong> are broken and should not be used. <strong>SHA-256</strong> and <strong>SHA-3</strong> are the current secure standards.</li>
+
+                <li><strong>Non-cryptographic hashes</strong> (CRC32, MurmurHash) are fast but lack security properties &mdash; they are designed for data structures, not protection.</li>
+
+                <li><strong>Tiger Hash</strong> is a cryptographic hash optimized for 64-bit systems, producing a 192-bit digest.</li>
+
+                <li><strong>HMAC</strong> combines a secret key with a hash function to provide message authentication and integrity.</li>
+
+                <li><strong>Hash functions</strong> are used for password storage, digital signatures, message integrity, fingerprinting, error detection, and blockchain technology.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In Chapter 8, we'll explore authorization &mdash; how systems determine what authenticated users are allowed to do, including access control models and firewalls.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>Credits and Attributions</h2>
+            <p class="credits-intro">All diagrams in this document are original educational works created specifically for this course.</p>
+            <ul class="credits-list">
+                <li><strong>Hash Function Input/Output Flow:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Hash Processing Steps Flow:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Hash Properties Grid:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>HMAC Process Flow:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Hash Algorithm Comparison Table:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 5 specific styles */
+        .crypto-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .crypto-step {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            min-width: 100px;
+        }
+
+        .crypto-step.highlight-step {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: var(--secondary-color);
+        }
+
+        .step-icon {
+            font-size: 2em;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .step-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .crypto-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        /* Hash Properties Grid */
+        .hash-properties-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .hash-property-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .hash-property-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        .property-example {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .property-fixed {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2196f3;
+        }
+
+        .property-oneway {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-color: #4caf50;
+        }
+
+        .property-avalanche {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-color: #ff9800;
+        }
+
+        .property-collision {
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+            border-color: #e91e63;
+        }
+
+        /* HMAC Flow */
+        .hmac-flow {
+            padding: 1.5rem;
+        }
+
+        .hmac-sender, .hmac-receiver {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .hmac-sender {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        }
+
+        .hmac-receiver {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        }
+
+        .hmac-sender h4, .hmac-receiver h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        @media screen and (max-width: 768px) {
+            .crypto-flow {
+                flex-direction: column;
+            }
+
+            .crypto-arrow {
+                transform: rotate(90deg);
+            }
+
+            .hash-properties-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

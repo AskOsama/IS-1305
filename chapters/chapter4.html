@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4: Public Key Cryptography</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter4_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>Public Key Cryptography</h1>
+        <p class="subtitle">Chapter 4: Asymmetric Encryption, RSA, Diffie-Hellman, ECC, and PKI</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#intro">1. Introduction to Public Key Cryptography</a></li>
+            <li><a href="#rsa">2. RSA Cryptosystem</a></li>
+            <li><a href="#diffie-hellman">3. Diffie-Hellman Key Exchange</a></li>
+            <li><a href="#ecc">4. Elliptic Curve Cryptography (ECC)</a></li>
+            <li><a href="#notation">5. Public Key Notation</a></li>
+            <li><a href="#pki">6. Public Key Infrastructure (PKI)</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this chapter, you will be able to:</p>
+            <ul>
+                <li>Explain how asymmetric (public key) cryptography solves the key distribution problem</li>
+                <li>Describe the mathematical foundations and operation of the RSA cryptosystem</li>
+                <li>Understand how the Diffie-Hellman key exchange protocol works</li>
+                <li>Explain the advantages of Elliptic Curve Cryptography (ECC) over RSA</li>
+                <li>Identify the standard notation for public and private key operations</li>
+                <li>Describe how Public Key Infrastructure (PKI) and Certificate Authorities provide trust</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="content-section">
+            <h2>1. Introduction to Public Key Cryptography</h2>
+
+            <div class="definition">
+                <h3>What is Public Key Cryptography?</h3>
+                <p><strong>Public Key Cryptography (PKC)</strong>, also known as <strong>asymmetric cryptography</strong>, is a cryptographic system that uses two mathematically related keys: a <strong>public key</strong> (shared openly) and a <strong>private key</strong> (kept secret). Data encrypted with one key can only be decrypted with the other.</p>
+            </div>
+
+            <p>Public key cryptography solves the fundamental problem of symmetric encryption &mdash; <strong>key distribution</strong>. With symmetric crypto, both parties must somehow share a secret key securely. Public key cryptography eliminates this requirement: anyone can encrypt a message using the recipient's public key, but only the recipient can decrypt it with their private key.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Asymmetric Encryption Process</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">Plaintext</div>
+                        <div class="step-desc">Original message</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔐</div>
+                        <div class="step-label">Encrypt</div>
+                        <div class="step-desc">+ Bob's Public Key</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔒</div>
+                        <div class="step-label">Ciphertext</div>
+                        <div class="step-desc">Transmitted</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔓</div>
+                        <div class="step-label">Decrypt</div>
+                        <div class="step-desc">+ Bob's Private Key</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">Plaintext</div>
+                        <div class="step-desc">Recovered</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Key Insight:</strong> Anyone can encrypt a message using the public key, but <strong>only the holder of the private key can decrypt it</strong>. This is the foundation of secure communication without prior key exchange.</p>
+            </div>
+
+            <h3>Symmetric vs Asymmetric Cryptography</h3>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Comparison: Symmetric vs Asymmetric</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Symmetric</th>
+                            <th>Asymmetric</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Keys</strong></td>
+                            <td>One shared secret key</td>
+                            <td>Public + Private key pair</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Key Distribution</strong></td>
+                            <td>Requires secure channel</td>
+                            <td>Public key shared openly</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Speed</strong></td>
+                            <td>Very fast</td>
+                            <td>Much slower</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Use Case</strong></td>
+                            <td>Bulk data encryption</td>
+                            <td>Key exchange, signatures</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Examples</strong></td>
+                            <td>AES, 3DES</td>
+                            <td>RSA, ECC, DH</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Best Practice:</strong> Public key cryptography enables secure key exchange and authentication, while symmetric cryptography provides efficient data encryption. Modern systems use <strong>both together</strong> &mdash; asymmetric crypto to exchange a session key, then symmetric crypto for fast data encryption.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: RSA -->
+        <section id="rsa" class="content-section">
+            <h2>2. RSA Cryptosystem</h2>
+
+            <div class="definition">
+                <h3>What is RSA?</h3>
+                <p>The <strong>RSA cryptosystem</strong> (named after Rivest, Shamir, and Adleman) is a public key cryptographic system whose security is based on the computational difficulty of <strong>factoring large composite integers</strong>. It uses a public/private key pair for encryption, decryption, and digital signatures.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>RSA Key Generation</h4>
+                <ol>
+                    <li><strong>Choose two large primes</strong> p and q</li>
+                    <li><strong>Compute</strong> n = p &times; q (the modulus)</li>
+                    <li><strong>Compute</strong> &phi;(n) = (p-1)(q-1)</li>
+                    <li><strong>Choose</strong> public exponent e such that gcd(e, &phi;(n)) = 1</li>
+                    <li><strong>Compute</strong> private exponent d such that e &times; d &equiv; 1 (mod &phi;(n))</li>
+                </ol>
+                <p><strong>Public key:</strong> (e, n) &mdash; shared with everyone</p>
+                <p><strong>Private key:</strong> (d, n) &mdash; kept secret</p>
+            </article>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">RSA Encryption and Decryption</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">Plaintext M</div>
+                        <div class="step-desc">Original message</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔐</div>
+                        <div class="step-label">C = M<sup>e</sup> mod n</div>
+                        <div class="step-desc">Encrypt with public key</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔒</div>
+                        <div class="step-label">Ciphertext C</div>
+                        <div class="step-desc">Transmitted</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔓</div>
+                        <div class="step-label">M = C<sup>d</sup> mod n</div>
+                        <div class="step-desc">Decrypt with private key</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">Plaintext M</div>
+                        <div class="step-desc">Recovered</div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>RSA Applications</h4>
+                <ul>
+                    <li><strong>Key Exchange:</strong> Securely transmit symmetric session keys</li>
+                    <li><strong>Digital Signatures:</strong> Sign messages to prove authenticity and non-repudiation</li>
+                    <li><strong>Authentication:</strong> Verify the identity of communicating parties</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Key Size Matters:</strong> RSA security depends on key size. A minimum of <strong>2048 bits</strong> is recommended today. RSA-1024 is considered insecure, while RSA-4096 provides a higher security margin.</p>
+            </div>
+
+            <div class="warning-box">
+                <h4>RSA is Slow</h4>
+                <p>RSA encryption is significantly slower than symmetric algorithms like AES. For this reason, RSA is typically <strong>not used to encrypt bulk data</strong>. Instead, it is used to securely exchange a symmetric key, which is then used for fast data encryption.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Diffie-Hellman -->
+        <section id="diffie-hellman" class="content-section">
+            <h2>3. Diffie-Hellman Key Exchange</h2>
+
+            <div class="definition">
+                <h3>What is Diffie-Hellman?</h3>
+                <p><strong>Diffie-Hellman (DH) key exchange</strong> is a public-key technique that allows two parties to agree on a <strong>shared secret key</strong> over an insecure network, without having shared a key beforehand. It does not encrypt data directly &mdash; it only establishes a shared secret.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Diffie-Hellman Key Exchange Process</h3>
+                </div>
+                <div class="dh-exchange">
+                    <div class="dh-setup">
+                        <h4>Public Parameters</h4>
+                        <p>Both parties agree on: prime <strong>p</strong> and generator <strong>g</strong></p>
+                    </div>
+                    <div class="dh-parties">
+                        <div class="dh-party dh-alice">
+                            <h4>Alice</h4>
+                            <p>Picks secret <strong>a</strong></p>
+                            <p>Computes g<sup>a</sup> mod p</p>
+                            <p>Sends g<sup>a</sup> mod p &rarr;</p>
+                            <p>Receives g<sup>b</sup> mod p</p>
+                            <p>Computes (g<sup>b</sup>)<sup>a</sup> mod p</p>
+                        </div>
+                        <div class="dh-party dh-bob">
+                            <h4>Bob</h4>
+                            <p>Picks secret <strong>b</strong></p>
+                            <p>Computes g<sup>b</sup> mod p</p>
+                            <p>&larr; Sends g<sup>b</sup> mod p</p>
+                            <p>Receives g<sup>a</sup> mod p</p>
+                            <p>Computes (g<sup>a</sup>)<sup>b</sup> mod p</p>
+                        </div>
+                    </div>
+                    <div class="dh-result">
+                        <h4>Shared Secret</h4>
+                        <p>Both arrive at the same value: g<sup>ab</sup> mod p</p>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>What DH Provides (and What It Does Not)</h4>
+                <div class="cipher-comparison-grid">
+                    <div class="cipher-card cipher-stream">
+                        <h4>Provides</h4>
+                        <ul>
+                            <li>Secure key agreement</li>
+                            <li>Basis for session keys</li>
+                            <li>Foundation for TLS, SSH, IPSec</li>
+                        </ul>
+                    </div>
+                    <div class="cipher-card cipher-block">
+                        <h4>Does NOT Provide</h4>
+                        <ul>
+                            <li>Encryption of data</li>
+                            <li>Authentication of parties (by itself)</li>
+                            <li>Protection against MITM (alone)</li>
+                        </ul>
+                    </div>
+                </div>
+            </article>
+
+            <div class="warning-box">
+                <h4>Vulnerable to Man-in-the-Middle</h4>
+                <p>By itself, Diffie-Hellman does <strong>not authenticate</strong> the communicating parties. An attacker (Trudy) could intercept the exchange and establish separate shared secrets with each party. DH must be combined with authentication (e.g., digital certificates) to be secure.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: ECC -->
+        <section id="ecc" class="content-section">
+            <h2>4. Elliptic Curve Cryptography (ECC)</h2>
+
+            <div class="definition">
+                <h3>What is ECC?</h3>
+                <p><strong>Elliptic Curve Cryptography (ECC)</strong> is a form of public key cryptography based on the mathematics of elliptic curves over finite fields. ECC provides the <strong>same level of security as RSA</strong> but with <strong>much smaller key sizes</strong>, making it faster and more efficient.</p>
+            </div>
+
+            <p>Traditional public key systems like RSA require increasingly large key sizes as security needs grow. ECC was developed to improve efficiency, reduce key size, and maintain strong security &mdash; especially important for mobile and embedded systems.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">RSA vs ECC: Key Size Comparison for Equivalent Security</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Security Level (bits)</th>
+                            <th>RSA Key Size</th>
+                            <th>ECC Key Size</th>
+                            <th>RSA / ECC Ratio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>80</strong></td>
+                            <td>1024 bits</td>
+                            <td>160 bits</td>
+                            <td>6:1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>112</strong></td>
+                            <td>2048 bits</td>
+                            <td>224 bits</td>
+                            <td>9:1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>128</strong></td>
+                            <td>3072 bits</td>
+                            <td>256 bits</td>
+                            <td>12:1</td>
+                        </tr>
+                        <tr>
+                            <td><strong>256</strong></td>
+                            <td>15360 bits</td>
+                            <td>512 bits</td>
+                            <td>30:1</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <article class="security-concept">
+                <h4>Where ECC is Used</h4>
+                <ul>
+                    <li><strong>TLS/SSL:</strong> Modern HTTPS connections use ECDHE (Elliptic Curve Diffie-Hellman Ephemeral)</li>
+                    <li><strong>Mobile and Embedded Systems:</strong> Smaller keys mean less processing power and memory</li>
+                    <li><strong>Cryptocurrencies:</strong> Bitcoin uses the secp256k1 elliptic curve for wallet keys</li>
+                    <li><strong>Secure Messaging:</strong> Signal Protocol uses Curve25519 for key exchange</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Why ECC Matters:</strong> A 256-bit ECC key provides comparable security to a 3072-bit RSA key. This makes ECC the preferred choice for resource-constrained environments and modern protocols where efficiency is critical.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Notation -->
+        <section id="notation" class="content-section">
+            <h2>5. Public Key Notation</h2>
+
+            <div class="definition">
+                <h3>Standard Notation for Public Key Operations</h3>
+                <p>Public key cryptography uses standardized notation to distinguish between encryption, decryption, and signing operations. The notation identifies which key is used and who owns it.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">Public Key Notation Guide</h3>
+                </div>
+                <div class="notation-grid">
+                    <div class="notation-card notation-public">
+                        <h4>{ } Curly Braces &mdash; Public Key</h4>
+                        <p class="notation-example">{M}<sub>Alice</sub></p>
+                        <p>Encrypt message M with <strong>Alice's public key</strong></p>
+                        <p class="notation-use">Anyone can do this</p>
+                    </div>
+                    <div class="notation-card notation-private">
+                        <h4>[ ] Square Braces &mdash; Private Key</h4>
+                        <p class="notation-example">[M]<sub>Alice</sub></p>
+                        <p>Encrypt/sign message M with <strong>Alice's private key</strong></p>
+                        <p class="notation-use">Only Alice can do this</p>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>Notation Examples</h4>
+                <ul>
+                    <li><strong>Encryption:</strong> C = {M}<sub>Alice</sub> &mdash; Encrypt message M with Alice's public key. Only Alice can decrypt.</li>
+                    <li><strong>Decryption:</strong> M = [C]<sub>Alice</sub> &mdash; Decrypt ciphertext C with Alice's private key.</li>
+                    <li><strong>Digital Signature:</strong> S = [M]<sub>Alice</sub> &mdash; Alice signs message M using her private key. Anyone can verify using Alice's public key.</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Digital Signatures and Non-Repudiation:</strong> When Alice signs a message with her private key [M]<sub>Alice</sub>, anyone can verify the signature using her public key. Since only Alice has her private key, she cannot deny having signed the message &mdash; this is called <strong>non-repudiation</strong>.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: PKI -->
+        <section id="pki" class="content-section">
+            <h2>6. Public Key Infrastructure (PKI)</h2>
+
+            <div class="definition">
+                <h3>What is PKI?</h3>
+                <p><strong>Public Key Infrastructure (PKI)</strong> is the framework that manages public keys and digital certificates to enable secure communication using public key cryptography. PKI provides a trusted way to verify that a public key genuinely belongs to its claimed owner.</p>
+            </div>
+
+            <article class="security-concept">
+                <h4>Why PKI is Needed</h4>
+                <p>Without PKI, public keys are vulnerable to <strong>Man-in-the-Middle (MITM) attacks</strong>:</p>
+                <ol>
+                    <li>Fahad shares his public key with Fatima</li>
+                    <li>Attacker Sara intercepts and replaces it with her own public key</li>
+                    <li>Fatima encrypts messages thinking she's using Fahad's key &mdash; but Sara can read them</li>
+                    <li>Sara re-encrypts with Fahad's real key and forwards, undetected</li>
+                </ol>
+                <p>PKI prevents this by having a <strong>trusted third party</strong> verify and certify public key ownership.</p>
+            </article>
+
+            <article class="security-concept">
+                <h4>Main Components of PKI</h4>
+                <ul>
+                    <li><strong>Certificate Authority (CA):</strong> Trusted entity that issues digital certificates. Verifies identity before binding a public key to a user.</li>
+                    <li><strong>Registration Authority (RA):</strong> Assists the CA by verifying user identity before certificate issuance.</li>
+                    <li><strong>Digital Certificates:</strong> Electronic documents that link a public key with an identity (e.g., SSL/TLS website certificates, X.509 format).</li>
+                    <li><strong>Certificate Repository:</strong> Database where certificates are stored and accessed by relying parties.</li>
+                </ul>
+            </article>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">How PKI Works: The Third-Party Trust Model</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">👤</div>
+                        <div class="step-label">User</div>
+                        <div class="step-desc">Requests certificate</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔍</div>
+                        <div class="step-label">RA</div>
+                        <div class="step-desc">Verifies identity</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🏛️</div>
+                        <div class="step-label">CA</div>
+                        <div class="step-desc">Issues certificate</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📜</div>
+                        <div class="step-label">Certificate</div>
+                        <div class="step-desc">Public key + identity</div>
+                    </div>
+                    <div class="crypto-arrow">→</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">✅</div>
+                        <div class="step-label">Trusted</div>
+                        <div class="step-desc">Secure communication</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Trust Model:</strong> Just as a government agency (like DMV) verifies identity and issues an ID card, the RA confirms identity and the CA issues a digitally signed certificate. Even if parties don't know each other, they can trust the CA that certified them.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>Public key cryptography</strong> uses two mathematically related keys (public and private) and solves the key distribution problem of symmetric cryptography.</li>
+
+                <li><strong>RSA</strong> is the most widely known public key algorithm, based on the difficulty of factoring large primes. It is used for key exchange, digital signatures, and authentication.</li>
+
+                <li><strong>Diffie-Hellman</strong> allows two parties to establish a shared secret over an insecure channel, but does not provide authentication by itself.</li>
+
+                <li><strong>Elliptic Curve Cryptography (ECC)</strong> provides the same security as RSA with much smaller keys, making it ideal for modern and resource-constrained systems.</li>
+
+                <li><strong>Public key notation</strong> uses curly braces {M} for public key operations and square brackets [M] for private key operations.</li>
+
+                <li><strong>Digital signatures</strong> provide non-repudiation &mdash; the signer cannot deny having signed the message.</li>
+
+                <li><strong>PKI</strong> (Certificate Authorities, Registration Authorities, and digital certificates) provides the trust framework for verifying public key ownership and preventing MITM attacks.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In Chapter 5, we'll explore hash functions &mdash; one-way functions that provide data integrity, authentication, and serve as building blocks for digital signatures and MACs.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>Credits and Attributions</h2>
+            <p class="credits-intro">All diagrams in this document are original educational works created specifically for this course.</p>
+            <ul class="credits-list">
+                <li><strong>Asymmetric Encryption Flow:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>RSA Encryption and Decryption Flow:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>Diffie-Hellman Exchange Diagram:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>RSA vs ECC Comparison Table:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+                <li><strong>PKI Trust Model Flow:</strong> Original educational diagram. Licensed under CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 4 specific styles */
+        .crypto-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .crypto-step {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            min-width: 100px;
+        }
+
+        .crypto-step.highlight-step {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: var(--secondary-color);
+        }
+
+        .step-icon {
+            font-size: 2em;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .step-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .crypto-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .cipher-comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .cipher-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .cipher-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2em;
+        }
+
+        .cipher-stream {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-color: #4caf50;
+        }
+
+        .cipher-block {
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+            border-color: #e91e63;
+        }
+
+        /* DH Exchange styles */
+        .dh-exchange {
+            padding: 1.5rem;
+        }
+
+        .dh-setup, .dh-result {
+            text-align: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-radius: 8px;
+            border: 2px solid #ff9800;
+        }
+
+        .dh-setup h4, .dh-result h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .dh-parties {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .dh-party {
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .dh-party h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .dh-alice {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        }
+
+        .dh-bob {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        }
+
+        /* Notation styles */
+        .notation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .notation-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            text-align: center;
+        }
+
+        .notation-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .notation-example {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .notation-use {
+            font-style: italic;
+            color: #666;
+        }
+
+        .notation-public {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2196f3;
+        }
+
+        .notation-private {
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+            border-color: #e91e63;
+        }
+
+        @media screen and (max-width: 768px) {
+            .crypto-flow {
+                flex-direction: column;
+            }
+
+            .crypto-arrow {
+                transform: rotate(90deg);
+            }
+
+            .cipher-comparison-grid,
+            .dh-parties,
+            .notation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>

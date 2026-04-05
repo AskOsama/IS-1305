@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفصل الخامس: دوال التجزئة++</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="chapter5.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>++دوال التجزئة</h1>
+        <p class="subtitle">الفصل الخامس: التجزئة التشفيرية، HMAC، وسلامة البيانات الرقمية</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#intro">1. مقدمة في دوال التجزئة</a></li>
+            <li><a href="#how-it-works">2. كيف تعمل دوال التجزئة</a></li>
+            <li><a href="#properties">3. خصائص دوال التجزئة التشفيرية</a></li>
+            <li><a href="#non-crypto">4. دوال التجزئة غير التشفيرية</a></li>
+            <li><a href="#tiger">5. تجزئة Tiger</a></li>
+            <li><a href="#hmac">6. HMAC</a></li>
+            <li><a href="#uses">7. استخدامات دوال التجزئة</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذا الفصل، ستكون قادراً على:</p>
+            <ul>
+                <li>تعريف دالة التجزئة التشفيرية وشرح مفهوم الدوال أحادية الاتجاه</li>
+                <li>وصف كيف تعالج دوال التجزئة البيانات المدخلة لإنتاج مخرجات ثابتة الطول</li>
+                <li>سرد وشرح الخصائص الأساسية لدوال التجزئة التشفيرية</li>
+                <li>التمييز بين دوال التجزئة التشفيرية وغير التشفيرية</li>
+                <li>شرح كيف يدمج HMAC مفتاحاً سرياً مع دالة تجزئة للمصادقة على الرسائل</li>
+                <li>تحديد التطبيقات العملية الشائعة لدوال التجزئة في الأمن</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Introduction -->
+        <section id="intro" class="content-section">
+            <h2>1. مقدمة في دوال التجزئة</h2>
+
+            <div class="definition">
+                <h3>ما هي دالة التجزئة؟</h3>
+                <p><strong>دالة التجزئة</strong> هي خوارزمية رياضية تحول بيانات <strong>بأي حجم</strong> إلى سلسلة <strong>ثابتة الطول</strong> تُسمى <strong>قيمة التجزئة</strong> (أو الملخص). تُنشئ بصمة رقمية فريدة للمدخلات، مما يضمن ثبات طول المخرجات بغض النظر عن حجم المدخلات. التجزئة هي <strong>دالة أحادية الاتجاه</strong> &mdash; بمجرد تجزئة البيانات، يكون من المستحيل حسابياً استرجاع البيانات الأصلية من قيمة التجزئة.</p>
+            </div>
+
+            <p>دوال التجزئة هي لبنات البناء الأساسية لأنظمة الأمان الحديثة. تُستخدم في كل مكان &mdash; من تخزين كلمات المرور والتحقق من سلامة البيانات إلى التوقيعات الرقمية وتقنية البلوكتشين.</p>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">دالة التجزئة: أي مدخلات ← مخرجات ثابتة</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📄</div>
+                        <div class="step-label">المدخلات</div>
+                        <div class="step-desc">بيانات بأي حجم</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">⚙️</div>
+                        <div class="step-label">دالة التجزئة H()</div>
+                        <div class="step-desc">تحويل أحادي الاتجاه</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔢</div>
+                        <div class="step-label">قيمة التجزئة</div>
+                        <div class="step-desc">طول ثابت (مثلاً 256 بت)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <p><strong>الخاصية الأساسية:</strong> دالة التجزئة هي <strong>دالة أحادية الاتجاه</strong>. من السهل حساب التجزئة من المدخلات، لكن من المستحيل حسابياً إيجاد المدخلات من التجزئة. هذا ما يجعل التجزئة مفيدة للأمن.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: How Hash Functions Work -->
+        <section id="how-it-works" class="content-section">
+            <h2>2. كيف تعمل دوال التجزئة</h2>
+
+            <div class="definition">
+                <h3>العملية الداخلية</h3>
+                <p>عند تجزئة البيانات، تحدث عملية معقدة خلف الكواليس. تُقسم المدخلات إلى كتل ثابتة الحجم، وتُعالج عبر جولات متعددة من التحويلات الرياضية، وتُنتج مخرجات فريدة ثابتة الحجم.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">خطوات معالجة دالة التجزئة</h3>
+                </div>
+                <div class="crypto-flow">
+                    <div class="crypto-step">
+                        <div class="step-icon">📝</div>
+                        <div class="step-label">رسالة المدخلات</div>
+                        <div class="step-desc">أي طول</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">📐</div>
+                        <div class="step-label">الحشو</div>
+                        <div class="step-desc">ملء حتى حجم الكتلة</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step highlight-step">
+                        <div class="step-icon">🔄</div>
+                        <div class="step-label">معالجة الكتل</div>
+                        <div class="step-desc">دالة الضغط</div>
+                    </div>
+                    <div class="crypto-arrow">←</div>
+                    <div class="crypto-step">
+                        <div class="step-icon">🔢</div>
+                        <div class="step-label">الملخص</div>
+                        <div class="step-desc">مخرجات ثابتة الحجم</div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>العملية خطوة بخطوة</h4>
+                <ol>
+                    <li><strong>معالجة المدخلات:</strong> تُقسم البيانات المدخلة (الرسالة) إلى كتل ثابتة الحجم (مثلاً SHA-256 يستخدم كتل بحجم 512 بت).</li>
+                    <li><strong>الحشو:</strong> إذا لم تكن الكتلة الأخيرة كبيرة بما يكفي، تضيف الخوارزمية بتات إضافية (حشو) لضمان معالجة متسقة.</li>
+                    <li><strong>الضغط:</strong> تمر كل كتلة عبر دالة ضغط تطبق سلسلة من التحويلات الرياضية.</li>
+                    <li><strong>المخرجات:</strong> النتيجة النهائية هي قيمة تجزئة فريدة ثابتة الحجم (ملخص الرسالة). يعتمد الطول على الخوارزمية المستخدمة.</li>
+                </ol>
+            </article>
+
+            <div class="key-message">
+                <p><strong>مثال على تأثير الانهيار:</strong> حتى تغيير حرف واحد (مثلاً "Hello" مقابل "hello") ينتج مخرجات تجزئة مختلفة تماماً. هذا يُسمى <strong>تأثير الانهيار</strong> وهو حاسم للأمن.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: Properties -->
+        <section id="properties" class="content-section">
+            <h2>3. خصائص دوال التجزئة التشفيرية</h2>
+
+            <div class="definition">
+                <h3>الخصائص الأساسية</h3>
+                <p>يجب أن تستوفي دالة التجزئة التشفيرية أربع خصائص رئيسية لتُعتبر آمنة. هذه الخصائص تميز التجزئة التشفيرية عن المجاميع الاختبارية البسيطة.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">أربع خصائص رئيسية</h3>
+                </div>
+                <div class="hash-properties-grid">
+                    <div class="hash-property-card property-fixed">
+                        <h4>مخرجات ثابتة الطول</h4>
+                        <p>تنتج التجزئة دائماً نفس حجم المخرجات بغض النظر عن حجم المدخلات.</p>
+                        <p class="property-example">مثال: SHA-256 ينتج دائماً 256 بت سواء كانت المدخلات 1 بايت أو 1 جيجا</p>
+                    </div>
+                    <div class="hash-property-card property-oneway">
+                        <h4>دالة أحادية الاتجاه</h4>
+                        <p>بمعرفة قيمة التجزئة h، من المستحيل حسابياً إيجاد أي مدخل m بحيث H(m) = h.</p>
+                        <p class="property-example">تُسمى أيضاً: مقاومة الصورة الأولى</p>
+                    </div>
+                    <div class="hash-property-card property-avalanche">
+                        <h4>تأثير الانهيار</h4>
+                        <p>تغيير صغير في المدخلات ينتج مخرجات مختلفة جذرياً.</p>
+                        <p class="property-example">قلب بت واحد في المدخلات يغير ~50% من بتات المخرجات</p>
+                    </div>
+                    <div class="hash-property-card property-collision">
+                        <h4>مقاومة التصادم</h4>
+                        <p>من المستحيل حسابياً إيجاد مدخلين مختلفين ينتجان نفس التجزئة.</p>
+                        <p class="property-example">إيجاد m1 &ne; m2 حيث H(m1) = H(m2) يجب أن يكون غير عملي</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">مقارنة خوارزميات التجزئة الشائعة</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الخوارزمية</th>
+                            <th>حجم المخرجات</th>
+                            <th>حجم الكتلة</th>
+                            <th>حالة الأمان</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>MD5</strong></td>
+                            <td>128 بت</td>
+                            <td>512 بت</td>
+                            <td>مكسور (وُجدت تصادمات)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SHA-1</strong></td>
+                            <td>160 بت</td>
+                            <td>512 بت</td>
+                            <td>مكسور (مُهمل)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SHA-256</strong></td>
+                            <td>256 بت</td>
+                            <td>512 بت</td>
+                            <td>آمن (واسع الاستخدام)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>SHA-3</strong></td>
+                            <td>متغير</td>
+                            <td>متغير</td>
+                            <td>آمن (أحدث معيار)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning-box">
+                <h4>MD5 وSHA-1 مكسوران</h4>
+                <p>MD5 وSHA-1 لديهما ثغرات تصادم معروفة و<strong>يجب عدم استخدامهما أبداً</strong> لأغراض أمنية. استخدم دائماً SHA-256 أو SHA-3 للتطبيقات التشفيرية.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: Non-Cryptographic -->
+        <section id="non-crypto" class="content-section">
+            <h2>4. دوال التجزئة غير التشفيرية</h2>
+
+            <div class="definition">
+                <h3>ما هي دوال التجزئة غير التشفيرية؟</h3>
+                <p><strong>دالة التجزئة غير التشفيرية</strong> هي خوارزمية تجزئة مصممة <strong>للسرعة والكفاءة</strong>، وليس للأمان. تحول البيانات المدخلة إلى قيمة ثابتة الطول بشكل رئيسي لمهام معالجة البيانات، وليس لحماية المعلومات.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">دوال التجزئة التشفيرية مقابل غير التشفيرية</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الميزة</th>
+                            <th>التشفيرية</th>
+                            <th>غير التشفيرية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>الغرض</strong></td>
+                            <td>الأمان (السلامة، المصادقة)</td>
+                            <td>الأداء (جداول التجزئة، المجاميع الاختبارية)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>السرعة</strong></td>
+                            <td>أبطأ (بالتصميم)</td>
+                            <td>سريعة جداً</td>
+                        </tr>
+                        <tr>
+                            <td><strong>مقاومة التصادم</strong></td>
+                            <td>متطلب أساسي</td>
+                            <td>غير مطلوب</td>
+                        </tr>
+                        <tr>
+                            <td><strong>أحادية الاتجاه</strong></td>
+                            <td>نعم (مقاومة الصورة الأولى)</td>
+                            <td>لا</td>
+                        </tr>
+                        <tr>
+                            <td><strong>أمثلة</strong></td>
+                            <td>SHA-256، SHA-3</td>
+                            <td>CRC32، MurmurHash، FNV</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <p><strong>مهم:</strong> يجب <strong>عدم</strong> استخدام دوال التجزئة غير التشفيرية لأغراض أمنية أبداً. صُممت للسرعة في هياكل البيانات (جداول التجزئة، مرشحات بلوم) وكشف الأخطاء، وليس للحماية من الهجمات الخبيثة.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: Tiger Hash -->
+        <section id="tiger" class="content-section">
+            <h2>5. تجزئة Tiger</h2>
+
+            <article class="security-concept">
+                <h4>ما هي تجزئة Tiger؟</h4>
+                <p><strong>Tiger</strong> هي دالة تجزئة تشفيرية صُممت لتكون سريعة في البرمجيات، خاصة على <strong>المعالجات 64 بت</strong>. تعالج بيانات مدخلة بأي حجم وتنتج قيمة تجزئة ثابتة الطول بحجم <strong>192 بت</strong> (ملخص الرسالة).</p>
+                <ul>
+                    <li><strong>المخرجات:</strong> 192 بت (24 بايت)</li>
+                    <li><strong>مُحسنة لـ:</strong> منصات 64 بت بسرعة عالية</li>
+                    <li><strong>أهداف التصميم:</strong> سرعة عالية على منصات 64 بت مع أمان تشفيري قوي</li>
+                    <li><strong>حالات الاستخدام:</strong> التحقق من الملفات، شبكات الند للند، تجزئة فعالة للبيانات الكبيرة</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>Tiger مقابل SHA-256:</strong> تُقدم Tiger كمثال على دالة تجزئة تشفيرية حديثة تؤكد على الأداء والأمان معاً. بينما SHA-256 هو المعيار الأكثر استخداماً، تُظهر Tiger أن دوال التجزئة يمكن تصميمها مع تحسين محدد للعتاد.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: HMAC -->
+        <section id="hmac" class="content-section">
+            <h2>6. HMAC (رمز مصادقة الرسالة القائم على التجزئة)</h2>
+
+            <div class="definition">
+                <h3>ما هو HMAC؟</h3>
+                <p><strong>HMAC</strong> هو آلية تستخدم دالة تجزئة تشفيرية مع <strong>مفتاح سري</strong> لتوفير <strong>مصادقة الرسالة</strong> و<strong>سلامتها</strong>. بدلاً من تجزئة الرسالة وحدها، يدمج HMAC مفتاحاً سرياً، مما يجعل التجزئة آمنة ضد المهاجمين.</p>
+            </div>
+
+            <div class="diagram-container">
+                <div class="diagram-title-section">
+                    <h3 class="diagram-title">عملية HMAC</h3>
+                </div>
+                <div class="hmac-flow">
+                    <div class="hmac-sender">
+                        <h4>المرسل</h4>
+                        <div class="crypto-flow">
+                            <div class="crypto-step">
+                                <div class="step-icon">📝</div>
+                                <div class="step-label">الرسالة</div>
+                            </div>
+                            <div class="crypto-step">
+                                <div class="step-icon">🔑</div>
+                                <div class="step-label">+ المفتاح السري</div>
+                            </div>
+                            <div class="crypto-arrow">←</div>
+                            <div class="crypto-step highlight-step">
+                                <div class="step-icon">⚙️</div>
+                                <div class="step-label">HMAC(مفتاح، رسالة)</div>
+                            </div>
+                            <div class="crypto-arrow">←</div>
+                            <div class="crypto-step">
+                                <div class="step-icon">📨</div>
+                                <div class="step-label">رسالة + وسم HMAC</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hmac-receiver">
+                        <h4>المستقبل</h4>
+                        <div class="crypto-flow">
+                            <div class="crypto-step">
+                                <div class="step-icon">📨</div>
+                                <div class="step-label">رسالة + وسم HMAC</div>
+                            </div>
+                            <div class="crypto-arrow">←</div>
+                            <div class="crypto-step highlight-step">
+                                <div class="step-icon">🔑</div>
+                                <div class="step-label">إعادة حساب HMAC</div>
+                            </div>
+                            <div class="crypto-arrow">←</div>
+                            <div class="crypto-step">
+                                <div class="step-icon">✅</div>
+                                <div class="step-label">المقارنة</div>
+                                <div class="step-desc">تطابق = صالح</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <article class="security-concept">
+                <h4>ما يوفره HMAC</h4>
+                <ul>
+                    <li><strong>سلامة الرسالة:</strong> يضمن أن الرسالة لم تُعدل أثناء النقل</li>
+                    <li><strong>مصادقة المرسل:</strong> فقط من يملك المفتاح السري يمكنه إنشاء HMAC الصحيح</li>
+                    <li><strong>الحماية من العبث:</strong> أي تعديل على الرسالة يُبطل HMAC</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>HMAC في التطبيق العملي:</strong> يُستخدم HMAC على نطاق واسع في بروتوكولات الأمان بما في ذلك <strong>TLS/SSL</strong>، <strong>IPSec</strong>، <strong>مصادقة API</strong> (مثل توقيع طلبات AWS)، و<strong>رموز JWT</strong>.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: Uses -->
+        <section id="uses" class="content-section">
+            <h2>7. استخدامات دوال التجزئة</h2>
+
+            <article class="security-concept">
+                <h4>التطبيقات العملية</h4>
+                <ul>
+                    <li><strong>تخزين كلمات المرور:</strong> تخزن الأنظمة قيم تجزئة كلمات المرور وليس كلمات المرور نفسها. عند تسجيل الدخول، يجزئ النظام كلمة المرور المدخلة ويقارنها بالتجزئة المخزنة.</li>
+                    <li><strong>سلامة الرسائل (HMAC):</strong> تضمن دوال التجزئة عدم تعديل الرسالة أثناء النقل باستخدام HMAC.</li>
+                    <li><strong>التوقيعات الرقمية:</strong> بدلاً من توقيع مستند كامل كبير، يوقع المرسل <strong>تجزئة المستند</strong>. هذا أسرع بكثير وآمن بنفس الدرجة.</li>
+                    <li><strong>بصمة الرسائل:</strong> تنتج التجزئة "بصمة" ثابتة الطول للبيانات. حتى تغيير بسيط في الرسالة يغير التجزئة بشكل جذري، مما يجعل العبث قابلاً للاكتشاف.</li>
+                    <li><strong>كشف الأخطاء:</strong> يمكن لقيم التجزئة كشف التغييرات العرضية في البيانات، مشابهة للمجاميع الاختبارية لكن أقوى تشفيرياً.</li>
+                    <li><strong>البلوكتشين:</strong> تستخدم العملات الرقمية مثل البيتكوين دوال التجزئة (SHA-256) بشكل مكثف للتعدين والتحقق من المعاملات وربط الكتل.</li>
+                </ul>
+            </article>
+
+            <div class="key-message">
+                <p><strong>دوال التجزئة في كل مكان:</strong> من قفل HTTPS في متصفحك إلى البلوكتشين وراء العملات الرقمية، دوال التجزئة هي واحدة من أكثر الأدوات انتشاراً في أمن المعلومات.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>دوال التجزئة</strong> تحول بيانات بأي حجم إلى ملخص ثابت الطول. هي دوال أحادية الاتجاه &mdash; لا يمكنك استرجاع البيانات الأصلية من التجزئة.</li>
+
+                <li><strong>تعمل دوال التجزئة</strong> بتقسيم المدخلات إلى كتل، وتطبيق الحشو، والمعالجة عبر دالة ضغط، وإنتاج مخرجات ثابتة الحجم.</li>
+
+                <li><strong>خصائص التجزئة التشفيرية</strong> تشمل ثبات طول المخرجات، ومقاومة الصورة الأولى (أحادية الاتجاه)، وتأثير الانهيار، ومقاومة التصادم.</li>
+
+                <li><strong>MD5 وSHA-1</strong> مكسوران ولا يجب استخدامهما. <strong>SHA-256</strong> و<strong>SHA-3</strong> هما المعياران الآمنان الحاليان.</li>
+
+                <li><strong>التجزئة غير التشفيرية</strong> (CRC32، MurmurHash) سريعة لكنها تفتقر لخصائص الأمان &mdash; صُممت لهياكل البيانات وليس للحماية.</li>
+
+                <li><strong>تجزئة Tiger</strong> هي تجزئة تشفيرية مُحسنة لأنظمة 64 بت، تنتج ملخصاً بحجم 192 بت.</li>
+
+                <li><strong>HMAC</strong> يدمج مفتاحاً سرياً مع دالة تجزئة لتوفير مصادقة الرسالة وسلامتها.</li>
+
+                <li><strong>تُستخدم دوال التجزئة</strong> لتخزين كلمات المرور والتوقيعات الرقمية وسلامة الرسائل والبصمات وكشف الأخطاء وتقنية البلوكتشين.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>نظرة مستقبلية:</strong> في الفصل الثامن، سنستكشف التفويض &mdash; كيف تحدد الأنظمة ما يُسمح للمستخدمين المصادق عليهم بفعله، بما في ذلك نماذج التحكم في الوصول والجدران النارية.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="image-credits">
+            <h2>الاعتمادات والإسناد</h2>
+            <p class="credits-intro">جميع الرسوم البيانية في هذا المستند هي أعمال تعليمية أصلية أُنشئت خصيصاً لهذا المقرر.</p>
+            <ul class="credits-list">
+                <li><strong>مخطط مدخلات/مخرجات دالة التجزئة:</strong> رسم تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>مخطط خطوات معالجة التجزئة:</strong> رسم تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>شبكة خصائص التجزئة:</strong> رسم تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>مخطط عملية HMAC:</strong> رسم تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+                <li><strong>جدول مقارنة خوارزميات التجزئة:</strong> رسم تعليمي أصلي. مرخص بموجب CC BY 4.0</li>
+            </ul>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">العودة إلى الصفحة الرئيسية →</a>
+        </p>
+    </footer>
+
+    <style>
+        /* Chapter 5 specific styles */
+        .crypto-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 1.5rem;
+        }
+
+        .crypto-step {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            min-width: 100px;
+        }
+
+        .crypto-step.highlight-step {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: var(--secondary-color);
+        }
+
+        .step-icon {
+            font-size: 2em;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .step-desc {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .crypto-arrow {
+            font-size: 1.5em;
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        /* Hash Properties Grid */
+        .hash-properties-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+
+        .hash-property-card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+        }
+
+        .hash-property-card h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.1em;
+        }
+
+        .property-example {
+            font-size: 0.9em;
+            color: #666;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        .property-fixed {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-color: #2196f3;
+        }
+
+        .property-oneway {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-color: #4caf50;
+        }
+
+        .property-avalanche {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-color: #ff9800;
+        }
+
+        .property-collision {
+            background: linear-gradient(135deg, #fce4ec, #f8bbd0);
+            border-color: #e91e63;
+        }
+
+        /* HMAC Flow */
+        .hmac-flow {
+            padding: 1.5rem;
+        }
+
+        .hmac-sender, .hmac-receiver {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .hmac-sender {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        }
+
+        .hmac-receiver {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+        }
+
+        .hmac-sender h4, .hmac-receiver h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        @media screen and (max-width: 768px) {
+            .crypto-flow {
+                flex-direction: column;
+            }
+
+            .crypto-arrow {
+                transform: rotate(90deg);
+            }
+
+            .hash-properties-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>
